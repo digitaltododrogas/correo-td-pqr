@@ -264,23 +264,78 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;min-
 .skeleton{background:linear-gradient(90deg,var(--bg2) 25%,var(--bg) 50%,var(--bg2) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:4px;height:14px;width:100%}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 .dot-online{display:inline-block;width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px #22c55e;margin-right:4px}
+
+/* ── ADMIN LOGIN ── */
+.admin-login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f8f9fc;padding:24px;position:relative;overflow:hidden}
+.admin-login-wrap::before{content:'';position:absolute;top:-160px;right:-160px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(37,99,235,.06) 0%,transparent 70%);pointer-events:none}
+.admin-login-wrap::after{content:'';position:absolute;bottom:-120px;left:-120px;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(37,99,235,.04) 0%,transparent 70%);pointer-events:none}
+.admin-login-card{background:#fff;border-radius:20px;padding:48px 44px;width:100%;max-width:420px;box-shadow:0 4px 6px rgba(0,0,0,.04),0 16px 48px rgba(0,0,0,.08);position:relative;z-index:1}
+.admin-login-badge{display:inline-block;background:#eff4ff;border:1px solid #bfdbfe;border-radius:99px;padding:4px 14px;font-size:11px;font-weight:700;color:#2563eb;letter-spacing:.8px;text-transform:uppercase;margin-top:10px}
+.admin-field{margin-bottom:20px}
+.admin-label{display:block;font-size:11px;font-weight:700;color:#64748b;margin-bottom:8px;letter-spacing:.8px;text-transform:uppercase}
+.admin-input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:13px 16px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--ink);outline:none;transition:all .2s}
+.admin-input:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 4px rgba(37,99,235,.1)}
+.admin-btn{width:100%;padding:14px;background:linear-gradient(135deg,#0d1b2a,#1a2f4a);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s;margin-top:8px;box-shadow:0 4px 16px rgba(13,27,42,.25)}
+.admin-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(13,27,42,.35)}
+.admin-btn:active{transform:none}
+.admin-login-error{font-size:12px;color:var(--red);text-align:center;margin-top:12px;min-height:18px;font-weight:600}
+#adminLoginWrap{display:none}
+#adminApp{display:none}
 </style>
 </head>
 <body>
 
+<!-- ADMIN LOGIN -->
+<div id="adminLoginWrap">
+  <div class="admin-login-wrap">
+    <div class="admin-login-card">
+      <div style="text-align:center;margin-bottom:28px">
+        <img src="LOGO_Tododrogas_Color_1__3_.png" style="height:52px;object-fit:contain" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+        <div style="display:none;font-size:20px;font-weight:800;color:#0a0e1a">Todo<span style="color:#2563eb">drogas</span></div>
+        <div class="admin-login-badge">Portal Admin</div>
+      </div>
+      <div style="text-align:center;margin-bottom:32px">
+        <div style="font-size:26px;font-weight:800;color:#0a0e1a;letter-spacing:-.5px;margin-bottom:6px">¡Bienvenido de vuelta!</div>
+        <div style="font-size:13px;color:#64748b;line-height:1.6">Ingresa tus credenciales para acceder<br>al panel de administración</div>
+      </div>
+      <div class="admin-field">
+        <label class="admin-label">Usuario</label>
+        <input class="admin-input" type="text" id="adminUser" placeholder="admin" autocomplete="username" autofocus>
+      </div>
+      <div class="admin-field">
+        <label class="admin-label">Contraseña</label>
+        <input class="admin-input" type="password" id="adminPass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doAdminLogin()">
+      </div>
+      <button class="admin-btn" onclick="doAdminLogin()">→ Ingresar al panel</button>
+      <div class="admin-login-error" id="adminLoginError"></div>
+      <div style="text-align:center;margin-top:24px;font-size:11px;color:#94a3b8">Tododrogas S.A.S · Sistema PQR Admin</div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN APP -->
+<div id="adminApp">
+
 <!-- TOPBAR -->
 <div class="topbar">
   <div class="topbar-logo">
-    <div class="dot"></div>
-    Tododrogas
+    <img src="LOGO_Tododrogas_Color_1__3_.png" style="height:28px;filter:brightness(0) invert(1);object-fit:contain" onerror="this.style.display='none';document.getElementById('topbarLogoText').style.display='flex'">
+    <span id="topbarLogoText" style="display:none;align-items:center;gap:8px"><div class="dot"></div>Tododrogas</span>
   </div>
   <div class="topbar-title">PQR Admin</div>
   <div class="topbar-right">
+    <span style="font-size:12px;color:#94a3b8;font-weight:500" id="adminUserLabel"></span>
     <span class="last-sync" id="lastSync">—</span>
+    <button onclick="openAdminChat()" id="adminChatBtn" style="background:#1e293b;border:1px solid #334155;color:#94a3b8;padding:5px 12px;border-radius:7px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s;position:relative" title="Chat interno">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Chat
+      <span id="adminChatBadge" style="display:none;position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;align-items:center;justify-content:center">!</span>
+    </button>
     <button class="topbar-sync" onclick="syncAll()" id="syncBtn">
       <svg id="syncIcon" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10"/><path d="M20.49 15a9 9 0 01-14.85 3.36L1 14"/></svg>
       Actualizar
     </button>
+    <button onclick="doAdminLogout()" style="background:none;border:1.5px solid #334155;color:#64748b;padding:5px 12px;border-radius:7px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s" onmouseenter="this.style.borderColor='#ef4444';this.style.color='#ef4444'" onmouseleave="this.style.borderColor='#334155';this.style.color='#64748b'">Salir</button>
   </div>
 </div>
 
@@ -453,8 +508,16 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;min-
           </div>
         </div>
         <textarea class="reply-textarea" id="replyText" placeholder="Escribir respuesta..." style="margin-top:10px"></textarea>
+        <!-- Adjuntos -->
+        <div style="padding:8px 0;border-bottom:1px solid var(--border)">
+          <input type="file" id="adminReplyFilesInput" multiple style="display:none" onchange="onAdminReplyFilesSelected()">
+          <div id="adminReplyFilesPreview" style="margin-bottom:6px;display:flex;flex-wrap:wrap;gap:4px"></div>
+          <button type="button" style="background:none;border:1.5px dashed var(--border);border-radius:7px;padding:4px 12px;font-size:12px;color:var(--ink3);cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;transition:all .15s" onmouseenter="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'" onmouseleave="this.style.borderColor='var(--border)';this.style.color='var(--ink3)'" onclick="document.getElementById('adminReplyFilesInput').click()">
+            📎 Adjuntar archivos
+          </button>
+        </div>
         <div class="reply-actions">
-          <button class="btn btn-ghost" onclick="document.getElementById('replyBox').style.display='none'">Cancelar</button>
+          <button class="btn btn-ghost" onclick="document.getElementById('replyBox').style.display='none';adminReplyAttachments=[];renderAdminReplyFiles()">Cancelar</button>
           <button class="btn btn-primary" onclick="sendReplyAdmin()">
             <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
             Enviar respuesta
@@ -501,6 +564,91 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;min-
 <!-- TOASTS -->
 <div id="toasts"></div>
 
+<!-- ADMIN CHAT PANEL -->
+<style>
+.chat-overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:800;display:none;align-items:flex-end;justify-content:flex-end}
+.chat-overlay.open{display:flex}
+.chat-panel{width:440px;height:100vh;background:#fff;display:flex;flex-direction:column;box-shadow:-4px 0 32px rgba(0,0,0,.15);animation:chatSlideIn .25s ease}
+@keyframes chatSlideIn{from{transform:translateX(100%)}to{transform:none}}
+.chat-header{background:var(--ink);color:#fff;padding:16px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.chat-header-title{flex:1}
+.chat-header-title h3{font-size:15px;font-weight:700;margin:0}
+.chat-header-title p{font-size:11px;color:#94a3b8;margin:2px 0 0}
+.chat-close{background:none;border:none;color:#94a3b8;cursor:pointer;padding:4px;border-radius:6px;font-size:18px;line-height:1}
+.chat-close:hover{color:#fff;background:#334155}
+.chat-body{display:flex;flex:1;min-height:0}
+.chat-sidebar{width:150px;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.chat-sidebar-title{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--ink3);text-transform:uppercase;padding:10px 12px 6px}
+.chat-contact{padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .12s}
+.chat-contact:hover{background:var(--bg)}
+.chat-contact.active{background:var(--blue-l);border-right:3px solid var(--blue)}
+.chat-contact-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0}
+.chat-contact-name{font-size:11px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-main{flex:1;display:flex;flex-direction:column;min-width:0}
+.chat-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:#f8f9fc}
+.chat-messages::-webkit-scrollbar{width:3px}
+.chat-messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+.chat-msg{display:flex;flex-direction:column;max-width:80%}
+.chat-msg.mine{align-self:flex-end;align-items:flex-end}
+.chat-msg.theirs{align-self:flex-start;align-items:flex-start}
+.chat-msg-name{font-size:10px;font-weight:700;color:var(--blue);margin-bottom:2px}
+.chat-bubble{padding:8px 12px;border-radius:12px;font-size:13px;line-height:1.5;word-break:break-word}
+.chat-msg.mine .chat-bubble{background:var(--ink);color:#fff;border-bottom-right-radius:3px}
+.chat-msg.theirs .chat-bubble{background:#fff;color:var(--ink);border:1px solid var(--border);border-bottom-left-radius:3px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.chat-msg-time{font-size:10px;color:var(--ink3);margin-top:2px}
+.chat-img-thumb{max-width:160px;border-radius:8px;cursor:pointer;margin-top:4px}
+.chat-file-pill{display:inline-flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:12px;text-decoration:none;color:var(--ink);margin-top:4px}
+.chat-input-area{padding:10px 12px;border-top:1px solid var(--border);background:#fff;display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+.chat-input-row{display:flex;gap:8px;align-items:flex-end}
+.chat-textarea{flex:1;border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--ink);resize:none;outline:none;min-height:36px;max-height:100px;line-height:1.5;background:var(--bg);transition:border-color .15s}
+.chat-textarea:focus{border-color:var(--blue);background:#fff}
+.chat-send-btn{width:36px;height:36px;border-radius:50%;background:var(--ink);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.chat-send-btn:hover{background:var(--blue);transform:scale(1.05)}
+.chat-attach-btn{width:32px;height:32px;border-radius:8px;background:var(--bg);border:1.5px solid var(--border);color:var(--ink3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.chat-attach-btn:hover{border-color:var(--blue);color:var(--blue)}
+.chat-attach-chip{display:inline-flex;align-items:center;gap:4px;background:var(--blue-l);border:1px solid var(--blue-m);border-radius:5px;padding:3px 8px;font-size:11px;font-weight:600;color:var(--blue)}
+.chat-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--ink3);font-size:13px;text-align:center;gap:8px;padding:24px}
+</style>
+
+<div class="chat-overlay" id="adminChatOverlay" onclick="if(event.target===this)closeAdminChat()">
+  <div class="chat-panel">
+    <div class="chat-header">
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">💬</div>
+      <div class="chat-header-title">
+        <h3>Chat Interno</h3>
+        <p id="adminChatHeaderSub">Equipo PQR · Tododrogas</p>
+      </div>
+      <button class="chat-close" onclick="closeAdminChat()">✕</button>
+    </div>
+    <div class="chat-body">
+      <div class="chat-sidebar">
+        <div class="chat-sidebar-title">Agentes</div>
+        <div id="adminChatContactsList" style="overflow-y:auto;flex:1"></div>
+      </div>
+      <div class="chat-main">
+        <div id="adminChatMessages" class="chat-messages">
+          <div class="chat-empty"><div style="font-size:32px">💬</div><div>Selecciona un agente<br>para enviarle un mensaje</div></div>
+        </div>
+        <div id="adminChatInputArea" class="chat-input-area" style="display:none">
+          <div id="adminChatAttachPreview" style="display:flex;flex-wrap:wrap;gap:4px"></div>
+          <div class="chat-input-row">
+            <input type="file" id="adminChatFileInput" multiple style="display:none" onchange="onAdminChatFileSelected()">
+            <button class="chat-attach-btn" onclick="document.getElementById('adminChatFileInput').click()" title="Adjuntar">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            </button>
+            <textarea class="chat-textarea" id="adminChatMsgInput" placeholder="Escribe un mensaje..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAdminChatMsg()}" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px'"></textarea>
+            <button class="chat-send-btn" onclick="sendAdminChatMsg()">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /adminApp -->
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 // ─── CONFIG (desde config.js inyectado por GitHub Actions) ───
@@ -510,6 +658,56 @@ const GRAPH_TENANT    = (window.CONFIG||{}).GRAPH_TENANT;
 const GRAPH_CLIENT_ID = (window.CONFIG||{}).GRAPH_CLIENT_ID;
 const GRAPH_SECRET    = (window.CONFIG||{}).GRAPH_SECRET;
 const GRAPH_USER_ID   = (window.CONFIG||{}).GRAPH_USER_ID;
+// Admin credentials (customize via config.js or hardcode here)
+const ADMIN_USER = (window.CONFIG||{}).ADMIN_USER || 'admin';
+const ADMIN_PASS = (window.CONFIG||{}).ADMIN_PASS || 'Tododrogas2024*';
+
+// ─── ADMIN AUTH ──────────────────────────────────────────────
+function initAdminAuth() {
+  const saved = sessionStorage.getItem('admin_auth');
+  if (saved === 'ok') {
+    showAdminApp();
+  } else {
+    document.getElementById('adminLoginWrap').style.display = 'block';
+  }
+}
+
+function doAdminLogin() {
+  const u = document.getElementById('adminUser').value.trim();
+  const p = document.getElementById('adminPass').value;
+  const err = document.getElementById('adminLoginError');
+  if (u === ADMIN_USER && p === ADMIN_PASS) {
+    sessionStorage.setItem('admin_auth', 'ok');
+    sessionStorage.setItem('admin_user', u);
+    document.getElementById('adminLoginWrap').style.display = 'none';
+    showAdminApp();
+  } else {
+    err.textContent = 'Usuario o contraseña incorrectos';
+    document.getElementById('adminPass').value = '';
+    setTimeout(() => err.textContent = '', 3000);
+  }
+}
+
+function doAdminLogout() {
+  sessionStorage.removeItem('admin_auth');
+  document.getElementById('adminApp').style.display = 'none';
+  document.getElementById('adminLoginWrap').style.display = 'block';
+  document.getElementById('adminUser').value = '';
+  document.getElementById('adminPass').value = '';
+}
+
+function showAdminApp() {
+  document.getElementById('adminApp').style.display = 'block';
+  const userName = sessionStorage.getItem('admin_user') || ADMIN_USER;
+  const hour = new Date().getHours();
+  const greet = hour < 12 ? '☀️ Buenos días' : hour < 18 ? '🌤️ Buenas tardes' : '🌙 Buenas noches';
+  const lbl = document.getElementById('adminUserLabel');
+  if (lbl) lbl.textContent = `${greet}, ${userName}`;
+  syncAll();
+}
+
+window.addEventListener('DOMContentLoaded', initAdminAuth);
+
 
 // ─── MAPEO DE CAMPOS n8n → UI ───────────────────────────────
 // n8n guarda: subject, from_email, from_name, received_at, body_content, body_type, has_attachments, is_read
@@ -538,6 +736,27 @@ function mapCorreo(c) {
 // ─── STATE ───────────────────────────────────────────────────
 const state = { emails:[], agents:[], historial:[], currentTab:'pendiente', selectedId:null };
 let chartEstados=null, chartAgentes=null;
+let adminReplyAttachments = [];
+
+function onAdminReplyFilesSelected() {
+  const input = document.getElementById('adminReplyFilesInput');
+  if (!input?.files?.length) return;
+  Array.from(input.files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const b64 = e.target.result.split(',')[1];
+      adminReplyAttachments.push({name:file.name,contentType:file.type||'application/octet-stream',content:b64,size:file.size});
+      renderAdminReplyFiles();
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value='';
+}
+function renderAdminReplyFiles() {
+  const wrap = document.getElementById('adminReplyFilesPreview');
+  if (!wrap) return;
+  wrap.innerHTML = adminReplyAttachments.map((f,i)=>`<div style="display:inline-flex;align-items:center;gap:5px;background:var(--blue-l);border:1px solid var(--blue-m);border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600;color:var(--blue);margin:2px">📎 ${esc(f.name)} <span style="opacity:.5;font-weight:400">${Math.round(f.size/1024)}KB</span><button onclick="adminReplyAttachments.splice(${i},1);renderAdminReplyFiles()" style="background:none;border:none;color:var(--blue);cursor:pointer;padding:0;font-size:12px;line-height:1">✕</button></div>`).join('');
+}
 
 // ─── SUPABASE HELPER ─────────────────────────────────────────
 async function sb(path, method='GET', body=null) {
@@ -794,17 +1013,26 @@ async function loadAdjuntos(correoId, email) {
 
   // PDFs inline
   pdfs.forEach(a=>{
-    const src=`data:application/pdf;base64,${a.content_bytes}`;
+    const bytes = Uint8Array.from(atob(a.content_bytes), c=>c.charCodeAt(0));
+    const blob = new Blob([bytes], {type:'application/pdf'});
+    const blobUrl = URL.createObjectURL(blob);
     const kb=Math.round((a.tamaño_bytes||0)/1024);
     html += `<div class="adj-pdf-wrap">
       <div class="adj-pdf-header">
         <span class="adj-pdf-name">📄 ${esc(a.nombre||'Documento.pdf')} ${kb>0?`(${kb} KB)`:''}</span>
         <div style="display:flex;gap:8px">
-          <button class="adj-pill" onclick="openAdjModal('pdf','${src}','${esc(a.nombre||'')}')">⛶ Expandir</button>
-          <a class="adj-pill" href="${src}" download="${a.nombre||'archivo.pdf'}">⬇ Descargar</a>
+          <button class="adj-pill" onclick="openAdjModal('pdf','${blobUrl}','${esc(a.nombre||'')}')">⛶ Expandir</button>
+          <a class="adj-pill" href="${blobUrl}" download="${a.nombre||'archivo.pdf'}">⬇ Descargar</a>
+          <a class="adj-pill" href="${blobUrl}" target="_blank">↗ Abrir</a>
         </div>
       </div>
-      <iframe class="adj-pdf-frame" src="${src}" title="${esc(a.nombre||'')}"></iframe>
+      <object class="adj-pdf-frame" data="${blobUrl}" type="application/pdf">
+        <div style="padding:16px;text-align:center;color:var(--ink3);font-size:13px">
+          <div style="margin-bottom:8px">⚠️ Tu navegador no puede mostrar PDFs en línea</div>
+          <a href="${blobUrl}" download="${a.nombre||'archivo.pdf'}" class="adj-pill">⬇ Descargar PDF</a>
+          &nbsp;<a href="${blobUrl}" target="_blank" class="adj-pill">↗ Abrir en nueva pestaña</a>
+        </div>
+      </object>
     </div>`;
   });
 
@@ -938,18 +1166,46 @@ async function sendReplyAdmin() {
   if(!email) return;
   const body=document.getElementById('replyText').value.trim();
   if(!body){showToast('Escribe un mensaje','info');return;}
+  const paraInput  = document.getElementById('replyPara')?.value?.trim()  || email.remitente;
+  const ccInput    = document.getElementById('replyCc')?.value?.trim()    || '';
+  const asuntoInput= document.getElementById('replyAsunto')?.value?.trim()|| ('RE: '+email.asunto);
+
+  const firma = `<br><br><div style="border-top:1px solid #dde1eb;margin-top:16px;padding-top:12px;font-family:Arial,sans-serif;font-size:12px;color:#64748b"><strong style="color:#0a0e1a;font-size:13px">Gestión PQR · Tododrogas S.A.S</strong><br>pqrs.institucional@tododrogas.com.co</div>`;
+  const citado = `<br><div style="border-left:3px solid #2563eb;padding-left:12px;margin-top:12px;color:#64748b;font-size:12px"><div style="margin-bottom:6px"><strong>De:</strong> ${email.remitente_nombre||email.remitente} &lt;${email.remitente}&gt;</div><div style="margin-bottom:8px"><strong>Fecha:</strong> ${new Date(email.fecha).toLocaleString('es-CO',{dateStyle:'full',timeStyle:'short'})}</div><div style="margin-bottom:8px"><strong>Asunto:</strong> ${email.asunto}</div>${email.cuerpo_html||''}</div>`;
+  const htmlBody = `<p style="font-family:Arial,sans-serif;font-size:14px;color:#0a0e1a;line-height:1.6">${body.replace(/\n/g,'<br>')}</p>${firma}${citado}`;
+
+  const toRecipients = paraInput.split(',').map(e=>e.trim()).filter(Boolean).map(addr=>({emailAddress:{address:addr,name:addr}}));
+  const ccRecipients = ccInput ? ccInput.split(',').map(e=>e.trim()).filter(Boolean).map(addr=>({emailAddress:{address:addr,name:addr}})) : [];
+
   let exitoso=false, errMsg='';
   try {
     const token=await getGraphToken();
+    const mensaje = {
+      subject: asuntoInput,
+      body: {contentType:'HTML', content: htmlBody},
+      toRecipients,
+      ...(ccRecipients.length ? {ccRecipients} : {}),
+      ...(adminReplyAttachments.length ? {attachments: adminReplyAttachments.map(f=>({'@odata.type':'#microsoft.graph.fileAttachment',name:f.name,contentType:f.contentType,contentBytes:f.content}))} : {}),
+      ...(email.internet_message_id ? {singleValueExtendedProperties:[
+        {id:'String {00020386-0000-0000-C000-000000000046} Name In-Reply-To', value:email.internet_message_id},
+        {id:'String {00020386-0000-0000-C000-000000000046} Name References',  value:email.internet_message_id},
+      ]} : {})
+    };
     const r=await fetch(`https://graph.microsoft.com/v1.0/users/${GRAPH_USER_ID}/sendMail`,{
       method:'POST',
       headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
-      body:JSON.stringify({message:{subject:'RE: '+email.asunto,body:{contentType:'HTML',content:`<p>${body.replace(/\n/g,'<br>')}</p>`},toRecipients:[{emailAddress:{address:email.remitente,name:email.remitente_nombre||email.remitente}}]},saveToSentItems:true})
+      body:JSON.stringify({message:mensaje, saveToSentItems:true})
     });
-    if(r.ok||r.status===202){exitoso=true;showToast('Respuesta enviada ✓','success');document.getElementById('replyText').value='';document.getElementById('replyBox').style.display='none';}
-    else throw new Error(await r.text());
+    if(r.ok||r.status===202){
+      exitoso=true;
+      showToast('Respuesta enviada ✓ — guardada en Enviados','success');
+      document.getElementById('replyText').value='';
+      adminReplyAttachments=[];renderAdminReplyFiles();
+      document.getElementById('replyBox').style.display='none';
+    } else throw new Error(await r.text());
   } catch(e){errMsg=e.message;showToast('Error: '+e.message.substring(0,80),'error');}
   try { await sb('respuestas','POST',{correo_id:id,cuerpo:body,enviado_en:new Date().toISOString(),exitoso,error_msg:errMsg}); } catch {}
+  try { await sb('historial_eventos','POST',{correo_id:id,evento:'respuesta_enviada',from_email:email?.remitente,subject:email?.asunto,metadata:{exitoso,para:paraInput}}); } catch {}
 }
 
 function closeDetail(){
@@ -970,7 +1226,7 @@ function renderAgents() {
     const carga = state.emails.filter(e=>e.asignado_a===a.id&&(e.estado==='gestion'||e.estado==='pendiente')).length;
     const pct = Math.round(carga/maxCarga*100);
     const ini = (a.nombre||'?').charAt(0).toUpperCase();
-    return `<div class="agent-row">
+    return `<div class="agent-row" style="cursor:pointer" onclick="filterByAgent('${a.id}','${esc(a.nombre)}')" title="Ver correos de ${esc(a.nombre)}">
       <div class="agent-av" style="background:${colors[i%colors.length]}">${ini}</div>
       <div class="agent-info">
         <div class="agent-name">${esc(a.nombre)}</div>
@@ -979,13 +1235,54 @@ function renderAgents() {
       <div class="agent-bar-wrap">
         <div class="agent-bar"><div class="agent-bar-fill" style="width:${pct}%;background:${colors[i%colors.length]}"></div></div>
       </div>
-      <button onclick="deleteAgent('${a.id}')" style="background:none;border:none;cursor:pointer;color:var(--ink3);padding:4px;border-radius:4px;font-size:11px" title="Desactivar">✕</button>
+      <button onclick="event.stopPropagation();deleteAgent('${a.id}')" style="background:none;border:none;cursor:pointer;color:var(--ink3);padding:4px;border-radius:4px;font-size:11px" title="Desactivar">✕</button>
     </div>`;
   }).join('');
 }
 
 function openCreateAgent(){document.getElementById('modalAgent').classList.add('show');}
 function closeModal(id){document.getElementById(id).classList.remove('show');}
+
+// Filter emails by agent
+let activeAgentFilter = null;
+function filterByAgent(agentId, agentName) {
+  if (activeAgentFilter === agentId) {
+    // Toggle off
+    activeAgentFilter = null;
+    document.getElementById('searchInput').value = '';
+    renderEmails();
+    showToast('Filtro de agente eliminado', 'info');
+  } else {
+    activeAgentFilter = agentId;
+    showToast(`Mostrando correos de ${agentName}`, 'info');
+    renderEmailsForAgent(agentId, agentName);
+  }
+}
+
+function renderEmailsForAgent(agentId, agentName) {
+  const filtered = state.emails.filter(e => e.asignado_a === agentId);
+  const container = document.getElementById('emailsList');
+  if (!filtered.length) {
+    container.innerHTML = `<div class="empty-state"><div class="ei">📭</div><p>Sin correos asignados a ${esc(agentName)}</p></div>`;
+    return;
+  }
+  const labels={pendiente:'Pendiente',gestion:'En Gestión',gestionado:'Gestionado',solucionado:'Solucionado'};
+  container.innerHTML = `<div style="padding:8px 12px;background:var(--blue-l);border-bottom:1px solid var(--blue-m);font-size:11px;font-weight:700;color:var(--blue);display:flex;align-items:center;justify-content:space-between">
+    <span>👤 ${esc(agentName)} · ${filtered.length} correos</span>
+    <button onclick="filterByAgent('${agentId}','${esc(agentName)}')" style="background:none;border:none;cursor:pointer;color:var(--blue);font-size:12px">✕ Quitar filtro</button>
+  </div>` + filtered.map(email => {
+    const timeStr = formatDate(new Date(email.fecha));
+    return `<div class="email-item ${email.id===state.selectedId?'selected':''}" onclick="selectEmail('${email.id}')">
+      <div class="e-from">${esc(email.remitente_nombre||email.remitente)}</div>
+      <div class="e-subj">${esc(email.asunto)}</div>
+      <div class="e-prev">${esc(email.preview||'')}</div>
+      <div class="e-foot">
+        <span class="badge ${email.estado}">${labels[email.estado]||email.estado}</span>
+        <span class="e-time">${timeStr}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
 
 async function createAgent() {
   const nombre=document.getElementById('agentName').value.trim();
@@ -1169,6 +1466,142 @@ function showToast(msg,type='info'){
   // Auto-asignar al inicio
   setTimeout(()=>autoAsignarPendientes(), 3000);
 })();
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════
+// CHAT SISTEMA — Admin
+// ═══════════════════════════════════════════════════
+const adminChatState = {
+  open:false, currentContactId:null, currentContactName:null,
+  messages:[], attachments:[], pollInterval:null,
+};
+const CHAT_COLORS = ['#2563eb','#16a34a','#ea580c','#7c3aed','#ca8a04','#dc2626','#0891b2'];
+const ADMIN_ID = 'admin';
+
+function openAdminChat() {
+  adminChatState.open=true;
+  document.getElementById('adminChatOverlay').classList.add('open');
+  loadAdminChatContacts();
+  const badge=document.getElementById('adminChatBadge');
+  if(badge) badge.style.display='none';
+  if(!adminChatState.pollInterval) adminChatState.pollInterval=setInterval(pollAdminChat,5000);
+}
+function closeAdminChat() {
+  adminChatState.open=false;
+  document.getElementById('adminChatOverlay').classList.remove('open');
+}
+async function loadAdminChatContacts() {
+  try {
+    const agents = state.agents.filter(a=>a.activo===true||a.activo===1||a.activo==='true');
+    const colors = CHAT_COLORS;
+    const el=document.getElementById('adminChatContactsList');
+    if(!agents.length){el.innerHTML='<div style="padding:12px;font-size:12px;color:var(--ink3)">Sin agentes</div>';return;}
+    el.innerHTML = agents.map((a,i)=>{
+      const ini=(a.nombre||'?').charAt(0).toUpperCase();
+      const active=adminChatState.currentContactId===a.id;
+      return `<div class="chat-contact ${active?'active':''}" onclick="selectAdminChatContact('${a.id}','${esc(a.nombre)}','${colors[i%colors.length]}')">
+        <div class="chat-contact-av" style="background:${colors[i%colors.length]}">${ini}</div>
+        <div class="chat-contact-name" title="${esc(a.nombre)}">${esc(a.nombre)}</div>
+      </div>`;
+    }).join('');
+  } catch {}
+}
+async function selectAdminChatContact(id,nombre,color) {
+  adminChatState.currentContactId=id;
+  adminChatState.currentContactName=nombre;
+  document.getElementById('adminChatInputArea').style.display='flex';
+  document.getElementById('adminChatHeaderSub').textContent=`Conversación con ${nombre}`;
+  loadAdminChatContacts();
+  await loadAdminChatMessages();
+  document.getElementById('adminChatMsgInput').focus();
+}
+async function loadAdminChatMessages() {
+  if(!adminChatState.currentContactId) return;
+  try {
+    const msgs=await sb(`chat_mensajes?or=(and(de_id.eq.${ADMIN_ID},para_id.eq.${adminChatState.currentContactId}),and(de_id.eq.${adminChatState.currentContactId},para_id.eq.${ADMIN_ID}))&order=created_at.asc&limit=100`)||[];
+    adminChatState.messages=msgs;
+    renderAdminChatMessages();
+    // Mark as read
+    const unread=msgs.filter(m=>m.de_id!==ADMIN_ID&&!(m.leido_por||[]).includes(ADMIN_ID));
+    for(const m of unread) {
+      const lp=[...(m.leido_por||[]),ADMIN_ID];
+      await sb(`chat_mensajes?id=eq.${m.id}`,'PATCH',{leido_por:lp});
+    }
+  } catch(e){console.error('admin chat msgs',e);}
+}
+function renderAdminChatMessages() {
+  const el=document.getElementById('adminChatMessages');
+  if(!adminChatState.messages.length){
+    el.innerHTML=`<div class="chat-empty"><div style="font-size:28px">👋</div><div>¡Inicia la conversación<br>con ${esc(adminChatState.currentContactName)}!</div></div>`;
+    return;
+  }
+  el.innerHTML=adminChatState.messages.map(m=>{
+    const mine=m.de_id===ADMIN_ID;
+    const time=formatDate(new Date(m.created_at));
+    let content='';
+    if(m.mensaje) content+=`<div>${esc(m.mensaje)}</div>`;
+    if(m.adjunto_b64&&m.adjunto_tipo?.startsWith('image/')){
+      content+=`<img src="data:${m.adjunto_tipo};base64,${m.adjunto_b64}" class="chat-img-thumb" style="max-width:160px;border-radius:8px;margin-top:4px;cursor:pointer">`;
+    } else if(m.adjunto_b64){
+      const blob=new Blob([Uint8Array.from(atob(m.adjunto_b64),c=>c.charCodeAt(0))],{type:m.adjunto_tipo||'application/octet-stream'});
+      const url=URL.createObjectURL(blob);
+      content+=`<a href="${url}" download="${m.adjunto_nombre||'archivo'}" class="chat-file-pill">📎 ${esc(m.adjunto_nombre||'Archivo')}</a>`;
+    }
+    return `<div class="chat-msg ${mine?'mine':'theirs'}">
+      ${!mine?`<div class="chat-msg-name">${esc(m.de_nombre)}</div>`:''}
+      <div class="chat-bubble">${content}</div>
+      <div class="chat-msg-time">${time}</div>
+    </div>`;
+  }).join('');
+  el.scrollTop=el.scrollHeight;
+}
+async function sendAdminChatMsg() {
+  if(!adminChatState.currentContactId) return;
+  const text=document.getElementById('adminChatMsgInput').value.trim();
+  const att=adminChatState.attachments[0];
+  if(!text&&!att) return;
+  const payload={
+    de_id:ADMIN_ID, de_nombre:'Admin PQR', de_tipo:'admin',
+    para_id:adminChatState.currentContactId,
+    mensaje:text||null,
+    adjunto_nombre:att?.name||null, adjunto_tipo:att?.contentType||null, adjunto_b64:att?.content||null,
+    leido_por:[ADMIN_ID], created_at:new Date().toISOString()
+  };
+  try {
+    await sb('chat_mensajes','POST',payload);
+    document.getElementById('adminChatMsgInput').value='';
+    adminChatState.attachments=[];renderAdminChatAttachPreview();
+    await loadAdminChatMessages();
+  } catch {showToast('Error al enviar','error');}
+}
+async function pollAdminChat() {
+  if(!adminChatState.open) return;
+  if(adminChatState.currentContactId) await loadAdminChatMessages();
+  // Badge for unread
+  try {
+    const unread=await sb(`chat_mensajes?para_id=eq.${ADMIN_ID}&not.leido_por=cs.{${ADMIN_ID}}&limit=1`)||[];
+    const b=document.getElementById('adminChatBadge');
+    if(b){ if(unread.length){b.style.display='flex';}else{b.style.display='none';} }
+  } catch {}
+}
+function onAdminChatFileSelected(){
+  const input=document.getElementById('adminChatFileInput');
+  if(!input.files.length) return;
+  const file=input.files[0];
+  const reader=new FileReader();
+  reader.onload=e=>{
+    adminChatState.attachments=[{name:file.name,contentType:file.type||'application/octet-stream',content:e.target.result.split(',')[1],size:file.size}];
+    renderAdminChatAttachPreview();
+  };
+  reader.readAsDataURL(file);
+  input.value='';
+}
+function renderAdminChatAttachPreview(){
+  const el=document.getElementById('adminChatAttachPreview');
+  if(!el) return;
+  el.innerHTML=adminChatState.attachments.map((f,i)=>`<div class="chat-attach-chip">📎 ${esc(f.name)} <button onclick="adminChatState.attachments.splice(${i},1);renderAdminChatAttachPreview()" style="background:none;border:none;cursor:pointer;color:var(--blue);padding:0;font-size:12px">✕</button></div>`).join('');
+}
 </script>
 </body>
 </html>
