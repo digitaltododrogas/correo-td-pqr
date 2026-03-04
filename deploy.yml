@@ -1,0 +1,72 @@
+name: Deploy PQR al VPS
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: TOKENS.env
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Generar config.js con secrets
+        run: |
+          cat > config.js << EOF
+          window.CONFIG = {
+            SUPABASE_URL:    '${{ secrets.SUPABASE_UR }}',
+            SUPABASE_KEY:    '${{ secrets.SUPABASE_KEY }}',
+            GRAPH_TENANT:    '${{ secrets.AZURE_TENANT_ID }}',
+            GRAPH_CLIENT_ID: '${{ secrets.AZURE_CLIENT_ID }}',
+            GRAPH_SECRET:    '${{ secrets.AZURE_CLIENT_SECRET }}',
+            GRAPH_USER_ID:   '${{ secrets.GRAPH_USER_ID }}',
+          };
+          EOF
+
+      - name: Limpiar credenciales hardcodeadas del admin.html
+        run: |
+          sed -i "s|const SUPABASE_URL = .*|const SUPABASE_URL = (window.CONFIG\|\|{}).SUPABASE_URL;|g" admin.html
+          sed -i "s|const SUPABASE_KEY = .*|const SUPABASE_KEY = (window.CONFIG\|\|{}).SUPABASE_KEY;|g" admin.html
+          sed -i "s|const GRAPH_TENANT.*=.*'[^']*'|const GRAPH_TENANT    = (window.CONFIG\|\|{}).GRAPH_TENANT|g" admin.html
+          sed -i "s|const GRAPH_CLIENT_ID.*=.*'[^']*'|const GRAPH_CLIENT_ID = (window.CONFIG\|\|{}).GRAPH_CLIENT_ID|g" admin.html
+          sed -i "s|const GRAPH_SECRET.*=.*'[^']*'|const GRAPH_SECRET    = (window.CONFIG\|\|{}).GRAPH_SECRET|g" admin.html
+          sed -i "s|const GRAPH_USER_ID.*=.*'[^']*'|const GRAPH_USER_ID   = (window.CONFIG\|\|{}).GRAPH_USER_ID|g" admin.html
+
+      - name: Limpiar credenciales hardcodeadas del agente.html
+        run: |
+          sed -i "s|const SUPABASE_URL = .*|const SUPABASE_URL = (window.CONFIG\|\|{}).SUPABASE_URL;|g" agente.html
+          sed -i "s|const SUPABASE_KEY = .*|const SUPABASE_KEY = (window.CONFIG\|\|{}).SUPABASE_KEY;|g" agente.html
+          sed -i "s|const GRAPH_TENANT.*=.*'[^']*'|const GRAPH_TENANT    = (window.CONFIG\|\|{}).GRAPH_TENANT|g" agente.html
+          sed -i "s|const GRAPH_CLIENT_ID.*=.*'[^']*'|const GRAPH_CLIENT_ID = (window.CONFIG\|\|{}).GRAPH_CLIENT_ID|g" agente.html
+          sed -i "s|const GRAPH_SECRET.*=.*'[^']*'|const GRAPH_SECRET    = (window.CONFIG\|\|{}).GRAPH_SECRET|g" agente.html
+          sed -i "s|const GRAPH_USER_ID.*=.*'[^']*'|const GRAPH_USER_ID   = (window.CONFIG\|\|{}).GRAPH_USER_ID|g" agente.html
+
+      - name: Subir archivos al VPS por SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: 187.124.71.241
+          username: root
+          password: ${{ secrets.VPS_PASSWORD }}
+          script: |
+            mkdir -p /var/www/pqr
+            echo "Servidor listo"
+
+      - name: Copiar archivos al VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: 187.124.71.241
+          username: root
+          password: ${{ secrets.VPS_PASSWORD }}
+          source: "admin.html,agente.html,config.js"
+          target: /var/www/pqr/
+
+      - name: Recargar Nginx
+        uses: appleboy/ssh-action@v1
+        with:
+          host: 187.124.71.241
+          username: root
+          password: ${{ secrets.VPS_PASSWORD }}
+          script: systemctl reload nginx && echo "✅ Deploy completado"
