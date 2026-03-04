@@ -261,6 +261,49 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;min-
 @media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.charts-grid{grid-template-columns:1fr}}
 @media(max-width:768px){.sidebar{display:none}.kpi-grid{grid-template-columns:repeat(2,1fr)}}
 
+/* ── DASHBOARD REDESIGN ── */
+.dash-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.btn-excel{background:linear-gradient(135deg,#16a34a,#15803d);border:none;color:#fff;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;gap:7px;box-shadow:0 2px 8px rgba(22,163,74,.25);transition:all .15s}
+.btn-excel:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(22,163,74,.35)}
+.kpi-row-label{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink3);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.kpi-grid-4{grid-template-columns:repeat(4,1fr)!important}
+.kpi-grid-5{grid-template-columns:repeat(5,1fr)!important}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;position:relative;overflow:hidden;display:flex;align-items:flex-start;gap:14px;transition:box-shadow .2s,transform .15s}
+.kpi:hover{box-shadow:var(--shadow-l);transform:translateY(-1px)}
+.kpi-icon{font-size:22px;flex-shrink:0;margin-top:2px}
+.kpi-content{flex:1;min-width:0}
+.kpi-val{font-size:32px;font-weight:700;font-family:'DM Mono',monospace;color:var(--ink);line-height:1.1}
+.kpi-label{font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--ink3);margin-top:4px}
+.kpi-sub{font-size:11px;color:var(--ink3);margin-top:2px}
+.kpi-bar{position:absolute;left:0;top:0;width:4px;height:100%;background:var(--c);border-radius:var(--r) 0 0 var(--r)}
+.kpi-blue{background:linear-gradient(135deg,#fff 60%,#eff4ff)}
+.kpi-yellow{background:linear-gradient(135deg,#fff 60%,#fef9c3)}
+.kpi-orange{background:linear-gradient(135deg,#fff 60%,#fff7ed)}
+.kpi-green{background:linear-gradient(135deg,#fff 60%,#dcfce7)}
+.kpi-purple{background:linear-gradient(135deg,#fff 60%,#f5f3ff)}
+.kpi-teal{background:linear-gradient(135deg,#fff 60%,#ecfeff)}
+.dash-grid-main{display:grid;grid-template-columns:1fr 320px;gap:16px;margin-bottom:16px}
+.dash-col-charts{min-width:0}
+.dash-col-ranking{min-width:0}
+.rank-tab{background:var(--bg);border:1.5px solid var(--border);border-radius:6px;padding:3px 10px;font-size:11px;font-weight:600;color:var(--ink3);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.rank-tab:hover{border-color:var(--blue);color:var(--blue)}
+.active-rank{background:var(--blue-l)!important;border-color:var(--blue)!important;color:var(--blue)!important}
+.rank-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;background:var(--bg);transition:background .12s}
+.rank-item:hover{background:var(--blue-l)}
+.rank-medal{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
+.rank-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0}
+.rank-info{flex:1;min-width:0}
+.rank-name{font-size:12px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-meta{font-size:11px;color:var(--ink3);margin-top:1px}
+.rank-val{font-size:15px;font-weight:700;font-family:'DM Mono',monospace;color:var(--blue);flex-shrink:0}
+.rank-best{border:1.5px solid #16a34a33;background:linear-gradient(135deg,#fff,#dcfce7)}
+.rank-worst{border:1.5px solid #ef444433;background:linear-gradient(135deg,#fff,#fee2e2)}
+.tiempo-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;font-family:'DM Mono',monospace}
+.tiempo-good{background:#dcfce7;color:#15803d}
+.tiempo-med{background:#fef9c3;color:#92400e}
+.tiempo-bad{background:#fee2e2;color:#dc2626}
+@media(max-width:1200px){.dash-grid-main{grid-template-columns:1fr}.kpi-grid-5{grid-template-columns:repeat(3,1fr)!important}}
+
 .skeleton{background:linear-gradient(90deg,var(--bg2) 25%,var(--bg) 50%,var(--bg2) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:4px;height:14px;width:100%}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 .dot-online{display:inline-block;width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px #22c55e;margin-right:4px}
@@ -399,65 +442,212 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;min-
 
   <!-- MAIN -->
   <main class="main">
-    <div class="page-title">Panel de Control</div>
-    <div class="page-sub"><span class="dot-online"></span>Sistema PQR activo · td-pruebas.online</div>
 
-    <!-- KPIs -->
-    <div class="kpi-grid">
-      <div class="kpi">
-        <div class="kpi-label">Total correos</div>
-        <div class="kpi-val" id="kpiTotal">—</div>
-        <div class="kpi-sub">Últimas 24 h (n8n)</div>
-        <div class="kpi-accent" style="background:var(--blue)"></div>
+    <!-- ── HEADER ROW ── -->
+    <div class="dash-header-row">
+      <div>
+        <div class="page-title">Panel de Control</div>
+        <div class="page-sub"><span class="dot-online"></span>Sistema PQR activo · td-pruebas.online · <span id="dashLastUpdate" style="font-family:'DM Mono',monospace">—</span></div>
       </div>
-      <div class="kpi">
-        <div class="kpi-label">Pendientes</div>
-        <div class="kpi-val" id="kpiPending">—</div>
-        <div class="kpi-sub">Sin asignar / sin resolver</div>
-        <div class="kpi-accent" style="background:var(--yellow)"></div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">En gestión</div>
-        <div class="kpi-val" id="kpiActive">—</div>
-        <div class="kpi-sub">Agentes trabajando</div>
-        <div class="kpi-accent" style="background:var(--orange)"></div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">Resueltos hoy</div>
-        <div class="kpi-val" id="kpiSolved">—</div>
-        <div class="kpi-sub">Solucionados + gestionados</div>
-        <div class="kpi-accent" style="background:var(--green)"></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button onclick="exportarExcel()" class="btn-excel">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Exportar Excel
+        </button>
       </div>
     </div>
 
-    <!-- CHARTS -->
-    <div class="charts-grid">
-      <div class="chart-card">
-        <div class="chart-title">Distribución por estado</div>
-        <div class="chart-wrap"><canvas id="chartEstados"></canvas></div>
+    <!-- ── KPI FILA 1: Volumen ── -->
+    <div class="kpi-row-label">📬 Volumen de correos</div>
+    <div class="kpi-grid kpi-grid-4">
+      <div class="kpi kpi-blue">
+        <div class="kpi-icon">📥</div>
+        <div class="kpi-content">
+          <div class="kpi-val" id="kpiTotal">—</div>
+          <div class="kpi-label">Total correos</div>
+          <div class="kpi-sub">En el sistema</div>
+        </div>
+        <div class="kpi-bar" style="--c:var(--blue)"></div>
       </div>
-      <div class="chart-card">
-        <div class="chart-title">Carga por agente</div>
-        <div class="chart-wrap"><canvas id="chartAgentes"></canvas></div>
+      <div class="kpi kpi-yellow">
+        <div class="kpi-icon">⏳</div>
+        <div class="kpi-content">
+          <div class="kpi-val" id="kpiPending">—</div>
+          <div class="kpi-label">Pendientes</div>
+          <div class="kpi-sub">Sin gestionar</div>
+        </div>
+        <div class="kpi-bar" style="--c:var(--yellow)"></div>
+      </div>
+      <div class="kpi kpi-orange">
+        <div class="kpi-icon">⚡</div>
+        <div class="kpi-content">
+          <div class="kpi-val" id="kpiActive">—</div>
+          <div class="kpi-label">En gestión</div>
+          <div class="kpi-sub">Trabajando ahora</div>
+        </div>
+        <div class="kpi-bar" style="--c:var(--orange)"></div>
+      </div>
+      <div class="kpi kpi-green">
+        <div class="kpi-icon">✅</div>
+        <div class="kpi-content">
+          <div class="kpi-val" id="kpiSolved">—</div>
+          <div class="kpi-label">Solucionados</div>
+          <div class="kpi-sub">Cerrados</div>
+        </div>
+        <div class="kpi-bar" style="--c:var(--green)"></div>
       </div>
     </div>
 
-    <!-- HISTORIAL RECIENTE -->
+    <!-- ── KPI FILA 2: Eficiencia ── -->
+    <div class="kpi-row-label" style="margin-top:8px">⚡ Eficiencia del equipo</div>
+    <div class="kpi-grid kpi-grid-5">
+      <div class="kpi kpi-purple">
+        <div class="kpi-icon">🎯</div>
+        <div class="kpi-content">
+          <div class="kpi-val" id="kpiPct">—</div>
+          <div class="kpi-label">% Resueltos</div>
+          <div class="kpi-sub">Sobre total</div>
+        </div>
+        <div class="kpi-bar" style="--c:#8b5cf6"></div>
+      </div>
+      <div class="kpi kpi-teal">
+        <div class="kpi-icon">📋</div>
+        <div class="kpi-content">
+          <div class="kpi-val" id="kpiGest">—</div>
+          <div class="kpi-label">Gestionados</div>
+          <div class="kpi-sub">Estado gestionado</div>
+        </div>
+        <div class="kpi-bar" style="--c:#0891b2"></div>
+      </div>
+      <div class="kpi kpi-blue">
+        <div class="kpi-icon">👥</div>
+        <div class="kpi-content">
+          <div class="kpi-val" id="kpiAgentes">—</div>
+          <div class="kpi-label">Agentes activos</div>
+          <div class="kpi-sub">Con correos</div>
+        </div>
+        <div class="kpi-bar" style="--c:var(--blue)"></div>
+      </div>
+      <div class="kpi" id="kpiUnassignedCard">
+        <div class="kpi-icon">⚠️</div>
+        <div class="kpi-content">
+          <div class="kpi-val" id="kpiUnassigned">—</div>
+          <div class="kpi-label">Sin asignar</div>
+          <div class="kpi-sub">Requieren atención</div>
+        </div>
+        <div class="kpi-bar" style="--c:#ef4444"></div>
+      </div>
+      <div class="kpi kpi-green">
+        <div class="kpi-icon">🚨</div>
+        <div class="kpi-content">
+          <div class="kpi-val" id="kpiCriticos">0</div>
+          <div class="kpi-label">Críticos</div>
+          <div class="kpi-sub">Marcados urgentes</div>
+        </div>
+        <div class="kpi-bar" style="--c:#ef4444"></div>
+      </div>
+    </div>
+
+    <!-- ── GRÁFICAS + RANKING ── -->
+    <div class="dash-grid-main">
+
+      <!-- Columna izquierda: gráficas -->
+      <div class="dash-col-charts">
+        <div class="charts-grid" style="grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+          <div class="chart-card">
+            <div class="chart-title">Distribución por estado</div>
+            <div class="chart-wrap" style="height:160px"><canvas id="chartEstados"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Carga activa por agente</div>
+            <div class="chart-wrap" style="height:160px"><canvas id="chartAgentes"></canvas></div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">✅ Solucionados vs Gestionados por agente</div>
+          <div class="chart-wrap" style="height:150px"><canvas id="chartSolucionados"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Columna derecha: ranking de agentes -->
+      <div class="dash-col-ranking">
+        <div class="chart-card" style="height:100%">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <div class="chart-title" style="margin-bottom:0">🏆 Ranking de Agentes</div>
+            <div style="display:flex;gap:4px">
+              <button onclick="setRankingMode('resueltos')" id="rankBtnRes" class="rank-tab active-rank">Resueltos</button>
+              <button onclick="setRankingMode('tiempo')" id="rankBtnTiempo" class="rank-tab">Tiempo</button>
+            </div>
+          </div>
+          <div id="rankingAgentes" style="display:flex;flex-direction:column;gap:6px;overflow-y:auto;max-height:330px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TABLA MÉTRICAS DE TIEMPO ── -->
+    <div class="table-card" style="margin-bottom:16px">
+      <div class="table-head">
+        <div class="table-title">⏱️ Métricas de Tiempo por Agente</div>
+        <div id="kpiMedallas" style="font-size:11px;display:flex;gap:12px;flex-wrap:wrap"></div>
+        <span style="font-size:11px;color:var(--ink3)">Basado en historial de eventos</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table id="tiemposTable" style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead>
+            <tr style="background:var(--bg);border-bottom:2px solid var(--border)">
+              <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.6px;text-transform:uppercase">Agente</th>
+              <th style="padding:10px 12px;text-align:center;font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.6px;text-transform:uppercase">Asignados</th>
+              <th style="padding:10px 12px;text-align:center;font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.6px;text-transform:uppercase">Resueltos</th>
+              <th style="padding:10px 12px;text-align:center;font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.6px;text-transform:uppercase">% Resolución</th>
+              <th style="padding:10px 12px;text-align:center;font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.6px;text-transform:uppercase">Tiempo Prom.</th>
+              <th style="padding:10px 12px;text-align:center;font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.6px;text-transform:uppercase">Más rápido</th>
+              <th style="padding:10px 12px;text-align:center;font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.6px;text-transform:uppercase">Más lento</th>
+              <th style="padding:10px 12px;text-align:center;font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.6px;text-transform:uppercase">Respuestas</th>
+            </tr>
+          </thead>
+          <tbody id="tiemposBody">
+            <tr><td colspan="8" style="padding:24px;text-align:center;color:var(--ink3)">Calculando métricas...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── ALERTAS ── -->
+    <div class="table-card" style="margin-bottom:16px">
+      <div class="table-head">
+        <div class="table-title">🚨 Alertas del sistema</div>
+        <span style="font-size:11px;color:var(--ink3)" id="alertasTime">—</span>
+      </div>
+      <div id="alertasWrap" style="padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px">
+        <div style="color:var(--ink3);font-size:13px">Calculando alertas...</div>
+      </div>
+    </div>
+
+    <!-- ── HISTORIAL CON FECHAS ── -->
     <div class="table-card">
       <div class="table-head">
-        <div class="table-title">📋 Historial reciente</div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <div class="auto-badge" id="autoBadge" onclick="toggleAutoAsign()" title="Asignación automática por carga">
+        <div class="table-title">📋 Historial de actividad</div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <input type="date" id="histFechaDesde" style="border:1.5px solid var(--border);border-radius:6px;padding:4px 8px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--bg);outline:none" onchange="filtrarHistorial()">
+          <span style="font-size:11px;color:var(--ink3)">→</span>
+          <input type="date" id="histFechaHasta" style="border:1.5px solid var(--border);border-radius:6px;padding:4px 8px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--bg);outline:none" onchange="filtrarHistorial()">
+          <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px" onclick="limpiarFiltroHist()">✕ Limpiar</button>
+          <div class="auto-badge" id="autoBadge" onclick="toggleAutoAsign()">
             <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
             AUTO-ASIGNACIÓN ✓
           </div>
           <button class="btn btn-ghost" onclick="loadHistorial()">Actualizar</button>
         </div>
       </div>
+      <div id="histResumen" style="display:none;padding:8px 16px;background:var(--bg);border-bottom:1px solid var(--border);font-size:12px;color:var(--ink3)"></div>
       <div class="hist-wrap" id="historialWrap">
         <div class="empty-state" style="padding:24px"><p>Cargando historial...</p></div>
       </div>
+      <div id="histVerMas" style="display:none;padding:10px 16px;border-top:1px solid var(--border);text-align:center">
+        <button class="btn btn-ghost" style="font-size:12px" onclick="histMostrarTodo()">Ver todos los registros</button>
+      </div>
     </div>
+
   </main>
 </div>
 
@@ -579,7 +769,8 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;min-
 .chat-body{display:flex;flex:1;min-height:0}
 .chat-sidebar{width:150px;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
 .chat-sidebar-title{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--ink3);text-transform:uppercase;padding:10px 12px 6px}
-.chat-contact{padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .12s}
+.chat-contact-unread{position:absolute;top:6px;right:6px;background:var(--blue);color:#fff;font-size:9px;font-weight:700;border-radius:99px;padding:1px 5px;min-width:16px;text-align:center}
+.chat-contact{padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .12s;position:relative}
 .chat-contact:hover{background:var(--bg)}
 .chat-contact.active{background:var(--blue-l);border-right:3px solid var(--blue)}
 .chat-contact-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0}
@@ -704,6 +895,7 @@ function showAdminApp() {
   const lbl = document.getElementById('adminUserLabel');
   if (lbl) lbl.textContent = `${greet}, ${userName}`;
   syncAll();
+  setTimeout(startGlobalAdminChatPoll, 2000);
 }
 
 window.addEventListener('DOMContentLoaded', initAdminAuth);
@@ -1309,58 +1501,498 @@ async function deleteAgent(id){
 
 // ─── KPIs & CHARTS ───────────────────────────────────────────
 function updateKPIs() {
-  document.getElementById('kpiTotal').textContent = state.emails.length;
-  document.getElementById('kpiPending').textContent = state.emails.filter(e=>e.estado==='pendiente').length;
-  document.getElementById('kpiActive').textContent = state.emails.filter(e=>e.estado==='gestion').length;
-  document.getElementById('kpiSolved').textContent = state.emails.filter(e=>e.estado==='solucionado'||e.estado==='gestionado').length;
+  const total    = state.emails.length;
+  const pending  = state.emails.filter(e=>e.estado==='pendiente').length;
+  const active   = state.emails.filter(e=>e.estado==='gestion').length;
+  const solved   = state.emails.filter(e=>e.estado==='solucionado').length;
+  const gest     = state.emails.filter(e=>e.estado==='gestionado').length;
+  const unassign = state.emails.filter(e=>!e.asignado_a).length;
+  const agentesConCorreos = state.agents.filter(a=>(a.activo===true||a.activo===1||a.activo==='true') && state.emails.some(e=>e.asignado_a===a.id)).length;
+  const criticos = state.emails.filter(e=>e._raw?.critico||e._raw?.is_critical).length;
+  const pct = total > 0 ? Math.round((solved+gest)/total*100) : 0;
+
+  const set = (id, val) => { const el=document.getElementById(id); if(el) el.textContent=val; };
+  set('kpiTotal', total);
+  set('kpiPending', pending);
+  set('kpiActive', active);
+  set('kpiSolved', solved);
+  set('kpiPct', pct+'%');
+  set('kpiGest', gest);
+  set('kpiAgentes', agentesConCorreos);
+  set('kpiUnassigned', unassign);
+  set('kpiCriticos', criticos);
+  set('dashLastUpdate', new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}));
+
+  // Color dinámico sin asignar
+  const card = document.getElementById('kpiUnassignedCard');
+  if(card) {
+    if(unassign>5) card.style.background='linear-gradient(135deg,#fff 60%,#fee2e2)';
+    else if(unassign>0) card.style.background='linear-gradient(135deg,#fff 60%,#fff7ed)';
+    else card.style.background='linear-gradient(135deg,#fff 60%,#dcfce7)';
+  }
+  renderAlertas();
+  renderRanking();
+  renderTiemposTable();
 }
+
+// ── HELPERS TIEMPO ─────────────────────────────────────────────
+function calcTiempoAgente(agente) {
+  const mis = state.emails.filter(e=>e.asignado_a===agente.id);
+  const resueltos = mis.filter(e=>e.estado==='solucionado'||e.estado==='gestionado');
+  const tiempos = [];
+  const casosFechas = []; // {minutos, fecha_recibido, fecha_resuelto, asunto}
+
+  resueltos.forEach(email => {
+    if(!email.fecha) return;
+    const recibido = new Date(email.fecha);
+    const hist = state.historial.filter(h=>{
+      const meta = h.metadata||{};
+      return (h.correo_id===email.id||meta.correo_id===email.id) &&
+             (h.evento==='estado_solucionado'||h.evento==='estado_gestionado'||h.evento==='respuesta_enviada');
+    }).sort((a,b)=>new Date(a.created_at||a.fecha)-new Date(b.created_at||b.fecha));
+
+    if(hist.length) {
+      const resueltoEn = new Date(hist[0].created_at||hist[0].fecha);
+      const diff = (resueltoEn - recibido) / 60000;
+      if(diff > 0 && diff < 43200) {
+        tiempos.push(diff);
+        casosFechas.push({minutos:diff, fecha_recibido:email.fecha, fecha_resuelto:hist[0].created_at||hist[0].fecha, asunto:email.asunto||''});
+      }
+    }
+  });
+
+  const respuestas = state.historial.filter(h=>
+    (h.metadata?.agente_id===agente.id||h.metadata?.agente_nombre===agente.nombre) &&
+    h.evento==='respuesta_enviada'
+  ).length;
+
+  const promedio = tiempos.length ? tiempos.reduce((a,b)=>a+b,0)/tiempos.length : null;
+  const minimo   = tiempos.length ? Math.min(...tiempos) : null;
+  const maximo   = tiempos.length ? Math.max(...tiempos) : null;
+
+  // Caso más rápido y más lento con fecha
+  const casoRapido = casosFechas.length ? casosFechas.reduce((a,b)=>a.minutos<b.minutos?a:b) : null;
+  const casoLento  = casosFechas.length ? casosFechas.reduce((a,b)=>a.minutos>b.minutos?a:b) : null;
+
+  // Fecha primer y último caso resuelto
+  const fechasResueltas = casosFechas.map(c=>new Date(c.fecha_resuelto)).filter(d=>!isNaN(d));
+  const primerResuelto = fechasResueltas.length ? new Date(Math.min(...fechasResueltas)) : null;
+  const ultimoResuelto = fechasResueltas.length ? new Date(Math.max(...fechasResueltas)) : null;
+
+  return {
+    asignados: mis.length,
+    resueltos: resueltos.length,
+    respuestas,
+    promedio, minimo, maximo,
+    tiemposSample: tiempos.length,
+    pct: mis.length > 0 ? Math.round(resueltos.length/mis.length*100) : 0,
+    casoRapido, casoLento,
+    primerResuelto, ultimoResuelto,
+  };
+}
+
+function fmtMin(min) {
+  if(min===null) return '—';
+  if(min < 60) return Math.round(min)+'m';
+  if(min < 1440) return (min/60).toFixed(1)+'h';
+  return (min/1440).toFixed(1)+'d';
+}
+
+function tiempoBadge(min, todos) {
+  if(min===null) return '<span class="tiempo-badge" style="background:var(--bg);color:var(--ink3)">Sin datos</span>';
+  const vals = todos.filter(x=>x!==null);
+  if(!vals.length) return `<span class="tiempo-badge tiempo-med">${fmtMin(min)}</span>`;
+  const avg = vals.reduce((a,b)=>a+b,0)/vals.length;
+  const cls = min <= avg*0.8 ? 'tiempo-good' : min >= avg*1.3 ? 'tiempo-bad' : 'tiempo-med';
+  return `<span class="tiempo-badge ${cls}">${fmtMin(min)}</span>`;
+}
+
+// ── RANKING ─────────────────────────────────────────────────────
+let _rankMode = 'resueltos';
+function setRankingMode(mode) {
+  _rankMode = mode;
+  document.getElementById('rankBtnRes')?.classList.toggle('active-rank', mode==='resueltos');
+  document.getElementById('rankBtnTiempo')?.classList.toggle('active-rank', mode==='tiempo');
+  renderRanking();
+}
+
+function renderRanking() {
+  const el = document.getElementById('rankingAgentes');
+  if(!el) return;
+  const activos = state.agents.filter(a=>a.activo===true||a.activo===1||a.activo==='true');
+  if(!activos.length) { el.innerHTML='<div style="color:var(--ink3);font-size:13px;padding:12px">Sin agentes activos</div>'; return; }
+
+  const COLORS=['#2563eb','#16a34a','#ea580c','#7c3aed','#ca8a04','#dc2626','#0891b2','#db2777'];
+  const datos = activos.map((a,i)=>({...a, color:COLORS[i%COLORS.length], metrics:calcTiempoAgente(a)}));
+
+  let sorted;
+  if(_rankMode==='resueltos') {
+    sorted = [...datos].sort((a,b)=>b.metrics.resueltos-a.metrics.resueltos);
+  } else {
+    sorted = [...datos].sort((a,b)=>{
+      if(a.metrics.promedio===null&&b.metrics.promedio===null) return 0;
+      if(a.metrics.promedio===null) return 1;
+      if(b.metrics.promedio===null) return -1;
+      return a.metrics.promedio-b.metrics.promedio;
+    });
+  }
+
+  const medals = ['🥇','🥈','🥉'];
+  const allPromedios = datos.map(d=>d.metrics.promedio);
+  const maxResueltos = Math.max(...datos.map(d=>d.metrics.resueltos),1);
+
+  el.innerHTML = sorted.map((a,i)=>{
+    const m = a.metrics;
+    const isFirst = i===0;
+    const isLast = i===sorted.length-1 && _rankMode==='tiempo' && m.promedio!==null;
+    let valText='', metaText='';
+    if(_rankMode==='resueltos') {
+      valText = m.resueltos;
+      const barW = Math.round(m.resueltos/maxResueltos*100);
+      metaText = `<div style="margin-top:4px;height:3px;border-radius:99px;background:var(--border)"><div style="height:100%;width:${barW}%;background:${a.color};border-radius:99px;transition:width .5s"></div></div>`;
+    } else {
+      valText = fmtMin(m.promedio);
+      metaText = `<span style="color:var(--ink3);font-size:10px">${m.tiemposSample} caso(s) medidos</span>`;
+    }
+    return `<div class="rank-item ${isFirst&&_rankMode==='resueltos'?'rank-best':''} ${isLast?'rank-worst':''}">
+      <div class="rank-medal">${medals[i]||'<span style="font-size:11px;color:var(--ink3);font-weight:700">${i+1}</span>'}</div>
+      <div class="rank-av" style="background:${a.color}">${(a.nombre||'?').charAt(0)}</div>
+      <div class="rank-info">
+        <div class="rank-name">${esc(a.nombre||'')}</div>
+        <div class="rank-meta">${_rankMode==='resueltos'?`${m.asignados} asignados · ${m.pct}% resuelto`:`${m.resueltos} resueltos`}</div>
+        ${metaText}
+      </div>
+      <div class="rank-val">${valText}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── TABLA TIEMPOS ────────────────────────────────────────────────
+function renderTiemposTable() {
+  const tbody = document.getElementById('tiemposBody');
+  if(!tbody) return;
+  const activos = state.agents.filter(a=>a.activo===true||a.activo===1||a.activo==='true');
+  if(!activos.length) { tbody.innerHTML='<tr><td colspan="9" style="padding:24px;text-align:center;color:var(--ink3)">Sin agentes activos</td></tr>'; return; }
+
+  const datos = activos.map(a=>({...a, m:calcTiempoAgente(a)}));
+  const todosPromedios = datos.map(d=>d.m.promedio);
+  datos.sort((a,b)=>b.m.resueltos-a.m.resueltos);
+
+  const mejorTiempo = datos.reduce((best,d)=>{ if(d.m.promedio===null) return best; if(!best||d.m.promedio<best.m.promedio) return d; return best; }, null);
+  const peorTiempo  = datos.reduce((worst,d)=>{ if(d.m.promedio===null) return worst; if(!worst||d.m.promedio>worst.m.promedio) return d; return worst; }, null);
+
+  tbody.innerHTML = datos.map((d,idx)=>{
+    const m=d.m;
+    const isBestTime  = mejorTiempo&&d.id===mejorTiempo.id&&m.promedio!==null;
+    const isWorstTime = peorTiempo&&d.id===peorTiempo.id&&m.promedio!==null&&mejorTiempo?.id!==peorTiempo?.id;
+    const isBestRes   = idx===0&&m.resueltos>0;
+    const rowBg = isBestTime ? 'background:linear-gradient(90deg,#dcfce740,transparent)' : isWorstTime ? 'background:linear-gradient(90deg,#fee2e240,transparent)' : '';
+    const pctColor = m.pct>=80?'#16a34a':m.pct>=50?'#ca8a04':'#dc2626';
+    const rapido = m.casoRapido ? `<div style="font-size:9px;color:var(--ink3);margin-top:1px">${new Date(m.casoRapido.fecha_resuelto).toLocaleDateString('es-CO')}</div>` : '';
+    const lento  = m.casoLento  ? `<div style="font-size:9px;color:var(--ink3);margin-top:1px">${new Date(m.casoLento.fecha_resuelto).toLocaleDateString('es-CO')}</div>` : '';
+    return `<tr style="border-bottom:1px solid var(--border);${rowBg}" onmouseenter="this.style.background='var(--blue-l)'" onmouseleave="this.style.background='${rowBg.replace('background:','')}'">
+      <td style="padding:10px 16px">
+        <div style="display:flex;align-items:center;gap:7px">
+          ${isBestTime?'<span title="Mejor tiempo ⚡" style="font-size:15px">⚡</span>':isWorstTime?'<span title="Peor tiempo 🐢" style="font-size:15px">🐢</span>':isBestRes?'<span title="Más resueltos" style="font-size:15px">🏆</span>':''}
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--ink)">${esc(d.nombre||'')} ${isBestTime?'<span style="font-size:9px;background:#dcfce7;color:#15803d;border-radius:4px;padding:1px 5px;vertical-align:middle">MÁS RÁPIDO</span>':isWorstTime?'<span style="font-size:9px;background:#fee2e2;color:#dc2626;border-radius:4px;padding:1px 5px;vertical-align:middle">MÁS LENTO</span>':''}</div>
+            ${m.ultimoResuelto?`<div style="font-size:10px;color:var(--ink3)">Último: ${m.ultimoResuelto.toLocaleDateString('es-CO')}</div>`:''}
+          </div>
+        </div>
+      </td>
+      <td style="padding:10px 12px;text-align:center;font-family:'DM Mono',monospace;font-size:13px;font-weight:600">${m.asignados}</td>
+      <td style="padding:10px 12px;text-align:center"><span style="font-family:'DM Mono',monospace;font-size:15px;font-weight:800;color:var(--green)">${m.resueltos}</span></td>
+      <td style="padding:10px 12px;text-align:center">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
+          <span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:${pctColor}">${m.pct}%</span>
+          <div style="width:48px;height:5px;border-radius:99px;background:var(--border)"><div style="height:100%;width:${m.pct}%;background:${pctColor};border-radius:99px"></div></div>
+        </div>
+      </td>
+      <td style="padding:10px 12px;text-align:center">${tiempoBadge(m.promedio,todosPromedios)}<div style="font-size:10px;color:var(--ink3);margin-top:2px">${m.tiemposSample} caso(s)</div></td>
+      <td style="padding:10px 12px;text-align:center"><span class="tiempo-badge tiempo-good">${fmtMin(m.minimo)}</span>${rapido}</td>
+      <td style="padding:10px 12px;text-align:center"><span class="tiempo-badge ${m.maximo!==null?'tiempo-bad':''}">${fmtMin(m.maximo)}</span>${lento}</td>
+      <td style="padding:10px 12px;text-align:center;font-family:'DM Mono',monospace;font-size:13px;font-weight:600">${m.respuestas}</td>
+    </tr>`;
+  }).join('');
+}
+
 
 function renderCharts() {
-  // Chart 1: por estado
-  const estadoCtx = document.getElementById('chartEstados').getContext('2d');
-  const counts = ['pendiente','gestion','gestionado','solucionado'].map(t=>state.emails.filter(e=>e.estado===t).length);
-  if(chartEstados) chartEstados.destroy();
-  chartEstados = new Chart(estadoCtx, {
-    type:'doughnut',
-    data:{
-      labels:['Pendiente','En Gestión','Gestionado','Solucionado'],
-      datasets:[{data:counts,backgroundColor:['#fef9c3','#eff4ff','#fff7ed','#dcfce7'],borderColor:['#ca8a04','#2563eb','#ea580c','#16a34a'],borderWidth:2}]
-    },
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{family:'DM Sans',size:11},padding:12}}}}
-  });
-
-  // Chart 2: carga por agente
-  const agentCtx = document.getElementById('chartAgentes').getContext('2d');
+  const COLORS_BG  = ['#fef9c3','#eff4ff','#fff7ed','#dcfce7'];
+  const COLORS_BD  = ['#ca8a04','#2563eb','#ea580c','#16a34a'];
   const activos = state.agents.filter(a=>a.activo===true||a.activo===1||a.activo==='true').slice(0,8);
-  const cargas = activos.map(a=>state.emails.filter(e=>e.asignado_a===a.id&&(e.estado==='gestion'||e.estado==='pendiente')).length);
-  if(chartAgentes) chartAgentes.destroy();
-  chartAgentes = new Chart(agentCtx, {
-    type:'bar',
-    data:{
-      labels:activos.map(a=>(a.nombre||'').split(' ')[0]),
-      datasets:[{label:'Correos activos',data:cargas,backgroundColor:'#eff4ff',borderColor:'#2563eb',borderWidth:2,borderRadius:6}]
-    },
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{family:'DM Mono',size:10}}},x:{ticks:{font:{family:'DM Sans',size:11}}}}}
-  });
+
+  // ── Chart 1: Donut por estado ──
+  const estadoCtx = document.getElementById('chartEstados')?.getContext('2d');
+  if(estadoCtx) {
+    const counts = ['pendiente','gestion','gestionado','solucionado'].map(t=>state.emails.filter(e=>e.estado===t).length);
+    if(chartEstados) chartEstados.destroy();
+    chartEstados = new Chart(estadoCtx, {
+      type:'doughnut',
+      data:{labels:['Pendiente','En Gestión','Gestionado','Solucionado'],datasets:[{data:counts,backgroundColor:COLORS_BG,borderColor:COLORS_BD,borderWidth:2,hoverOffset:4}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'right',labels:{font:{family:'DM Sans',size:10},padding:8,boxWidth:10}}}}
+    });
+  }
+
+  // ── Chart 2: Barras carga activa por agente ──
+  const agentCtx = document.getElementById('chartAgentes')?.getContext('2d');
+  if(agentCtx) {
+    const cargas     = activos.map(a=>state.emails.filter(e=>e.asignado_a===a.id&&e.estado==='gestion').length);
+    const pendAgente = activos.map(a=>state.emails.filter(e=>e.asignado_a===a.id&&e.estado==='pendiente').length);
+    if(chartAgentes) chartAgentes.destroy();
+    chartAgentes = new Chart(agentCtx, {
+      type:'bar',
+      data:{
+        labels:activos.map(a=>(a.nombre||'').split(' ')[0]),
+        datasets:[
+          {label:'En gestión',data:cargas,backgroundColor:'#eff4ff',borderColor:'#2563eb',borderWidth:2,borderRadius:4},
+          {label:'Pendiente',data:pendAgente,backgroundColor:'#fef9c3',borderColor:'#ca8a04',borderWidth:1.5,borderRadius:4}
+        ]
+      },
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{family:'DM Sans',size:10},padding:8,boxWidth:10}}},scales:{x:{stacked:false,ticks:{font:{family:'DM Sans',size:10}}},y:{beginAtZero:true,ticks:{stepSize:1,font:{family:'DM Mono',size:10}}}}}
+    });
+  }
+
+  // ── Chart 3: Solucionados + Gestionados por agente ──
+  const solCtx = document.getElementById('chartSolucionados')?.getContext('2d');
+  if(solCtx) {
+    const solCounts  = activos.map(a=>state.emails.filter(e=>e.asignado_a===a.id&&e.estado==='solucionado').length);
+    const gestCounts = activos.map(a=>state.emails.filter(e=>e.asignado_a===a.id&&e.estado==='gestionado').length);
+    if(window._chartSol) window._chartSol.destroy();
+    window._chartSol = new Chart(solCtx, {
+      type:'bar',
+      data:{
+        labels:activos.map(a=>(a.nombre||'').split(' ')[0]),
+        datasets:[
+          {label:'Solucionados',data:solCounts,backgroundColor:'#dcfce7',borderColor:'#16a34a',borderWidth:2,borderRadius:4},
+          {label:'Gestionados', data:gestCounts,backgroundColor:'#fff7ed',borderColor:'#ea580c',borderWidth:1.5,borderRadius:4}
+        ]
+      },
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{font:{family:'DM Sans',size:10},padding:8,boxWidth:10}}},scales:{x:{stacked:true,ticks:{font:{family:'DM Sans',size:10}}},y:{stacked:true,beginAtZero:true,ticks:{stepSize:1,font:{family:'DM Mono',size:10}}}}}
+    });
+  }
 }
 
-function renderHistorial() {
+// ─── ALERTAS ─────────────────────────────────────────────────
+function renderAlertas() {
+  const el = document.getElementById('alertasWrap');
+  if(!el) return;
+  const alertas = [];
+  const pending  = state.emails.filter(e=>e.estado==='pendiente').length;
+  const unassign = state.emails.filter(e=>!e.asignado_a).length;
+  const activos  = state.agents.filter(a=>a.activo===true||a.activo===1||a.activo==='true');
+  const criticos = state.emails.filter(e=>e._raw?.critico).length;
+
+  if(pending > 10)  alertas.push({color:'#ef4444',bg:'#fef2f2',icon:'🔴',msg:`${pending} correos pendientes sin gestionar`});
+  else if(pending > 0) alertas.push({color:'#ea580c',bg:'#fff7ed',icon:'🟡',msg:`${pending} correos pendientes`});
+
+  if(unassign > 5)  alertas.push({color:'#ef4444',bg:'#fef2f2',icon:'⚠️',msg:`${unassign} correos sin asignar a agente`});
+  else if(unassign > 0) alertas.push({color:'#ca8a04',bg:'#fefce8',icon:'📌',msg:`${unassign} correo(s) sin agente asignado`});
+
+  if(criticos > 0) alertas.push({color:'#dc2626',bg:'#fef2f2',icon:'🚨',msg:`${criticos} correo(s) marcado(s) como CRÍTICO por agente — requiere atención`});
+
+  activos.forEach(a=>{
+    const carga = state.emails.filter(e=>e.asignado_a===a.id&&(e.estado==='gestion'||e.estado==='pendiente')).length;
+    if(carga > 12) alertas.push({color:'#7c3aed',bg:'#f5f3ff',icon:'📬',msg:`${(a.nombre||'').split(' ')[0]} tiene ${carga} correos activos — carga alta`});
+  });
+
+  const sinCarga = activos.filter(a=>!state.emails.some(e=>e.asignado_a===a.id));
+  if(sinCarga.length) alertas.push({color:'#0891b2',bg:'#ecfeff',icon:'💤',msg:`Sin correos: ${sinCarga.map(a=>(a.nombre||'').split(' ')[0]).join(', ')}`});
+
+  // Destacar mejor y peor tiempo
+  const conTiempo = activos.map(a=>({...a,m:calcTiempoAgente(a)})).filter(d=>d.m.promedio!==null&&d.m.tiemposSample>=2);
+  if(conTiempo.length >= 2) {
+    const best    = conTiempo.reduce((b,d)=>d.m.promedio<b.m.promedio?d:b);
+    const slowest = conTiempo.reduce((b,d)=>d.m.promedio>b.m.promedio?d:b);
+    alertas.push({color:'#16a34a',bg:'#dcfce7',icon:'🏆',msg:`Mejor tiempo: ${(best.nombre||'').split(' ')[0]} — promedio ${fmtMin(best.m.promedio)}`});
+    if(best.id!==slowest.id) alertas.push({color:'#ca8a04',bg:'#fef9c3',icon:'🐢',msg:`Tiempo más lento: ${(slowest.nombre||'').split(' ')[0]} — promedio ${fmtMin(slowest.m.promedio)}`});
+  }
+
+  const timeEl = document.getElementById('alertasTime');
+  if(timeEl) timeEl.textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+
+  if(!alertas.length) {
+    el.innerHTML='<div style="display:flex;align-items:center;gap:8px;color:#16a34a;font-size:13px;font-weight:600"><span style="font-size:18px">✅</span> Todo en orden — sin alertas activas</div>';
+    return;
+  }
+  el.innerHTML = alertas.map(a=>`<div style="display:inline-flex;align-items:center;gap:7px;background:${a.bg};border:1px solid ${a.color}33;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;color:${a.color};max-width:100%">${a.icon} ${esc(a.msg)}</div>`).join('');
+}
+
+// ─── HISTORIAL CON FILTRO ─────────────────────────────────────
+let _histTodos = [];
+let _histMostrandoTodo = false;
+
+function filtrarHistorial() {
+  const desde = document.getElementById('histFechaDesde')?.value;
+  const hasta = document.getElementById('histFechaHasta')?.value;
+  let data = [..._histTodos];
+  if(desde) data = data.filter(h=>{ const f=h.created_at||h.fecha||''; return f>=desde; });
+  if(hasta) data = data.filter(h=>{ const f=h.created_at||h.fecha||''; return f<=hasta+'T23:59:59'; });
+  const resEl = document.getElementById('histResumen');
+  if(desde||hasta) {
+    resEl.style.display='block';
+    resEl.innerHTML=`📊 Mostrando <strong>${data.length}</strong> registro(s) en el rango seleccionado`;
+  } else { resEl.style.display='none'; }
+  renderHistorialData(data);
+}
+
+function limpiarFiltroHist() {
+  const d=document.getElementById('histFechaDesde'), h=document.getElementById('histFechaHasta');
+  if(d) d.value=''; if(h) h.value='';
+  document.getElementById('histResumen').style.display='none';
+  renderHistorialData(_histTodos);
+}
+
+function histMostrarTodo() {
+  _histMostrandoTodo=true;
+  renderHistorialData(_histTodos, true);
+  document.getElementById('histVerMas').style.display='none';
+}
+
+function renderHistorialData(data, all=false) {
   const el = document.getElementById('historialWrap');
-  if(!state.historial.length) { el.innerHTML=`<div class="empty-state" style="padding:24px"><p>Sin historial reciente</p></div>`; return; }
-  el.innerHTML = state.historial.slice(0,20).map(h=>{
+  const verMas = document.getElementById('histVerMas');
+  if(!data.length) { el.innerHTML=`<div class="empty-state" style="padding:24px"><p>Sin registros en este período</p></div>`; if(verMas) verMas.style.display='none'; return; }
+  const limit = all ? data.length : 25;
+  const slice = data.slice(0,limit);
+  const iconMap = {
+    'respuesta_enviada':'📤','estado_solucionado':'✅','estado_gestion':'🔄',
+    'estado_gestionado':'📋','estado_pendiente':'⏳','asignacion':'👤','auto_asignacion':'🤖'
+  };
+  el.innerHTML = slice.map(h=>{
     const fecha=h.created_at||h.fecha||'';
     const accion=h.evento||h.accion||'';
     const detail=h.subject||h.detalle||'';
     const from=h.from_email||'';
-    return `<div class="hist-row">
-      <div class="hist-dot"></div>
+    const icon=iconMap[accion]||'📌';
+    const colorMap={
+      'respuesta_enviada':'var(--blue)','estado_solucionado':'var(--green)',
+      'estado_gestionado':'var(--orange)','estado_gestion':'#7c3aed',
+    };
+    const color=colorMap[accion]||'var(--ink3)';
+    return `<div class="hist-row" style="border-left:3px solid ${color}20;padding-left:8px">
+      <div class="hist-dot" style="background:${color}"></div>
       <span class="hist-time">${fecha?formatDate(new Date(fecha)):''}</span>
       <div>
-        <div class="hist-label">${esc(accion)}</div>
-        <div class="hist-detail">${esc(detail)} ${from?`· ${esc(from)}`:''}</div>
+        <div class="hist-label">${icon} ${esc(accion.replace(/_/g,' '))}</div>
+        <div class="hist-detail">${esc(detail)} ${from?`· <span style="color:var(--blue)">${esc(from)}</span>`:''}</div>
       </div>
     </div>`;
   }).join('');
+  if(verMas) verMas.style.display = (!all && data.length>limit) ? 'block' : 'none';
+}
+
+function renderHistorial_OLD_REMOVED() {} // placeholder
+
+function renderHistorial() {
+  _histTodos = state.historial;
+  filtrarHistorial();
+}
+
+// ─── EXPORTAR EXCEL ──────────────────────────────────────────
+function exportarExcel() {
+  if(typeof XLSX === 'undefined') {
+    showToast('Cargando librería Excel...','info');
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload=()=>_generarExcel();
+    document.head.appendChild(s);
+  } else { _generarExcel(); }
+}
+
+function _generarExcel() {
+  try {
+    const wb = XLSX.utils.book_new();
+    const now = new Date().toLocaleString('es-CO');
+    const activos = state.agents.filter(a=>a.activo===true||a.activo===1||a.activo==='true');
+    const total = state.emails.length;
+    const solved = state.emails.filter(e=>e.estado==='solucionado').length;
+    const gest   = state.emails.filter(e=>e.estado==='gestionado').length;
+
+    // ── HOJA 1: Resumen KPIs ──
+    const resumenData = [
+      ['INFORME DE GESTIÓN PQR — TODODROGAS S.A.S','',''],
+      [`Generado: ${now}`,'',''],
+      ['','',''],
+      ['INDICADOR','VALOR','DESCRIPCIÓN'],
+      ['Total correos en sistema', total, 'Todos los correos registrados'],
+      ['Pendientes', state.emails.filter(e=>e.estado==='pendiente').length, 'Sin gestionar'],
+      ['En gestión', state.emails.filter(e=>e.estado==='gestion').length, 'Agentes trabajando actualmente'],
+      ['Gestionados', gest, 'Estado gestionado (en seguimiento)'],
+      ['Solucionados', solved, 'Cerrados exitosamente'],
+      ['Sin asignar', state.emails.filter(e=>!e.asignado_a).length, 'Requieren asignación de agente'],
+      ['Marcados críticos', state.emails.filter(e=>e._raw?.critico).length, 'Escalados por agentes'],
+      ['% Resolución total', total>0 ? Math.round((solved+gest)/total*100)+'%' : '0%', 'Solucionados + Gestionados / Total'],
+      ['Agentes activos', activos.length, 'Con correos asignados'],
+      ['','',''],
+      ['MEJOR AGENTE (resueltos)', '', ''],
+    ];
+    // Best agent by resueltos
+    const dataAgentes = activos.map(a=>({...a, m:calcTiempoAgente(a)}));
+    if(dataAgentes.length) {
+      const best = dataAgentes.reduce((b,d)=>d.m.resueltos>b.m.resueltos?d:b, dataAgentes[0]);
+      const worst = dataAgentes.filter(d=>d.m.promedio!==null).reduce((w,d)=>!w||d.m.promedio<w.m.promedio?d:w, null);
+      const slowest = dataAgentes.filter(d=>d.m.promedio!==null).reduce((w,d)=>!w||d.m.promedio>w.m.promedio?d:w, null);
+      resumenData.push(['🏆 Más resueltos', best.nombre||'—', `${best.m.resueltos} caso(s) resueltos`]);
+      if(worst) resumenData.push(['⚡ Tiempo más rápido', worst.nombre||'—', `Promedio: ${fmtMin(worst.m.promedio)}`]);
+      if(slowest && slowest.id!==worst?.id) resumenData.push(['🐢 Tiempo más lento', slowest.nombre||'—', `Promedio: ${fmtMin(slowest.m.promedio)}`]);
+    }
+    const wsResumen = XLSX.utils.aoa_to_sheet(resumenData);
+    wsResumen['!cols'] = [{wch:30},{wch:20},{wch:40}];
+    XLSX.utils.book_append_sheet(wb, wsResumen, '📊 Resumen');
+
+    // ── HOJA 2: Gestión por Agente ──
+    const agenteHeader = ['AGENTE','ASIGNADOS','PENDIENTES','EN GESTIÓN','GESTIONADOS','SOLUCIONADOS','% RESOLUCIÓN','RESPUESTAS ENVIADAS'];
+    const agenteRows = [agenteHeader];
+    dataAgentes.sort((a,b)=>b.m.resueltos-a.m.resueltos).forEach(d=>{
+      const m=d.m;
+      agenteRows.push([d.nombre||'Sin nombre', m.asignados, state.emails.filter(e=>e.asignado_a===d.id&&e.estado==='pendiente').length, state.emails.filter(e=>e.asignado_a===d.id&&e.estado==='gestion').length, state.emails.filter(e=>e.asignado_a===d.id&&e.estado==='gestionado').length, m.resueltos, m.pct+'%', m.respuestas]);
+    });
+    agenteRows.push([]);
+    agenteRows.push(['TOTAL', total, state.emails.filter(e=>e.estado==='pendiente').length, state.emails.filter(e=>e.estado==='gestion').length, gest, solved, total>0?Math.round((solved+gest)/total*100)+'%':'0%', '—']);
+    const wsAgentes = XLSX.utils.aoa_to_sheet(agenteRows);
+    wsAgentes['!cols'] = [{wch:22},{wch:11},{wch:12},{wch:13},{wch:13},{wch:14},{wch:14},{wch:20}];
+    XLSX.utils.book_append_sheet(wb, wsAgentes, '👥 Por Agente');
+
+    // ── HOJA 3: Métricas de Tiempo ──
+    const tiempoHeader = ['AGENTE','RESUELTOS','TIEMPO PROMEDIO','TIEMPO MÍNIMO','FECHA CASO RÁPIDO','TIEMPO MÁXIMO','FECHA CASO LENTO','CASOS MEDIDOS','RESPUESTAS','RANKING'];
+    const tiempoRows = [tiempoHeader];
+    const withTime = dataAgentes.filter(d=>d.m.promedio!==null).sort((a,b)=>a.m.promedio-b.m.promedio);
+    const withoutTime = dataAgentes.filter(d=>d.m.promedio===null);
+    [...withTime,...withoutTime].forEach((d,i)=>{
+      const m=d.m;
+      const fechaRapido = m.casoRapido ? new Date(m.casoRapido.fecha_resuelto).toLocaleString('es-CO') : '—';
+      const fechaLento  = m.casoLento  ? new Date(m.casoLento.fecha_resuelto).toLocaleString('es-CO')  : '—';
+      const badge = i===0&&m.promedio!==null ? '⚡ MÁS RÁPIDO' : (i===withTime.length-1&&withTime.length>1) ? '🐢 MÁS LENTO' : m.promedio!==null?(i+1)+'°':'Sin datos';
+      tiempoRows.push([d.nombre||'—', m.resueltos, fmtMin(m.promedio), fmtMin(m.minimo), fechaRapido, fmtMin(m.maximo), fechaLento, m.tiemposSample, m.respuestas, badge]);
+    });
+    const wsTiempos = XLSX.utils.aoa_to_sheet(tiempoRows);
+    wsTiempos['!cols'] = [{wch:22},{wch:11},{wch:16},{wch:14},{wch:22},{wch:14},{wch:22},{wch:14},{wch:12},{wch:16}];
+    XLSX.utils.book_append_sheet(wb, wsTiempos, '⏱ Tiempos');
+
+    // ── HOJA 4: Detalle de Correos ──
+    const correoRows = [['ID','ASUNTO','REMITENTE','NOMBRE REMITENTE','ESTADO','AGENTE ASIGNADO','FECHA RECIBIDO','TIENE ADJUNTOS','CRÍTICO']];
+    state.emails.forEach(e=>{
+      const agente = state.agents.find(a=>a.id===e.asignado_a);
+      correoRows.push([e.id||'', e.asunto||'', e.remitente||'', e.remitente_nombre||'', e.estado||'', agente?.nombre||'Sin asignar', e.fecha?new Date(e.fecha).toLocaleString('es-CO'):'', e.tiene_adjuntos?'Sí':'No', e._raw?.critico?'Sí':'No']);
+    });
+    const wsCorreos = XLSX.utils.aoa_to_sheet(correoRows);
+    wsCorreos['!cols'] = [{wch:36},{wch:45},{wch:32},{wch:22},{wch:13},{wch:20},{wch:22},{wch:14},{wch:10}];
+    XLSX.utils.book_append_sheet(wb, wsCorreos, '📬 Correos');
+
+    // ── HOJA 5: Historial ──
+    const histRows = [['FECHA','EVENTO','ASUNTO','REMITENTE','AGENTE','DETALLE']];
+    (state.historial||[]).forEach(h=>{
+      histRows.push([h.created_at||h.fecha||'', h.evento||h.accion||'', h.subject||h.detalle||'', h.from_email||'', h.metadata?.agente_nombre||'', JSON.stringify(h.metadata||{})]);
+    });
+    const wsHist = XLSX.utils.aoa_to_sheet(histRows);
+    wsHist['!cols'] = [{wch:22},{wch:22},{wch:45},{wch:30},{wch:20},{wch:40}];
+    XLSX.utils.book_append_sheet(wb, wsHist, '📋 Historial');
+
+    const fecha = new Date().toISOString().slice(0,10);
+    XLSX.writeFile(wb, `PQR_Tododrogas_${fecha}.xlsx`);
+    showToast('✅ Excel generado — 5 hojas de datos completos','success');
+  } catch(e) { showToast('Error al generar Excel: '+e.message,'error'); console.error(e); }
 }
 
 // ─── AUTO-ASIGNACIÓN ─────────────────────────────────────────
@@ -1485,7 +2117,6 @@ function openAdminChat() {
   loadAdminChatContacts();
   const badge=document.getElementById('adminChatBadge');
   if(badge) badge.style.display='none';
-  if(!adminChatState.pollInterval) adminChatState.pollInterval=setInterval(pollAdminChat,5000);
 }
 function closeAdminChat() {
   adminChatState.open=false;
@@ -1500,7 +2131,7 @@ async function loadAdminChatContacts() {
     el.innerHTML = agents.map((a,i)=>{
       const ini=(a.nombre||'?').charAt(0).toUpperCase();
       const active=adminChatState.currentContactId===a.id;
-      return `<div class="chat-contact ${active?'active':''}" onclick="selectAdminChatContact('${a.id}','${esc(a.nombre)}','${colors[i%colors.length]}')">
+      return `<div class="chat-contact ${active?'active':''}" data-contact-id="${a.id}" onclick="selectAdminChatContact('${a.id}','${esc(a.nombre)}','${colors[i%colors.length]}')">
         <div class="chat-contact-av" style="background:${colors[i%colors.length]}">${ini}</div>
         <div class="chat-contact-name" title="${esc(a.nombre)}">${esc(a.nombre)}</div>
       </div>`;
@@ -1576,14 +2207,86 @@ async function sendAdminChatMsg() {
   } catch {showToast('Error al enviar','error');}
 }
 async function pollAdminChat() {
-  if(!adminChatState.open) return;
-  if(adminChatState.currentContactId) await loadAdminChatMessages();
-  // Badge for unread
+  // Solo actualiza conversación abierta
+  if(adminChatState.open && adminChatState.currentContactId) await loadAdminChatMessages();
+}
+
+// ─── POLL GLOBAL ADMIN (siempre activo) ─────
+let _adminChatLastKnownId = null;
+
+function startGlobalAdminChatPoll() {
+  checkAdminChatUnread();
+  setInterval(checkAdminChatUnread, 3000);
+}
+
+async function checkAdminChatUnread() {
   try {
-    const unread=await sb(`chat_mensajes?para_id=eq.${ADMIN_ID}&not.leido_por=cs.{${ADMIN_ID}}&limit=1`)||[];
-    const b=document.getElementById('adminChatBadge');
-    if(b){ if(unread.length){b.style.display='flex';}else{b.style.display='none';} }
+    const unread = await sb(`chat_mensajes?para_id=eq.${ADMIN_ID}&not.leido_por=cs.{${ADMIN_ID}}&order=created_at.desc&limit=10`) || [];
+    const badge = document.getElementById('adminChatBadge');
+    const btn   = document.getElementById('adminChatBtn');
+
+    if(unread.length > 0) {
+      if(badge) { badge.style.display='flex'; badge.textContent = unread.length > 9 ? '9+' : unread.length; }
+      if(btn) btn.style.background = '#1e3a5f';
+
+      const newest = unread[0];
+      if(_adminChatLastKnownId !== newest.id) {
+        _adminChatLastKnownId = newest.id;
+        if(!adminChatState.open || adminChatState.currentContactId !== newest.de_id) {
+          playAdminChatSound();
+          showAdminChatToast(newest.de_nombre, newest.mensaje || '📎 Adjunto');
+        }
+      }
+      if(adminChatState.open && adminChatState.currentContactId === unread[0].de_id) {
+        await loadAdminChatMessages();
+      }
+      const byContact = {};
+      unread.forEach(m => { byContact[m.de_id]=(byContact[m.de_id]||0)+1; });
+      renderAdminContactBadges(byContact);
+    } else {
+      if(badge) { badge.style.display='none'; }
+      if(btn) btn.style.background = '#1e293b';
+      renderAdminContactBadges({});
+      _adminChatLastKnownId = null;
+    }
   } catch {}
+}
+
+function renderAdminContactBadges(byContact) {
+  document.querySelectorAll('.chat-contact[data-contact-id]').forEach(el => {
+    const id = el.dataset.contactId;
+    const existing = el.querySelector('.chat-contact-unread');
+    const count = byContact[id] || 0;
+    if(count > 0) {
+      if(existing) { existing.textContent = count; }
+      else { const s=document.createElement('span'); s.className='chat-contact-unread'; s.textContent=count; el.appendChild(s); }
+    } else { if(existing) existing.remove(); }
+  });
+}
+
+function playAdminChatSound() {
+  try {
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const osc=ctx.createOscillator(),gain=ctx.createGain();
+    osc.connect(gain);gain.connect(ctx.destination);
+    osc.frequency.setValueAtTime(880,ctx.currentTime);
+    osc.frequency.setValueAtTime(1100,ctx.currentTime+0.1);
+    gain.gain.setValueAtTime(0.15,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.3);
+    osc.start(ctx.currentTime);osc.stop(ctx.currentTime+0.3);
+  } catch {}
+}
+
+function showAdminChatToast(nombre, mensaje) {
+  const tc=document.getElementById('toastContainer');
+  if(!tc) return;
+  const t=document.createElement('div');
+  t.className='toast-msg success';
+  t.style.cssText='cursor:pointer;display:flex;align-items:center;gap:10px;padding:12px 16px';
+  t.innerHTML=`<div style="width:28px;height:28px;border-radius:50%;background:#2563eb;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">💬</div><div><div style="font-weight:700;font-size:12px">${esc(nombre)}</div><div style="font-size:12px;opacity:.85">${esc(mensaje.substring(0,50))}</div></div>`;
+  t.onclick=()=>{ openAdminChat(); t.remove(); };
+  tc.appendChild(t);
+  setTimeout(()=>t.remove(),5000);
 }
 function onAdminChatFileSelected(){
   const input=document.getElementById('adminChatFileInput');
