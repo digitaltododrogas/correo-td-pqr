@@ -67,6 +67,9 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;min-
 .topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
 .btn-logout{background:none;border:1.5px solid #334155;color:#64748b;padding:5px 12px;border-radius:7px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s}
 .btn-logout:hover{border-color:#ef4444;color:#ef4444}
+.btn-refresh{background:#1e293b;border:1px solid #334155;color:#94a3b8;padding:5px 12px;border-radius:7px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s}
+.btn-refresh:hover{background:#334155;color:#fff}
+.btn-refresh.spin svg{animation:spin 1s linear infinite}
 .last-sync{font-size:10px;color:#475569;font-family:'DM Mono',monospace}
 
 /* ── LAYOUT ── */
@@ -160,12 +163,21 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;min-
 .adj-pill:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-l)}
 
 /* ── REPLY ── */
-.reply-section{padding:16px 20px;border-bottom:1px solid var(--border)}
-.reply-wrap{display:none}
-.reply-to{font-size:11px;color:var(--ink3);margin-bottom:8px}
-.reply-textarea{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r2);padding:12px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--ink);resize:vertical;min-height:100px;outline:none;transition:border-color .15s}
-.reply-textarea:focus{border-color:var(--blue);background:#fff}
-.reply-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
+.reply-section{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:10px}
+.reply-wrap{background:var(--surface2);border:1.5px solid var(--blue-m);border-radius:var(--r);overflow:hidden}
+.reply-header{background:var(--blue-l);border-bottom:1px solid var(--blue-m);padding:12px 16px;display:flex;flex-direction:column;gap:4px}
+.reply-to-row{display:flex;align-items:center;gap:8px}
+.reply-agent-row{display:flex;align-items:center;gap:8px;padding-top:4px;border-top:1px solid var(--blue-m);margin-top:4px}
+.reply-label{font-size:11px;font-weight:700;color:var(--blue);min-width:50px;text-transform:uppercase;letter-spacing:.5px}
+.reply-addr{font-size:12px;color:var(--ink2)}
+.reply-textarea{width:100%;background:#fff;border:none;border-bottom:1px solid var(--border);padding:14px 16px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--ink);resize:vertical;min-height:120px;outline:none}
+.reply-preview-toggle{padding:8px 16px;font-size:11px;color:var(--ink3);cursor:pointer;display:flex;align-items:center;gap:4px;border-bottom:1px solid var(--border);transition:color .15s}
+.reply-preview-toggle:hover{color:var(--blue)}
+.reply-preview-citado{padding:12px 16px;border-bottom:1px solid var(--border);background:var(--bg)}
+.reply-firma-preview{font-size:11px;color:var(--ink3);padding:8px 0 12px;border-bottom:1px solid var(--border);margin-bottom:12px;line-height:1.6}
+.reply-citado-header{font-size:11px;color:var(--ink3);border-left:3px solid var(--blue);padding-left:10px;margin-bottom:8px;line-height:1.8}
+.reply-citado-body{font-size:12px;color:var(--ink3);border-left:3px solid var(--border);padding-left:10px;max-height:200px;overflow-y:auto;line-height:1.6}
+.reply-actions{display:flex;justify-content:flex-end;gap:8px;padding:12px 16px}
 
 /* ── HISTORIAL ── */
 .hist-section{padding:16px 20px}
@@ -234,6 +246,10 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;min-
     </div>
     <div class="topbar-right">
       <span class="last-sync" id="lastSync">—</span>
+      <button class="btn-refresh" onclick="refreshSinLogout()" id="refreshBtn" title="Actualizar correos">
+        <svg id="refreshIcon" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10"/><path d="M20.49 15a9 9 0 01-14.85 3.36L1 14"/></svg>
+        Actualizar
+      </button>
       <button class="btn-logout" onclick="doLogout()">Salir</button>
     </div>
   </div>
@@ -325,19 +341,22 @@ const GRAPH_USER_ID   = (window.CONFIG||{}).GRAPH_USER_ID;
 // ─── MAPEO campos n8n → UI ───────────────────────────────────
 function mapCorreo(c) {
   return {
-    id:              c.id,
-    message_id:      c.message_id,
-    asunto:          c.subject      || c.asunto      || '(Sin asunto)',
-    remitente:       c.from_email   || c.remitente   || '',
-    remitente_nombre:c.from_name    || c.remitente_nombre || '',
-    fecha:           c.received_at  || c.fecha        || c.created_at,
-    cuerpo_html:     c.body_content || c.cuerpo_html  || '',
-    cuerpo_tipo:     c.body_type    || c.cuerpo_tipo  || 'text',
-    tiene_adjuntos:  c.has_attachments ?? c.tiene_adjuntos ?? false,
-    leido:           c.is_read      ?? c.leido        ?? false,
-    preview:         c.body_preview || c.preview      || '',
-    estado:          c.estado       || 'pendiente',
-    asignado_a:      c.asignado_a,
+    id:                  c.id,
+    message_id:          c.message_id,
+    internet_message_id: c.internet_message_id || c.internetMessageId || '',
+    conversation_id:     c.conversation_id     || c.conversationId    || '',
+    reply_to:            c.reply_to            || c.replyTo           || [],
+    asunto:              c.subject      || c.asunto      || '(Sin asunto)',
+    remitente:           c.from_email   || c.remitente   || '',
+    remitente_nombre:    c.from_name    || c.remitente_nombre || '',
+    fecha:               c.received_at  || c.fecha        || c.created_at,
+    cuerpo_html:         c.body_content || c.cuerpo_html  || '',
+    cuerpo_tipo:         c.body_type    || c.cuerpo_tipo  || 'text',
+    tiene_adjuntos:      c.has_attachments ?? c.tiene_adjuntos ?? false,
+    leido:               c.is_read      ?? c.leido        ?? false,
+    preview:             c.body_preview || c.preview      || '',
+    estado:              c.estado       || 'pendiente',
+    asignado_a:          c.asignado_a,
     _raw: c,
   };
 }
@@ -414,6 +433,15 @@ function doLogout() {
   document.getElementById('app').style.display='none';
   document.getElementById('loginPin').value='';
   document.getElementById('loginNombre').value='';
+}
+
+async function refreshSinLogout() {
+  if(!state.currentAgent) return;
+  const btn=document.getElementById('refreshBtn');
+  btn.classList.add('spin');
+  await loadMyEmails();
+  btn.classList.remove('spin');
+  showToast('Actualizado ✓','success');
 }
 
 // ─── LOAD MY EMAILS ──────────────────────────────────────────
@@ -547,21 +575,51 @@ async function selectEmail(id) {
       ${adjHTML}
 
       <div class="reply-section">
-        <div class="reply-wrap" id="replyWrap">
-          <div class="reply-to" id="replyTo">Para: ${esc(email.remitente_nombre||email.remitente)} &lt;${esc(email.remitente)}&gt;</div>
-          <textarea class="reply-textarea" id="replyText" placeholder="Escribe tu respuesta..."></textarea>
-          <div class="reply-actions">
-            <button class="btn btn-ghost" onclick="document.getElementById('replyWrap').style.display='none'">Cancelar</button>
-            <button class="btn btn-primary" onclick="sendReply('${id}')">
-              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-              Enviar
-            </button>
-          </div>
-        </div>
         <button class="btn btn-ghost" id="showReplyBtn" onclick="toggleReply('${id}')">
           <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 00-4-4H4"/></svg>
           Responder al remitente
         </button>
+        <div class="reply-wrap" id="replyWrap" style="display:none">
+          <div class="reply-header">
+            <div class="reply-to-row">
+              <span class="reply-label">Para:</span>
+              <span class="reply-addr">${esc(email.remitente_nombre||email.remitente)} &lt;${esc(email.remitente)}&gt;</span>
+            </div>
+            <div class="reply-to-row">
+              <span class="reply-label">Asunto:</span>
+              <span class="reply-addr">${email.asunto.startsWith('RE:')?esc(email.asunto):'RE: '+esc(email.asunto)}</span>
+            </div>
+            <div class="reply-agent-row">
+              <span class="reply-label">De:</span>
+              <span class="reply-addr">${esc(state.currentAgent?.nombre||'')} — pqrs.institucional@tododrogas.com.co</span>
+            </div>
+          </div>
+          <textarea class="reply-textarea" id="replyText" placeholder="Escribe tu respuesta aquí...&#10;&#10;La firma corporativa se agrega automáticamente."></textarea>
+          <div class="reply-preview-toggle" onclick="togglePreviewCitado('${id}')">
+            <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            Ver correo original citado
+          </div>
+          <div class="reply-preview-citado" id="previewCitado" style="display:none">
+            <div class="reply-firma-preview">
+              <strong>${esc(state.currentAgent?.nombre||'')}</strong><br>
+              Gestión PQR · Tododrogas S.A.S<br>
+              pqrs.institucional@tododrogas.com.co
+            </div>
+            <div class="reply-citado-header">
+              De: ${esc(email.remitente_nombre||email.remitente)} &lt;${esc(email.remitente)}&gt;<br>
+              Fecha: ${new Date(email.fecha).toLocaleString('es-CO',{dateStyle:'full',timeStyle:'short'})}<br>
+              Asunto: ${esc(email.asunto)}
+            </div>
+            <div class="reply-citado-body">${email.cuerpo_html||email.preview||''}</div>
+          </div>
+          <div class="reply-actions">
+            <button class="btn btn-ghost" onclick="toggleReply('${id}')">Cancelar</button>
+            <button class="btn btn-primary" onclick="sendReply('${id}')">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              Enviar respuesta
+            </button>
+          </div>
+        </div>
       </div>
 
       ${histHTML}
@@ -672,24 +730,90 @@ function toggleReply(id) {
   if(!shown && document.getElementById('replyText')) document.getElementById('replyText').focus();
 }
 
+function togglePreviewCitado(id) {
+  const el=document.getElementById('previewCitado');
+  const toggle=document.querySelector('.reply-preview-toggle');
+  if(!el) return;
+  const shown=el.style.display!=='none';
+  el.style.display=shown?'none':'block';
+  if(toggle) toggle.innerHTML=shown
+    ? '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg> Ver correo original citado'
+    : '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg> Ocultar correo original';
+}
+
 async function sendReply(id) {
   const email=state.emails.find(e=>e.id===id);
   if(!email) return;
   const body=document.getElementById('replyText')?.value?.trim();
   if(!body){showToast('Escribe un mensaje','info');return;}
   let exitoso=false,errMsg='';
+
+  // Firma corporativa
+  const firma = `
+    <br><br>
+    <div style="border-top:1px solid #dde1eb;margin-top:16px;padding-top:12px;font-family:Arial,sans-serif;font-size:12px;color:#64748b">
+      <strong style="color:#0a0e1a;font-size:13px">${state.currentAgent?.nombre||''}</strong><br>
+      Gestión PQR · Tododrogas S.A.S<br>
+      pqrs.institucional@tododrogas.com.co
+    </div>`;
+
+  // Hilo del correo original (para que quede en el mismo hilo)
+  const citado = `
+    <br>
+    <div style="border-left:3px solid #2563eb;padding-left:12px;margin-top:12px;color:#64748b;font-size:12px">
+      <div style="margin-bottom:6px"><strong>De:</strong> ${email.remitente_nombre||email.remitente} &lt;${email.remitente}&gt;</div>
+      <div style="margin-bottom:8px"><strong>Fecha:</strong> ${new Date(email.fecha).toLocaleString('es-CO',{dateStyle:'full',timeStyle:'short'})}</div>
+      <div style="margin-bottom:8px"><strong>Asunto:</strong> ${email.asunto}</div>
+      ${email.cuerpo_html||''}
+    </div>`;
+
+  const htmlBody = `<p style="font-family:Arial,sans-serif;font-size:14px;color:#0a0e1a;line-height:1.6">${body.replace(/\n/g,'<br>')}</p>${firma}${citado}`;
+
+  // Determinar destinatario: si hay reply_to usar ese, si no usar from_email
+  let replyToAddr = email.remitente;
+  let replyToName = email.remitente_nombre||email.remitente;
+  try {
+    const rawReplyTo = email._raw?.reply_to||email._raw?.replyTo||[];
+    const rt = Array.isArray(rawReplyTo) ? rawReplyTo : [];
+    if(rt.length>0 && rt[0]?.emailAddress?.address) {
+      replyToAddr = rt[0].emailAddress.address;
+      replyToName = rt[0].emailAddress.name||replyToAddr;
+    }
+  } catch {}
+
+  // Asunto con RE: sin duplicar
+  const subject = email.asunto.startsWith('RE:') ? email.asunto : 'RE: '+email.asunto;
+
+  // Mensaje con threading headers para que quede en el mismo hilo
+  const mensaje = {
+    subject,
+    body: { contentType:'HTML', content: htmlBody },
+    toRecipients: [{ emailAddress:{ address:replyToAddr, name:replyToName }}],
+    // Threading: enlaza con el correo original
+    ...(email.internet_message_id ? {
+      singleValueExtendedProperties: [
+        { id:'String {00020386-0000-0000-C000-000000000046} Name In-Reply-To', value: email.internet_message_id },
+        { id:'String {00020386-0000-0000-C000-000000000046} Name References',  value: email.internet_message_id },
+      ]
+    } : {})
+  };
+
   try {
     const token=await getGraphToken();
     const r=await fetch(`https://graph.microsoft.com/v1.0/users/${GRAPH_USER_ID}/sendMail`,{
       method:'POST',
       headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
-      body:JSON.stringify({message:{subject:'RE: '+email.asunto,body:{contentType:'HTML',content:`<p>${body.replace(/\n/g,'<br>')}</p>`},toRecipients:[{emailAddress:{address:email.remitente,name:email.remitente_nombre||email.remitente}}]},saveToSentItems:true})
+      body:JSON.stringify({ message:mensaje, saveToSentItems:true })
     });
-    if(r.ok||r.status===202){exitoso=true;showToast('Respuesta enviada ✓','success');if(document.getElementById('replyText'))document.getElementById('replyText').value='';toggleReply(id);}
-    else throw new Error(await r.text());
-  } catch(e){errMsg=e.message;showToast('Error: '+e.message.substring(0,60),'error');}
+    if(r.ok||r.status===202){
+      exitoso=true;
+      showToast('Respuesta enviada ✓ — guardada en Enviados','success');
+      if(document.getElementById('replyText'))document.getElementById('replyText').value='';
+      toggleReply(id);
+    } else throw new Error(await r.text());
+  } catch(e){errMsg=e.message;showToast('Error: '+e.message.substring(0,80),'error');}
   try{await sb('respuestas','POST',{correo_id:id,agente_id:state.currentAgent?.id,cuerpo:body,enviado_en:new Date().toISOString(),exitoso,error_msg:errMsg});}catch{}
-  try{await sb('historial_eventos','POST',{correo_id:id,message_id:email?.message_id,evento:'respuesta_enviada',from_email:email?.remitente,subject:email?.asunto,metadata:{exitoso,agente_id:state.currentAgent?.id,agente_nombre:state.currentAgent?.nombre}});}catch{}
+  try{await sb('historial_eventos','POST',{correo_id:id,message_id:email?.message_id,evento:'respuesta_enviada',from_email:email?.remitente,subject:email?.asunto,metadata:{exitoso,para:replyToAddr,agente_id:state.currentAgent?.id,agente_nombre:state.currentAgent?.nombre}});}catch{}
 }
 
 // ─── UTILS ───────────────────────────────────────────────────
