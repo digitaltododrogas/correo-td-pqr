@@ -186,7 +186,7 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;min-
 .reply-input{background:#fff;border:1.5px solid var(--blue-m);border-radius:6px;padding:5px 10px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--ink);outline:none;transition:border-color .15s;flex:1}
 .reply-input:focus{border-color:var(--blue)}
 .reply-cc-row{display:flex;align-items:center;gap:6px;padding:6px 16px;border-bottom:1px solid var(--border);background:var(--blue-l)}
-.reply-cc-label{font-size:10px;font-weight:700;color:var(--blue);min-width:50px;text-transform:uppercase;letter-spacing:.5px}
+.reply-cc-label{font-size:11px;font-weight:700;color:var(--blue);min-width:50px;text-transform:uppercase;letter-spacing:.5px}
 .reply-all-btn{font-size:10px;color:var(--blue);cursor:pointer;text-decoration:underline;white-space:nowrap}
 /* Popup celebración */
 .celebration-overlay{position:fixed;inset:0;z-index:999;display:none;align-items:center;justify-content:center;pointer-events:none}
@@ -265,8 +265,8 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;min-
   <!-- TOPBAR -->
   <div class="topbar">
     <div class="topbar-logo">
-      <div class="topbar-dot"></div>
-      Tododrogas PQR
+      <img src="LOGO_Tododrogas_Color_1__3_.png" style="height:26px;filter:brightness(0) invert(1);object-fit:contain" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <span style="display:none;align-items:center;gap:8px"><div class="topbar-dot"></div>Tododrogas PQR</span>
     </div>
     <div class="topbar-agent" id="topbarAgent">
       <span>👤</span><span id="topbarAgentName">—</span>
@@ -489,6 +489,8 @@ function enterApp() {
   document.getElementById('motiveText').textContent = tip.t;
   loadMyEmails();
   setInterval(()=>loadMyEmails(), 90000);
+  // Iniciar poll de chat global (corre siempre, avisa aunque el panel esté cerrado)
+  setTimeout(startGlobalChatPoll, 2000);
 }
 
 function doLogout() {
@@ -628,6 +630,9 @@ async function selectEmail(id) {
           <button class="btn btn-ghost" onclick="toggleReply('${id}')">
             <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 00-4-4H4"/></svg>
             Responder
+          </button>
+          <button onclick="abrirModalCritico('${id}')" style="background:linear-gradient(135deg,#dc2626,#b91c1c);border:none;color:#fff;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(220,38,38,.35);transition:all .15s;animation:criticalPulse 2s infinite" title="Solicitar apoyo urgente al admin">
+            🚨 Correo Crítico
           </button>
         </div>
       </div>
@@ -856,60 +861,44 @@ async function sendReply(id) {
   if(!email) return;
   const body=document.getElementById('replyText')?.value?.trim();
   if(!body){showToast('Escribe un mensaje','info');return;}
+
+  // Verificar tamaño de adjuntos (Graph API límite: 3 MB por adjunto, 4 MB total)
+  const totalSize = replyAttachments.reduce((s,f)=>s+(f.size||0),0);
+  if(totalSize > 3.5*1024*1024) {
+    showToast('⚠️ Adjunto demasiado grande. El límite es 3.5 MB. Descarga y envía por separado.','error');
+    return;
+  }
+
   let exitoso=false,errMsg='';
+  const btnEnviar = document.querySelector('.reply-send-btn');
+  if(btnEnviar){btnEnviar.disabled=true;btnEnviar.textContent='Enviando...';}
 
-  // Firma corporativa
-  const firma = `
-    <br><br>
-    <div style="border-top:1px solid #dde1eb;margin-top:16px;padding-top:12px;font-family:Arial,sans-serif;font-size:12px;color:#64748b">
-      <strong style="color:#0a0e1a;font-size:13px">${state.currentAgent?.nombre||''}</strong><br>
-      Gestión PQR · Tododrogas S.A.S<br>
-      pqrs.institucional@tododrogas.com.co
-    </div>`;
-
-  // Hilo del correo original (para que quede en el mismo hilo)
-  const citado = `
-    <br>
-    <div style="border-left:3px solid #2563eb;padding-left:12px;margin-top:12px;color:#64748b;font-size:12px">
-      <div style="margin-bottom:6px"><strong>De:</strong> ${email.remitente_nombre||email.remitente} &lt;${email.remitente}&gt;</div>
-      <div style="margin-bottom:8px"><strong>Fecha:</strong> ${new Date(email.fecha).toLocaleString('es-CO',{dateStyle:'full',timeStyle:'short'})}</div>
-      <div style="margin-bottom:8px"><strong>Asunto:</strong> ${email.asunto}</div>
-      ${email.cuerpo_html||''}
-    </div>`;
-
+  const firma = `<br><br><div style="border-top:1px solid #dde1eb;margin-top:16px;padding-top:12px;font-family:Arial,sans-serif;font-size:12px;color:#64748b"><strong style="color:#0a0e1a;font-size:13px">${state.currentAgent?.nombre||''}</strong><br>Gestión PQR · Tododrogas S.A.S<br>pqrs.institucional@tododrogas.com.co</div>`;
+  const citado = `<br><div style="border-left:3px solid #2563eb;padding-left:12px;margin-top:12px;color:#64748b;font-size:12px"><div style="margin-bottom:6px"><strong>De:</strong> ${email.remitente_nombre||email.remitente} &lt;${email.remitente}&gt;</div><div style="margin-bottom:8px"><strong>Fecha:</strong> ${new Date(email.fecha).toLocaleString('es-CO',{dateStyle:'full',timeStyle:'short'})}</div><div style="margin-bottom:8px"><strong>Asunto:</strong> ${email.asunto}</div>${email.cuerpo_html||''}</div>`;
   const htmlBody = `<p style="font-family:Arial,sans-serif;font-size:14px;color:#0a0e1a;line-height:1.6">${body.replace(/\n/g,'<br>')}</p>${firma}${citado}`;
 
-  // Leer campos editables del formulario
   const paraInput = document.getElementById('replyPara')?.value?.trim() || email.remitente;
   const ccInput   = document.getElementById('replyCc')?.value?.trim()   || '';
   const asuntoInput = document.getElementById('replyAsunto')?.value?.trim() || ('RE: '+email.asunto);
-
-  // Construir destinatarios Para
   const toRecipients = paraInput.split(',').map(e=>e.trim()).filter(Boolean).map(addr=>({emailAddress:{address:addr,name:addr}}));
-
-  // Construir CC
   const ccRecipients = ccInput ? ccInput.split(',').map(e=>e.trim()).filter(Boolean).map(addr=>({emailAddress:{address:addr,name:addr}})) : [];
-
   const replyToAddr = toRecipients[0]?.emailAddress?.address || email.remitente;
 
-  // Mensaje con threading headers para que quede en el mismo hilo
   const mensaje = {
     subject: asuntoInput,
     body: { contentType:'HTML', content: htmlBody },
     toRecipients,
     ...(ccRecipients.length ? { ccRecipients } : {}),
     ...(replyAttachments.length ? { attachments: replyAttachments.map(f=>({ '@odata.type':'#microsoft.graph.fileAttachment', name:f.name, contentType:f.contentType, contentBytes:f.content })) } : {}),
-    // Threading: enlaza con el correo original
-    ...(email.internet_message_id ? {
-      singleValueExtendedProperties: [
-        { id:'String {00020386-0000-0000-C000-000000000046} Name In-Reply-To', value: email.internet_message_id },
-        { id:'String {00020386-0000-0000-C000-000000000046} Name References',  value: email.internet_message_id },
-      ]
-    } : {})
+    ...(email.internet_message_id ? { singleValueExtendedProperties: [
+      { id:'String {00020386-0000-0000-C000-000000000046} Name In-Reply-To', value: email.internet_message_id },
+      { id:'String {00020386-0000-0000-C000-000000000046} Name References',  value: email.internet_message_id },
+    ]} : {})
   };
 
   try {
     const token=await getGraphToken();
+    if(!token) throw new Error('No se obtuvo token de autenticación. Verifica las credenciales.');
     const r=await fetch(`https://graph.microsoft.com/v1.0/users/${GRAPH_USER_ID}/sendMail`,{
       method:'POST',
       headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
@@ -921,8 +910,20 @@ async function sendReply(id) {
       if(document.getElementById('replyText'))document.getElementById('replyText').value='';
       replyAttachments=[];renderReplyFiles();
       toggleReply(id);
-    } else throw new Error(await r.text());
-  } catch(e){errMsg=e.message;showToast('Error: '+e.message.substring(0,80),'error');}
+    } else {
+      const errText = await r.text();
+      throw new Error(`HTTP ${r.status}: ${errText.substring(0,120)}`);
+    }
+  } catch(e){
+    errMsg=e.message;
+    if(e.message.includes('Failed to fetch')) {
+      showToast('Error de red. Verifica tu conexión e intenta de nuevo.','error');
+    } else {
+      showToast('Error: '+e.message.substring(0,80),'error');
+    }
+  } finally {
+    if(btnEnviar){btnEnviar.disabled=false;btnEnviar.textContent='Enviar';}
+  }
   try{await sb('respuestas','POST',{correo_id:id,agente_id:state.currentAgent?.id,cuerpo:body,enviado_en:new Date().toISOString(),exitoso,error_msg:errMsg});}catch{}
   try{await sb('historial_eventos','POST',{correo_id:id,message_id:email?.message_id,evento:'respuesta_enviada',from_email:email?.remitente,subject:email?.asunto,metadata:{exitoso,para:replyToAddr,agente_id:state.currentAgent?.id,agente_nombre:state.currentAgent?.nombre}});}catch{}
 }
@@ -1139,7 +1140,6 @@ function openChat() {
   document.getElementById('chatOverlay').classList.add('open');
   loadChatContacts();
   clearChatUnread();
-  if(!chatState.pollInterval) chatState.pollInterval = setInterval(pollChat, 5000);
 }
 function closeChat() {
   chatState.open = false;
@@ -1170,7 +1170,7 @@ function renderChatContacts() {
   el.innerHTML = chatState.contacts.map(c => {
     const ini = (c.nombre||'?').charAt(0).toUpperCase();
     const active = chatState.currentContactId===c.id;
-    return `<div class="chat-contact ${active?'active':''}" onclick="selectChatContact('${c.id}','${esc(c.nombre)}','${c.color}')">
+    return `<div class="chat-contact ${active?'active':''}" data-contact-id="${c.id}" onclick="selectChatContact('${c.id}','${esc(c.nombre)}','${c.color}')">
       <div class="chat-contact-av" style="background:${c.color}">${ini}</div>
       <div class="chat-contact-name" title="${esc(c.nombre)}">${esc(c.nombre)}</div>
     </div>`;
@@ -1258,19 +1258,113 @@ async function sendChatMsg() {
 }
 
 async function pollChat() {
-  if(!chatState.open || !chatState.currentContactId) return;
+  // Solo actualiza mensajes de la conversación abierta
+  if(chatState.open && chatState.currentContactId) {
+    await loadChatMessages();
+  }
+}
+
+// ─── POLL GLOBAL (siempre activo, detecta mensajes nuevos sin importar si el panel está abierto) ─────
+let _chatLastKnownId = null;
+
+function startGlobalChatPoll() {
+  checkChatUnread(); // inmediato
+  setInterval(checkChatUnread, 3000); // cada 3 segundos
+}
+
+async function checkChatUnread() {
   const me = state.currentAgent;
   if(!me) return;
-  await loadChatMessages();
-  // Check unread from all contacts
   try {
-    const unread = await sb(`chat_mensajes?para_id=eq.${me.id}&not.leido_por=cs.{${me.id}}&limit=1`) || [];
+    // Traer mensajes no leídos dirigidos a este agente
+    const unread = await sb(`chat_mensajes?para_id=eq.${me.id}&not.leido_por=cs.{${me.id}}&order=created_at.desc&limit=10`) || [];
     const badge = document.getElementById('chatUnreadBadge');
-    if(badge) {
-      if(unread.length && !chatState.open) { badge.style.display='flex'; badge.textContent='!'; }
-      else { badge.style.display='none'; }
+    const btn   = document.getElementById('chatBtn');
+
+    if(unread.length > 0) {
+      // Hay mensajes sin leer
+      if(badge) {
+        badge.style.display = 'flex';
+        badge.textContent = unread.length > 9 ? '9+' : unread.length;
+      }
+      if(btn) btn.style.background = '#1e3a5f';
+
+      // Verificar si hay mensaje nuevo que no conocíamos
+      const newest = unread[0];
+      if(_chatLastKnownId !== newest.id) {
+        _chatLastKnownId = newest.id;
+        // Notificación visual y sonido si el panel está cerrado o es otro contacto
+        if(!chatState.open || chatState.currentContactId !== newest.de_id) {
+          playChatSound();
+          showChatToast(newest.de_nombre, newest.mensaje || '📎 Adjunto');
+        }
+      }
+
+      // Si el panel está abierto en esa conversación, recargar mensajes
+      if(chatState.open && chatState.currentContactId === unread[0].de_id) {
+        await loadChatMessages();
+      }
+
+      // Actualizar badges por contacto
+      const unreadByContact = {};
+      unread.forEach(m => { unreadByContact[m.de_id] = (unreadByContact[m.de_id]||0)+1; });
+      renderChatContactBadges(unreadByContact);
+
+    } else {
+      // Sin mensajes sin leer
+      if(badge) { badge.style.display='none'; badge.textContent='0'; }
+      if(btn) btn.style.background = '#1e293b';
+      renderChatContactBadges({});
+      _chatLastKnownId = null;
     }
+  } catch(e) { /* silencioso */ }
+}
+
+function renderChatContactBadges(unreadByContact) {
+  const contacts = document.querySelectorAll('.chat-contact[data-contact-id]');
+  contacts.forEach(el => {
+    const id = el.dataset.contactId;
+    const existing = el.querySelector('.chat-contact-unread');
+    const count = unreadByContact[id] || 0;
+    if(count > 0) {
+      if(existing) { existing.textContent = count; }
+      else {
+        const span = document.createElement('span');
+        span.className = 'chat-contact-unread';
+        span.textContent = count;
+        el.appendChild(span);
+      }
+    } else {
+      if(existing) existing.remove();
+    }
+  });
+}
+
+function playChatSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.setValueAtTime(1100, ctx.currentTime + 0.1);
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.3);
   } catch {}
+}
+
+function showChatToast(nombre, mensaje) {
+  const tc = document.getElementById('toasts');
+  if(!tc) return;
+  const t = document.createElement('div');
+  t.className = 'toast info';
+  t.style.cssText = 'cursor:pointer;display:flex;align-items:center;gap:10px';
+  t.innerHTML = `<div style="width:28px;height:28px;border-radius:50%;background:#2563eb;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">💬</div><div><div style="font-weight:700;font-size:12px">${esc(nombre)}</div><div style="font-size:12px;opacity:.85">${esc(mensaje.substring(0,50))}</div></div>`;
+  t.onclick = () => { openChat(); selectChatContact(chatState.contacts.find(c=>c.nombre===nombre)?.id||'', nombre, '#2563eb'); t.remove(); };
+  tc.appendChild(t);
+  setTimeout(() => t.remove(), 5000);
 }
 
 async function markChatRead(myId, fromId) {
@@ -1299,6 +1393,131 @@ function renderChatAttachPreview() {
   const el = document.getElementById('chatAttachPreview');
   if(!el) return;
   el.innerHTML = chatState.attachments.map((f,i)=>`<div class="chat-attach-chip">📎 ${esc(f.name)} <button onclick="chatState.attachments.splice(${i},1);renderChatAttachPreview()" style="background:none;border:none;cursor:pointer;color:var(--blue);padding:0;font-size:12px">✕</button></div>`).join('');
+}
+</script>
+
+<!-- ═══ MODAL CORREO CRÍTICO ═══ -->
+<style>
+@keyframes criticalPulse{0%,100%{box-shadow:0 2px 8px rgba(220,38,38,.35)}50%{box-shadow:0 2px 20px rgba(220,38,38,.7),0 0 0 4px rgba(220,38,38,.15)}}
+@keyframes criticalShake{0%,100%{transform:scale(1)}10%,30%,50%,70%,90%{transform:scale(1.01) rotate(-1deg)}20%,40%,60%,80%{transform:scale(1.01) rotate(1deg)}}
+.critico-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:900;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.critico-overlay.show{display:flex}
+.critico-modal{background:#fff;border-radius:16px;width:480px;max-width:95vw;overflow:hidden;box-shadow:0 24px 64px rgba(220,38,38,.2),0 8px 24px rgba(0,0,0,.15);animation:criticalShake .4s ease;border:2px solid #fecaca}
+.critico-header{background:linear-gradient(135deg,#dc2626,#991b1b);padding:20px 24px;color:#fff;display:flex;align-items:center;gap:12px}
+.critico-hicon{font-size:30px;animation:criticalPulse 1.5s infinite}
+.critico-header h3{font-size:16px;font-weight:800;margin:0;letter-spacing:-.3px}
+.critico-header p{font-size:11px;color:rgba(255,255,255,.75);margin:3px 0 0}
+.critico-body{padding:20px 24px}
+.critico-preview{background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px 14px;margin-bottom:16px}
+.critico-subject{font-weight:700;color:#0a0e1a;font-size:13px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.critico-from{font-size:11px;color:#64748b}
+.critico-lbl{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#64748b;margin-bottom:8px}
+.critico-niveles{display:flex;gap:8px;margin-bottom:16px}
+.cnivel{flex:1;padding:10px 6px;border:2px solid #e2e8f0;border-radius:8px;text-align:center;cursor:pointer;transition:all .15s;font-size:11px;font-weight:700;color:#64748b;background:#fff}
+.cnivel:hover{border-color:#dc2626;background:#fef2f2;color:#dc2626}
+.cnivel.sel{border-color:#dc2626;background:#fef2f2;color:#dc2626;box-shadow:0 0 0 3px rgba(220,38,38,.12)}
+.cnivel .ni{font-size:20px;display:block;margin-bottom:4px}
+.critico-ta{width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:11px 14px;font-size:13px;font-family:'DM Sans',sans-serif;color:#0a0e1a;resize:none;outline:none;box-sizing:border-box;transition:border-color .15s}
+.critico-ta:focus{border-color:#dc2626}
+.critico-footer{display:flex;gap:10px;margin-top:14px}
+.btn-csend{flex:1;background:linear-gradient(135deg,#dc2626,#b91c1c);border:none;color:#fff;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s;box-shadow:0 4px 12px rgba(220,38,38,.3)}
+.btn-csend:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(220,38,38,.45)}
+.btn-csend:disabled{opacity:.6;transform:none;cursor:not-allowed}
+.btn-ccancel{background:none;border:1.5px solid #e2e8f0;color:#64748b;padding:12px 20px;border-radius:10px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.btn-ccancel:hover{border-color:#dc2626;color:#dc2626}
+</style>
+
+<div class="critico-overlay" id="criticoOverlay" onclick="if(event.target===this)cerrarModalCritico()">
+  <div class="critico-modal">
+    <div class="critico-header">
+      <div class="critico-hicon">🚨</div>
+      <div>
+        <h3>Solicitar Apoyo — Correo Crítico</h3>
+        <p>El admin recibirá una alerta inmediata vía chat interno</p>
+      </div>
+    </div>
+    <div class="critico-body">
+      <div class="critico-preview">
+        <div class="critico-subject" id="criticoSubject">—</div>
+        <div class="critico-from" id="criticoFrom">—</div>
+      </div>
+      <div class="critico-lbl">Nivel de urgencia</div>
+      <div class="critico-niveles">
+        <div class="cnivel sel" onclick="selNivel(this,'alta')" data-nivel="alta">
+          <span class="ni">🔴</span>Alta
+        </div>
+        <div class="cnivel" onclick="selNivel(this,'maxima')" data-nivel="maxima">
+          <span class="ni">🆘</span>Máxima
+        </div>
+        <div class="cnivel" onclick="selNivel(this,'bloqueo')" data-nivel="bloqueo">
+          <span class="ni">🔒</span>Bloqueo
+        </div>
+      </div>
+      <div class="critico-lbl">¿Por qué necesitas apoyo?</div>
+      <textarea class="critico-ta" id="criticoMensaje" rows="3" placeholder="Describe brevemente el problema o por qué es crítico..."></textarea>
+      <div class="critico-footer">
+        <button class="btn-ccancel" onclick="cerrarModalCritico()">Cancelar</button>
+        <button class="btn-csend" id="btnCriticoEnviar" onclick="enviarAlertaCritica()">
+          🚨 Alertar al admin ahora
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let _criticoEmailId = null, _criticoNivel = 'alta';
+
+function abrirModalCritico(emailId) {
+  _criticoEmailId = emailId;
+  _criticoNivel = 'alta';
+  const email = state.emails.find(e=>e.id===emailId);
+  document.getElementById('criticoSubject').textContent = email?.asunto || '(Sin asunto)';
+  document.getElementById('criticoFrom').textContent = `De: ${email?.remitente_nombre||email?.remitente||'—'} · ${email?.remitente||''}`;
+  document.getElementById('criticoMensaje').value = '';
+  document.querySelectorAll('.cnivel').forEach(n=>n.classList.remove('sel'));
+  document.querySelector('.cnivel[data-nivel="alta"]')?.classList.add('sel');
+  document.getElementById('criticoOverlay').classList.add('show');
+  setTimeout(()=>document.getElementById('criticoMensaje')?.focus(), 200);
+}
+
+function cerrarModalCritico() {
+  document.getElementById('criticoOverlay').classList.remove('show');
+}
+
+function selNivel(el, nivel) {
+  _criticoNivel = nivel;
+  document.querySelectorAll('.cnivel').forEach(n=>n.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+async function enviarAlertaCritica() {
+  const me = state.currentAgent;
+  if(!me || !_criticoEmailId) return;
+  const email = state.emails.find(e=>e.id===_criticoEmailId);
+  const motivo = document.getElementById('criticoMensaje').value.trim();
+  const nivelMap = {alta:'🔴 URGENCIA ALTA', maxima:'🆘 URGENCIA MÁXIMA', bloqueo:'🔒 CASO BLOQUEADO'};
+  const nivelTexto = nivelMap[_criticoNivel] || '🔴 URGENTE';
+
+  const msg = `${nivelTexto}\n\n📬 Asunto: ${email?.asunto||'(Sin asunto)'}\n📧 Remitente: ${email?.remitente||'—'}\n👤 Agente: ${me.nombre}${motivo?'\n\n💬 '+motivo:''}`;
+
+  const btn = document.getElementById('btnCriticoEnviar');
+  btn.disabled = true; btn.innerHTML = '⏳ Enviando...';
+
+  try {
+    await sb('chat_mensajes', 'POST', {
+      de_id: me.id, de_nombre: me.nombre, de_tipo: 'agente',
+      para_id: 'admin', mensaje: msg,
+      leido_por: [me.id], created_at: new Date().toISOString()
+    });
+    try { await sb(`correos?id=eq.${_criticoEmailId}`, 'PATCH', {critico:true}); } catch {}
+    cerrarModalCritico();
+    showToast('🚨 Alerta enviada — el admin fue notificado al instante','success');
+  } catch(e) {
+    showToast('Error: '+e.message.substring(0,60),'error');
+  } finally {
+    btn.disabled=false; btn.innerHTML='🚨 Alertar al admin ahora';
+  }
 }
 </script>
 </body>
