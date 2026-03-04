@@ -38,23 +38,27 @@ html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;min-height:100vh}
 
 /* ── LOGIN ── */
-.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0a0e1a 0%,#1e2d4a 50%,#0f1d36 100%);padding:24px}
-.login-card{background:rgba(255,255,255,.04);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:40px;width:400px;max-width:100%;box-shadow:0 24px 64px rgba(0,0,0,.4)}
-.login-logo{text-align:center;margin-bottom:32px}
-.login-logomark{width:56px;height:56px;border-radius:16px;background:var(--blue);display:inline-flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;margin-bottom:12px;box-shadow:0 8px 24px rgba(37,99,235,.4)}
-.login-brand{font-size:22px;font-weight:700;color:#fff;letter-spacing:-.5px}
-.login-brand span{color:var(--blue-m)}
-.login-caption{font-size:12px;color:#64748b;margin-top:4px}
-.login-field{margin-bottom:20px}
-.login-label{display:block;font-size:12px;font-weight:600;color:#94a3b8;margin-bottom:8px;letter-spacing:.3px}
-.login-input{width:100%;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:var(--r2);padding:12px 16px;font-size:14px;font-family:'DM Sans',sans-serif;color:#fff;outline:none;transition:all .2s}
-.login-input::placeholder{color:#475569}
-.login-input:focus{border-color:var(--blue);background:rgba(37,99,235,.1);box-shadow:0 0 0 4px rgba(37,99,235,.15)}
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f8f9fc;padding:24px;position:relative;overflow:hidden}
+.login-wrap::before{content:'';position:absolute;top:-160px;right:-160px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(37,99,235,.06) 0%,transparent 70%);pointer-events:none}
+.login-wrap::after{content:'';position:absolute;bottom:-120px;left:-120px;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(37,99,235,.04) 0%,transparent 70%);pointer-events:none}
+.login-card{background:#fff;border-radius:20px;padding:48px 44px;width:100%;max-width:420px;box-shadow:0 4px 6px rgba(0,0,0,.04),0 16px 48px rgba(0,0,0,.08);position:relative;z-index:1}
+.login-logo-area{text-align:center;margin-bottom:28px}
+.login-logo-img{height:52px;object-fit:contain}
+.login-badge{display:inline-block;background:#eff4ff;border:1px solid #bfdbfe;border-radius:99px;padding:4px 14px;font-size:11px;font-weight:700;color:#2563eb;letter-spacing:.8px;text-transform:uppercase;margin-top:10px}
+.login-welcome{text-align:center;margin-bottom:32px}
+.login-welcome-title{font-size:26px;font-weight:800;color:#0a0e1a;letter-spacing:-.5px;margin-bottom:6px}
+.login-welcome-sub{font-size:13px;color:#64748b;line-height:1.6}
+.login-field{margin-bottom:18px}
+.login-label{display:block;font-size:11px;font-weight:700;color:#64748b;margin-bottom:8px;letter-spacing:.8px;text-transform:uppercase}
+.login-input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:13px 16px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--ink);outline:none;transition:all .2s}
+.login-input::placeholder{color:#94a3b8}
+.login-input:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 4px rgba(37,99,235,.1)}
 .pin-input{text-align:center;letter-spacing:16px;font-size:26px;font-family:'DM Mono',monospace;padding:14px}
-.login-btn{width:100%;padding:14px;background:var(--blue);border:none;border-radius:var(--r2);color:#fff;font-size:15px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s;margin-top:8px}
-.login-btn:hover{background:var(--blue-d);transform:translateY(-1px);box-shadow:0 8px 24px rgba(37,99,235,.4)}
+.login-btn{width:100%;padding:14px;background:linear-gradient(135deg,#0d1b2a,#1a2f4a);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s;margin-top:8px;box-shadow:0 4px 16px rgba(13,27,42,.25)}
+.login-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(13,27,42,.35)}
 .login-btn:active{transform:none}
-.login-error{font-size:12px;color:#f87171;text-align:center;margin-top:12px;min-height:18px;font-weight:600}
+.login-error{font-size:12px;color:var(--red);text-align:center;margin-top:12px;min-height:18px;font-weight:600}
+.login-footer{text-align:center;margin-top:24px;font-size:11px;color:#94a3b8}
 
 /* ── APP (oculto hasta login) ── */
 #app{display:none;flex-direction:column;min-height:100vh}
@@ -231,10 +235,14 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;min-
 <div id="loginWrap">
   <div class="login-wrap">
     <div class="login-card">
-      <div class="login-logo">
-        <div class="login-logomark">TD</div>
-        <div class="login-brand">Todo<span>drogas</span></div>
-        <div class="login-caption">Sistema PQR — Portal Agente</div>
+      <div class="login-logo-area">
+        <img src="LOGO_Tododrogas_Color_1__3_.png" class="login-logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+        <div style="display:none;font-size:20px;font-weight:800;color:#0a0e1a">Todo<span style="color:#2563eb">drogas</span></div>
+        <div class="login-badge">Portal Agente</div>
+      </div>
+      <div class="login-welcome">
+        <div class="login-welcome-title">¡Bienvenido de vuelta!</div>
+        <div class="login-welcome-sub">Ingresa tus credenciales para acceder<br>a tu bandeja de PQR</div>
       </div>
       <div class="login-field">
         <label class="login-label">Nombre completo</label>
@@ -242,11 +250,12 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;min-
       </div>
       <div class="login-field">
         <label class="login-label">PIN de acceso</label>
-        <input class="login-input pin-input" type="password" id="loginPin" maxlength="4" inputmode="numeric" placeholder="·  ·  ·  ·">
-        <div style="font-size:11px;color:#475569;text-align:center;margin-top:6px">4 dígitos asignados por el administrador</div>
+        <input class="login-input pin-input" type="password" id="loginPin" maxlength="4" inputmode="numeric" placeholder="·  ·  ·  ·" onkeydown="if(event.key==='Enter')doLogin()">
+        <div style="font-size:11px;color:#94a3b8;text-align:center;margin-top:6px">4 dígitos asignados por el administrador</div>
       </div>
-      <button class="login-btn" onclick="doLogin()">Ingresar al sistema</button>
+      <button class="login-btn" onclick="doLogin()">→ Ingresar al sistema</button>
       <div class="login-error" id="loginError"></div>
+      <div class="login-footer">Tododrogas S.A.S · Sistema PQR</div>
     </div>
   </div>
 </div>
@@ -267,6 +276,11 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;min-
       <button class="btn-refresh" onclick="refreshSinLogout()" id="refreshBtn" title="Actualizar correos">
         <svg id="refreshIcon" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10"/><path d="M20.49 15a9 9 0 01-14.85 3.36L1 14"/></svg>
         Actualizar
+      </button>
+      <button onclick="openChat()" id="chatBtn" style="background:#1e293b;border:1px solid #334155;color:#94a3b8;padding:5px 12px;border-radius:7px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s;position:relative" title="Chat interno">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Chat
+        <span id="chatUnreadBadge" style="display:none;position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;display:none;align-items:center;justify-content:center">0</span>
       </button>
       <button class="btn-logout" onclick="doLogout()">Salir</button>
     </div>
@@ -309,7 +323,7 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;min-
         <div class="welcome-av" id="welcomeAv">?</div>
         <div>
           <div class="welcome-name" id="welcomeName">—</div>
-          <div class="welcome-sub">Portal de gestión PQR · td-pruebas.online</div>
+          <div class="welcome-sub" id="welcomeGreeting">Portal de gestión PQR · Tododrogas</div>
         </div>
         <div class="mini-stats">
           <div class="mini-stat">
@@ -320,10 +334,15 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;min-
             <div class="mini-stat-val" id="myActive">0</div>
             <div class="mini-stat-lbl">En gestión</div>
           </div>
-          <div class="mini-stat">
-            <div class="mini-stat-val" id="mySolved">0</div>
-            <div class="mini-stat-lbl">Resueltos</div>
+          <div class="mini-stat" style="border-right:none">
+            <div class="mini-stat-val" id="mySolved" style="color:var(--green)">0</div>
+            <div class="mini-stat-lbl">✓ Resueltos hoy</div>
           </div>
+        </div>
+        <!-- Motivational tip -->
+        <div id="motiveTip" style="background:linear-gradient(135deg,var(--blue-l),#e0f2fe);border:1px solid var(--blue-m);border-radius:10px;padding:10px 14px;max-width:220px;font-size:12px;line-height:1.5;color:var(--ink2)">
+          <div style="font-size:16px;margin-bottom:4px" id="motiveEmoji">💡</div>
+          <div id="motiveText">Cada caso resuelto es un paciente mejor atendido. ¡Gracias por tu esfuerzo!</div>
         </div>
       </div>
 
@@ -346,6 +365,19 @@ body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;min-
 
 <!-- TOASTS -->
 <div id="toasts"></div>
+
+<!-- CELEBRATION POPUP -->
+<div class="celebration-overlay" id="celebrationOverlay" onclick="closeCelebration()">
+  <div class="celebration-card" onclick="event.stopPropagation()">
+    <div class="celebration-emoji" id="celebEmoji">🎉</div>
+    <div class="celebration-title" id="celebTitle">¡Caso resuelto!</div>
+    <div class="celebration-sub" id="celebSub">Excelente trabajo. Sigue así.</div>
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:4px">
+      <button class="btn btn-primary" onclick="closeCelebration()" style="padding:10px 28px">¡Gracias! 💪</button>
+    </div>
+  </div>
+</div>
+<div class="confetti-wrap" id="confettiWrap"></div>
 
 <script>
 // ─── CONFIG ──────────────────────────────────────────────────
@@ -439,8 +471,22 @@ function enterApp() {
   const a = state.currentAgent;
   const ini = (a.nombre||'?').charAt(0).toUpperCase();
   document.getElementById('topbarAgentName').textContent = a.nombre;
-  document.getElementById('welcomeName').textContent = `Hola, ${a.nombre}`;
+  const hour = new Date().getHours();
+  const greet = hour < 12 ? '☀️ Buenos días' : hour < 18 ? '🌤️ Buenas tardes' : '🌙 Buenas noches';
+  document.getElementById('welcomeName').textContent = `${greet}, ${a.nombre.split(' ')[0]}`;
   document.getElementById('welcomeAv').textContent = ini;
+  // Motivational tips rotation
+  const tips = [
+    {e:'💡', t:'Cada caso resuelto es un paciente mejor atendido. ¡Gracias por tu dedicación!'},
+    {e:'🚀', t:'Tu trabajo hace la diferencia. ¡Sigue adelante con energía!'},
+    {e:'🎯', t:'Responder a tiempo genera confianza. ¡Tú lo haces posible!'},
+    {e:'❤️', t:'Detrás de cada PQR hay una persona que confía en Tododrogas.'},
+    {e:'⭐', t:'La excelencia es un hábito. ¡Tú lo demuestras cada día!'},
+    {e:'💪', t:'Cada gestión cuenta. Tu esfuerzo construye nuestra reputación.'},
+  ];
+  const tip = tips[Math.floor(Math.random()*tips.length)];
+  document.getElementById('motiveEmoji').textContent = tip.e;
+  document.getElementById('motiveText').textContent = tip.t;
   loadMyEmails();
   setInterval(()=>loadMyEmails(), 90000);
 }
@@ -618,6 +664,15 @@ async function selectEmail(id) {
             </div>
           </div>
           <textarea class="reply-textarea" id="replyText" placeholder="Escribe tu respuesta aquí...&#10;&#10;La firma corporativa se agrega automáticamente."></textarea>
+          <!-- Adjuntos en respuesta -->
+          <div style="padding:8px 16px;border-bottom:1px solid var(--border)">
+            <input type="file" id="replyFilesInput" multiple style="display:none" onchange="onReplyFilesSelected()">
+            <div id="replyFilesPreview" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px"></div>
+            <button type="button" style="background:none;border:1.5px dashed var(--border);border-radius:7px;padding:5px 12px;font-size:12px;color:var(--ink3);cursor:pointer;display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;transition:all .15s" onmouseenter="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'" onmouseleave="this.style.borderColor='var(--border)';this.style.color='var(--ink3)'" onclick="document.getElementById('replyFilesInput').click()">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+              Adjuntar archivos
+            </button>
+          </div>
           <div class="reply-preview-toggle" onclick="togglePreviewCitado('${id}')">
             <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
             Ver correo original citado
@@ -683,17 +738,26 @@ async function buildAdjuntos(correoId, email) {
     html+=`</div>`;
   }
   pdfs.forEach(a=>{
-    const src=`data:application/pdf;base64,${a.content_bytes}`;
+    const bytes = Uint8Array.from(atob(a.content_bytes), c=>c.charCodeAt(0));
+    const blob = new Blob([bytes], {type:'application/pdf'});
+    const blobUrl = URL.createObjectURL(blob);
     const kb=Math.round((a.tamaño_bytes||0)/1024);
     html+=`<div class="adj-pdf-wrap">
       <div class="adj-pdf-header">
         <span class="adj-pdf-name">📄 ${esc(a.nombre||'Documento.pdf')} ${kb>0?`(${kb} KB)`:''}</span>
         <div style="display:flex;gap:6px">
-          <button class="adj-pill" onclick="openAdjModal('pdf','${src}','${esc(a.nombre||'')}')">⛶ Ampliar</button>
-          <a class="adj-pill" href="${src}" download="${a.nombre||'archivo.pdf'}">⬇</a>
+          <button class="adj-pill" onclick="openAdjModal('pdf','${blobUrl}','${esc(a.nombre||'')}')">⛶ Ampliar</button>
+          <a class="adj-pill" href="${blobUrl}" download="${a.nombre||'archivo.pdf'}">⬇</a>
+          <a class="adj-pill" href="${blobUrl}" target="_blank">↗</a>
         </div>
       </div>
-      <iframe class="adj-pdf-frame" src="${src}" title="${esc(a.nombre||'')}"></iframe>
+      <object class="adj-pdf-frame" data="${blobUrl}" type="application/pdf">
+        <div style="padding:12px;text-align:center;color:var(--ink3);font-size:12px">
+          <div style="margin-bottom:6px">⚠️ No se puede mostrar en línea</div>
+          <a href="${blobUrl}" download="${a.nombre||'archivo.pdf'}" class="adj-pill">⬇ Descargar</a>
+          &nbsp;<a href="${blobUrl}" target="_blank" class="adj-pill">↗ Abrir</a>
+        </div>
+      </object>
     </div>`;
   });
   if(others.length){
@@ -715,7 +779,7 @@ async function buildAdjuntos(correoId, email) {
 function openAdjModal(type,src,nombre){
   const modal=document.getElementById('adjModal'),content=document.getElementById('adjModalContent');
   if(type==='img') content.innerHTML=`<div style="text-align:center"><div style="color:#94a3b8;font-size:12px;margin-bottom:10px">${esc(nombre)}</div><img src="${src}" style="max-width:90vw;max-height:85vh;object-fit:contain;border-radius:8px"></div>`;
-  else if(type==='pdf') content.innerHTML=`<iframe src="${src}" style="width:90vw;height:88vh;border:none;border-radius:8px"></iframe>`;
+  else if(type==='pdf') content.innerHTML=`<object data="${src}" type="application/pdf" style="width:90vw;height:88vh;border:none;border-radius:8px"><div style="color:#fff;padding:32px;text-align:center"><div style="font-size:18px;margin-bottom:12px">⚠️ No se puede mostrar el PDF</div><a href="${src}" target="_blank" style="color:#93c5fd">Abrir en nueva pestaña ↗</a></div></object>`;
   modal.classList.add('show');
 }
 function closeAdjModal(){document.getElementById('adjModal').classList.remove('show');}
@@ -755,6 +819,25 @@ function toggleReply(id) {
   if(rw) rw.style.display=shown?'none':'block';
   if(rb) rb.style.display=shown?'':'none';
   if(!shown && document.getElementById('replyText')) document.getElementById('replyText').focus();
+}
+
+function replyAll(id) {
+  const email = state.emails.find(e=>e.id===id);
+  if(!email) return;
+  // Ya está puesto el remitente en Para; agregar el resto al CC
+  try {
+    const raw = email._raw;
+    const tos = raw.to_recipients || raw.toRecipients || [];
+    const parsed = typeof tos==='string' ? JSON.parse(tos) : tos;
+    const addrs = parsed.map(r=>r?.emailAddress?.address||'').filter(a=>a && !a.includes('pqrs.institucional'));
+    const ccEl = document.getElementById('replyCc');
+    if(ccEl && addrs.length) {
+      ccEl.value = addrs.join(', ');
+      showToast('CC completado con todos los destinatarios','info');
+    } else {
+      showToast('No hay destinatarios adicionales','info');
+    }
+  } catch(e) { showToast('No se pudo leer destinatarios','info'); }
 }
 
 function togglePreviewCitado(id) {
@@ -815,6 +898,7 @@ async function sendReply(id) {
     body: { contentType:'HTML', content: htmlBody },
     toRecipients,
     ...(ccRecipients.length ? { ccRecipients } : {}),
+    ...(replyAttachments.length ? { attachments: replyAttachments.map(f=>({ '@odata.type':'#microsoft.graph.fileAttachment', name:f.name, contentType:f.contentType, contentBytes:f.content })) } : {}),
     // Threading: enlaza con el correo original
     ...(email.internet_message_id ? {
       singleValueExtendedProperties: [
@@ -835,6 +919,7 @@ async function sendReply(id) {
       exitoso=true;
       showToast('Respuesta enviada ✓ — guardada en Enviados','success');
       if(document.getElementById('replyText'))document.getElementById('replyText').value='';
+      replyAttachments=[];renderReplyFiles();
       toggleReply(id);
     } else throw new Error(await r.text());
   } catch(e){errMsg=e.message;showToast('Error: '+e.message.substring(0,80),'error');}
@@ -842,11 +927,379 @@ async function sendReply(id) {
   try{await sb('historial_eventos','POST',{correo_id:id,message_id:email?.message_id,evento:'respuesta_enviada',from_email:email?.remitente,subject:email?.asunto,metadata:{exitoso,para:replyToAddr,agente_id:state.currentAgent?.id,agente_nombre:state.currentAgent?.nombre}});}catch{}
 }
 
+// ─── CELEBRATION ─────────────────────────────────────────────
+const celebMsgs=[
+  {emoji:'🏆',title:'¡Caso resuelto!',sub:'¡Increíble trabajo! Sigue ayudando a nuestros pacientes.'},
+  {emoji:'⭐',title:'¡Excelente gestión!',sub:'Tu dedicación marca la diferencia.'},
+  {emoji:'🚀',title:'¡Lo lograste!',sub:'Cada caso cerrado es un paciente satisfecho.'},
+  {emoji:'💎',title:'¡Genial!',sub:'Eres clave para nuestro equipo PQR.'},
+  {emoji:'🎯',title:'¡Objetivo cumplido!',sub:'Compromiso y eficiencia al 100%.'},
+];
+function showCelebration(nombre) {
+  const msg=celebMsgs[Math.floor(Math.random()*celebMsgs.length)];
+  document.getElementById('celebEmoji').textContent=msg.emoji;
+  document.getElementById('celebTitle').textContent=msg.title;
+  document.getElementById('celebSub').textContent=msg.sub+(nombre?` — ¡Así se hace, ${nombre.split(' ')[0]}!`:'');
+  document.getElementById('celebrationOverlay').classList.add('show');
+  launchConfetti();
+  setTimeout(closeCelebration,6000);
+}
+function closeCelebration(){
+  document.getElementById('celebrationOverlay').classList.remove('show');
+  document.getElementById('confettiWrap').innerHTML='';
+}
+function launchConfetti(){
+  const wrap=document.getElementById('confettiWrap');
+  wrap.innerHTML='';
+  const colors=['#2563eb','#16a34a','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4'];
+  for(let i=0;i<60;i++){
+    const p=document.createElement('div');
+    p.className='confetti-piece';
+    const c=colors[Math.floor(Math.random()*colors.length)];
+    const x=Math.random()*100;
+    const delay=Math.random()*1.5;
+    const dur=2+Math.random()*2;
+    const size=6+Math.random()*8;
+    p.style.cssText=`left:${x}%;background:${c};width:${size}px;height:${size}px;animation-duration:${dur}s;animation-delay:${delay}s;border-radius:${Math.random()>0.5?'50%':'2px'}`;
+    wrap.appendChild(p);
+  }
+}
+
+// ─── REPLY ATTACHMENTS ───────────────────────────────────────
+let replyAttachments = [];
+
+function onReplyFilesSelected() {
+  const input = document.getElementById('replyFilesInput');
+  if (!input?.files?.length) return;
+  Array.from(input.files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const b64 = e.target.result.split(',')[1];
+      replyAttachments.push({ name: file.name, contentType: file.type||'application/octet-stream', content: b64, size: file.size });
+      renderReplyFiles();
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
+}
+
+function renderReplyFiles() {
+  const wrap = document.getElementById('replyFilesPreview');
+  if (!wrap) return;
+  wrap.innerHTML = replyAttachments.map((f, i) => `
+    <div style="display:flex;align-items:center;gap:6px;background:var(--blue-l);border:1px solid var(--blue-m);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;color:var(--blue)">
+      📎 ${esc(f.name)} <span style="opacity:.6;font-weight:400">${Math.round(f.size/1024)}KB</span>
+      <button onclick="removeReplyFile(${i})" style="background:none;border:none;color:var(--blue);cursor:pointer;padding:0;font-size:13px;line-height:1;margin-left:2px">✕</button>
+    </div>`).join('');
+}
+
+function removeReplyFile(i) {
+  replyAttachments.splice(i, 1);
+  renderReplyFiles();
+}
+
 // ─── UTILS ───────────────────────────────────────────────────
 function getFileIcon(n='',t=''){const e=(n.split('.').pop()||'').toLowerCase();if(e==='pdf')return '📄';if(['doc','docx'].includes(e))return '📝';if(['xls','xlsx','csv'].includes(e))return '📊';if(['ppt','pptx'].includes(e))return '📽';if(['zip','rar'].includes(e))return '🗜';if((t||'').startsWith('image/'))return '🖼';return '📎';}
 function formatDate(d){const now=new Date(),diff=now-d;if(isNaN(diff))return '—';if(diff<60000)return 'ahora';if(diff<3600000)return Math.floor(diff/60000)+'m';if(diff<86400000)return Math.floor(diff/3600000)+'h';if(diff<604800000)return Math.floor(diff/86400000)+'d';return d.toLocaleDateString('es-CO');}
 function esc(s){if(!s)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function showToast(msg,type='info'){const tc=document.getElementById('toasts'),t=document.createElement('div');t.className=`toast ${type}`;t.innerHTML=`<span>${msg}</span>`;tc.appendChild(t);setTimeout(()=>t.remove(),4000);}
+</script>
+
+<!-- ═══════════════════════════════════════════════════════
+     CHAT INTERNO — Panel estilo WhatsApp
+     Tabla Supabase: chat_mensajes
+     CREATE TABLE chat_mensajes (
+       id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+       de_id text NOT NULL,
+       de_nombre text NOT NULL,
+       de_tipo text DEFAULT 'agente',
+       para_id text,
+       mensaje text,
+       adjunto_nombre text,
+       adjunto_tipo text,
+       adjunto_b64 text,
+       leido_por text[] DEFAULT '{}',
+       created_at timestamptz DEFAULT now()
+     );
+═══════════════════════════════════════════════════════ -->
+<style>
+/* CHAT PANEL */
+.chat-overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:800;display:none;align-items:flex-end;justify-content:flex-end;padding:0}
+.chat-overlay.open{display:flex}
+.chat-panel{width:420px;height:100vh;background:#fff;display:flex;flex-direction:column;box-shadow:-4px 0 32px rgba(0,0,0,.15);animation:chatSlideIn .25s ease}
+@keyframes chatSlideIn{from{transform:translateX(100%)}to{transform:none}}
+.chat-header{background:var(--ink);color:#fff;padding:16px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.chat-header-title{flex:1}
+.chat-header-title h3{font-size:15px;font-weight:700;margin:0}
+.chat-header-title p{font-size:11px;color:#94a3b8;margin:2px 0 0}
+.chat-close{background:none;border:none;color:#94a3b8;cursor:pointer;padding:4px;border-radius:6px;font-size:18px;line-height:1}
+.chat-close:hover{color:#fff;background:#334155}
+.chat-contacts{border-right:1px solid var(--border);overflow-y:auto;flex-shrink:0}
+.chat-body{display:flex;flex:1;min-height:0;flex-direction:row}
+.chat-sidebar{width:140px;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.chat-sidebar-title{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--ink3);text-transform:uppercase;padding:10px 12px 6px}
+.chat-contact{padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .12s;position:relative}
+.chat-contact:hover{background:var(--bg)}
+.chat-contact.active{background:var(--blue-l);border-right:3px solid var(--blue)}
+.chat-contact-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0}
+.chat-contact-name{font-size:11px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-contact-unread{position:absolute;top:6px;right:6px;background:var(--blue);color:#fff;font-size:9px;font-weight:700;border-radius:99px;padding:1px 5px;min-width:16px;text-align:center}
+.chat-main{flex:1;display:flex;flex-direction:column;min-width:0}
+.chat-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:#f8f9fc}
+.chat-messages::-webkit-scrollbar{width:3px}
+.chat-messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+.chat-msg{display:flex;flex-direction:column;max-width:80%}
+.chat-msg.mine{align-self:flex-end;align-items:flex-end}
+.chat-msg.theirs{align-self:flex-start;align-items:flex-start}
+.chat-msg-name{font-size:10px;font-weight:700;color:var(--blue);margin-bottom:2px}
+.chat-msg.mine .chat-msg-name{color:var(--green)}
+.chat-bubble{padding:8px 12px;border-radius:12px;font-size:13px;line-height:1.5;word-break:break-word;position:relative}
+.chat-msg.mine .chat-bubble{background:var(--blue);color:#fff;border-bottom-right-radius:3px}
+.chat-msg.theirs .chat-bubble{background:#fff;color:var(--ink);border:1px solid var(--border);border-bottom-left-radius:3px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.chat-msg-time{font-size:10px;color:var(--ink3);margin-top:2px}
+.chat-msg.mine .chat-msg-time{color:rgba(255,255,255,.7)}
+.chat-img-thumb{max-width:160px;border-radius:8px;cursor:pointer;margin-top:4px}
+.chat-file-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:6px 10px;font-size:12px;text-decoration:none;color:inherit;margin-top:4px}
+.chat-msg.theirs .chat-file-pill{background:var(--bg);border-color:var(--border);color:var(--ink)}
+.chat-input-area{padding:10px 12px;border-top:1px solid var(--border);background:#fff;display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+.chat-input-row{display:flex;gap:8px;align-items:flex-end}
+.chat-textarea{flex:1;border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--ink);resize:none;outline:none;min-height:36px;max-height:100px;line-height:1.5;background:var(--bg);transition:border-color .15s}
+.chat-textarea:focus{border-color:var(--blue);background:#fff}
+.chat-send-btn{width:36px;height:36px;border-radius:50%;background:var(--blue);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.chat-send-btn:hover{background:var(--blue-d);transform:scale(1.05)}
+.chat-attach-btn{width:32px;height:32px;border-radius:8px;background:var(--bg);border:1.5px solid var(--border);color:var(--ink3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.chat-attach-btn:hover{border-color:var(--blue);color:var(--blue)}
+.chat-attach-preview{display:flex;flex-wrap:wrap;gap:4px}
+.chat-attach-chip{display:inline-flex;align-items:center;gap:4px;background:var(--blue-l);border:1px solid var(--blue-m);border-radius:5px;padding:3px 8px;font-size:11px;font-weight:600;color:var(--blue)}
+.chat-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--ink3);font-size:13px;text-align:center;gap:8px;padding:24px}
+.chat-broadcast-bar{background:var(--bg);border-bottom:1px solid var(--border);padding:6px 12px;font-size:11px;font-weight:600;color:var(--ink3);display:flex;align-items:center;gap:6px}
+</style>
+
+<!-- CHAT PANEL HTML -->
+<div class="chat-overlay" id="chatOverlay" onclick="if(event.target===this)closeChat()">
+  <div class="chat-panel">
+    <div class="chat-header">
+      <div style="width:36px;height:36px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">💬</div>
+      <div class="chat-header-title">
+        <h3>Chat Interno</h3>
+        <p id="chatHeaderSub">Equipo PQR · Tododrogas</p>
+      </div>
+      <button class="chat-close" onclick="closeChat()">✕</button>
+    </div>
+    <div class="chat-body">
+      <!-- Contactos sidebar -->
+      <div class="chat-sidebar">
+        <div class="chat-sidebar-title">Contactos</div>
+        <div id="chatContactsList" style="overflow-y:auto;flex:1"></div>
+      </div>
+      <!-- Mensajes -->
+      <div class="chat-main">
+        <div id="chatMessages" class="chat-messages">
+          <div class="chat-empty">
+            <div style="font-size:32px">💬</div>
+            <div>Selecciona un contacto<br>para chatear</div>
+          </div>
+        </div>
+        <div id="chatInputArea" class="chat-input-area" style="display:none">
+          <div class="chat-attach-preview" id="chatAttachPreview"></div>
+          <div class="chat-input-row">
+            <input type="file" id="chatFileInput" multiple style="display:none" onchange="onChatFileSelected()">
+            <button class="chat-attach-btn" onclick="document.getElementById('chatFileInput').click()" title="Adjuntar">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            </button>
+            <textarea class="chat-textarea" id="chatMsgInput" placeholder="Escribe un mensaje..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMsg()}" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px'"></textarea>
+            <button class="chat-send-btn" onclick="sendChatMsg()">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// CHAT SISTEMA — Agente
+// ═══════════════════════════════════════════════════
+const chatState = {
+  open: false,
+  currentContactId: null,
+  currentContactName: null,
+  messages: [],
+  contacts: [],
+  attachments: [],
+  pollInterval: null,
+  lastMsgId: null,
+};
+const CHAT_COLORS = ['#2563eb','#16a34a','#ea580c','#7c3aed','#ca8a04','#dc2626','#0891b2'];
+
+function openChat() {
+  chatState.open = true;
+  document.getElementById('chatOverlay').classList.add('open');
+  loadChatContacts();
+  clearChatUnread();
+  if(!chatState.pollInterval) chatState.pollInterval = setInterval(pollChat, 5000);
+}
+function closeChat() {
+  chatState.open = false;
+  document.getElementById('chatOverlay').classList.remove('open');
+}
+function clearChatUnread() {
+  const b = document.getElementById('chatUnreadBadge');
+  if(b) b.style.display = 'none';
+}
+
+async function loadChatContacts() {
+  const me = state.currentAgent;
+  if(!me) return;
+  try {
+    // Load all agents
+    const agents = await sb('agentes?activo=eq.true&order=nombre.asc') || [];
+    chatState.contacts = agents.filter(a=>a.id!==me.id).map((a,i)=>({...a,color:CHAT_COLORS[i%CHAT_COLORS.length]}));
+    // Add admin contact
+    chatState.contacts.unshift({id:'admin',nombre:'Admin PQR',color:'#0f172a',tipo:'admin'});
+    renderChatContacts();
+  } catch(e) { console.error('chat contacts error',e); }
+}
+
+function renderChatContacts() {
+  const el = document.getElementById('chatContactsList');
+  const me = state.currentAgent;
+  if(!chatState.contacts.length) { el.innerHTML='<div style="padding:12px;font-size:12px;color:var(--ink3)">Sin contactos</div>'; return; }
+  el.innerHTML = chatState.contacts.map(c => {
+    const ini = (c.nombre||'?').charAt(0).toUpperCase();
+    const active = chatState.currentContactId===c.id;
+    return `<div class="chat-contact ${active?'active':''}" onclick="selectChatContact('${c.id}','${esc(c.nombre)}','${c.color}')">
+      <div class="chat-contact-av" style="background:${c.color}">${ini}</div>
+      <div class="chat-contact-name" title="${esc(c.nombre)}">${esc(c.nombre)}</div>
+    </div>`;
+  }).join('');
+}
+
+async function selectChatContact(id, nombre, color) {
+  chatState.currentContactId = id;
+  chatState.currentContactName = nombre;
+  document.getElementById('chatInputArea').style.display = 'flex';
+  document.getElementById('chatHeaderSub').textContent = `Conversación con ${nombre}`;
+  renderChatContacts();
+  await loadChatMessages();
+  document.getElementById('chatMsgInput').focus();
+}
+
+async function loadChatMessages() {
+  const me = state.currentAgent;
+  if(!me || !chatState.currentContactId) return;
+  try {
+    const myId = me.id;
+    const otherId = chatState.currentContactId;
+    // Get messages between me and this contact (both directions)
+    const msgs = await sb(`chat_mensajes?or=(and(de_id.eq.${myId},para_id.eq.${otherId}),and(de_id.eq.${otherId},para_id.eq.${myId}))&order=created_at.asc&limit=100`) || [];
+    chatState.messages = msgs;
+    renderChatMessages();
+    // Mark as read
+    markChatRead(myId, otherId);
+  } catch(e) { console.error('load chat msgs', e); }
+}
+
+function renderChatMessages() {
+  const me = state.currentAgent;
+  const el = document.getElementById('chatMessages');
+  if(!chatState.messages.length) {
+    el.innerHTML = `<div class="chat-empty"><div style="font-size:28px">👋</div><div>¡Saluda a ${esc(chatState.currentContactName)}!</div></div>`;
+    return;
+  }
+  el.innerHTML = chatState.messages.map(m => {
+    const mine = m.de_id === me.id;
+    const time = formatDate(new Date(m.created_at));
+    let content = '';
+    if(m.mensaje) content += `<div>${esc(m.mensaje)}</div>`;
+    if(m.adjunto_b64 && m.adjunto_tipo?.startsWith('image/')) {
+      content += `<img src="data:${m.adjunto_tipo};base64,${m.adjunto_b64}" class="chat-img-thumb" onclick="openAdjModal('img','data:${m.adjunto_tipo};base64,${m.adjunto_b64}','${esc(m.adjunto_nombre||'')}')">`;
+    } else if(m.adjunto_b64) {
+      const blob = new Blob([Uint8Array.from(atob(m.adjunto_b64),c=>c.charCodeAt(0))],{type:m.adjunto_tipo||'application/octet-stream'});
+      const url = URL.createObjectURL(blob);
+      content += `<a href="${url}" download="${m.adjunto_nombre||'archivo'}" class="chat-file-pill">📎 ${esc(m.adjunto_nombre||'Archivo')}</a>`;
+    }
+    return `<div class="chat-msg ${mine?'mine':'theirs'}">
+      ${!mine?`<div class="chat-msg-name">${esc(m.de_nombre)}</div>`:''}
+      <div class="chat-bubble">${content}</div>
+      <div class="chat-msg-time">${time}</div>
+    </div>`;
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+async function sendChatMsg() {
+  const me = state.currentAgent;
+  if(!me || !chatState.currentContactId) return;
+  const text = document.getElementById('chatMsgInput').value.trim();
+  const att = chatState.attachments[0]; // send one at a time
+  if(!text && !att) return;
+
+  const payload = {
+    de_id: me.id,
+    de_nombre: me.nombre,
+    de_tipo: 'agente',
+    para_id: chatState.currentContactId,
+    mensaje: text || null,
+    adjunto_nombre: att?.name || null,
+    adjunto_tipo: att?.contentType || null,
+    adjunto_b64: att?.content || null,
+    leido_por: [me.id],
+    created_at: new Date().toISOString()
+  };
+  try {
+    await sb('chat_mensajes','POST',payload);
+    document.getElementById('chatMsgInput').value='';
+    chatState.attachments=[];renderChatAttachPreview();
+    await loadChatMessages();
+  } catch(e) { showToast('Error al enviar mensaje','error'); }
+}
+
+async function pollChat() {
+  if(!chatState.open || !chatState.currentContactId) return;
+  const me = state.currentAgent;
+  if(!me) return;
+  await loadChatMessages();
+  // Check unread from all contacts
+  try {
+    const unread = await sb(`chat_mensajes?para_id=eq.${me.id}&not.leido_por=cs.{${me.id}}&limit=1`) || [];
+    const badge = document.getElementById('chatUnreadBadge');
+    if(badge) {
+      if(unread.length && !chatState.open) { badge.style.display='flex'; badge.textContent='!'; }
+      else { badge.style.display='none'; }
+    }
+  } catch {}
+}
+
+async function markChatRead(myId, fromId) {
+  try {
+    const unread = await sb(`chat_mensajes?de_id=eq.${fromId}&para_id=eq.${myId}&not.leido_por=cs.{${myId}}`) || [];
+    for(const m of unread) {
+      const lp = [...(m.leido_por||[]), myId];
+      await sb(`chat_mensajes?id=eq.${m.id}`,'PATCH',{leido_por:lp});
+    }
+  } catch {}
+}
+
+function onChatFileSelected() {
+  const input = document.getElementById('chatFileInput');
+  if(!input.files.length) return;
+  const file = input.files[0];
+  const reader = new FileReader();
+  reader.onload = e => {
+    chatState.attachments = [{name:file.name,contentType:file.type||'application/octet-stream',content:e.target.result.split(',')[1],size:file.size}];
+    renderChatAttachPreview();
+  };
+  reader.readAsDataURL(file);
+  input.value='';
+}
+function renderChatAttachPreview() {
+  const el = document.getElementById('chatAttachPreview');
+  if(!el) return;
+  el.innerHTML = chatState.attachments.map((f,i)=>`<div class="chat-attach-chip">📎 ${esc(f.name)} <button onclick="chatState.attachments.splice(${i},1);renderChatAttachPreview()" style="background:none;border:none;cursor:pointer;color:var(--blue);padding:0;font-size:12px">✕</button></div>`).join('');
+}
 </script>
 </body>
 </html>
