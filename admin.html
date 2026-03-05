@@ -1443,7 +1443,11 @@ function formatDate(d, full=false) {
 }
 function logout(){sessionStorage.clear();window.location.href='login.html';}
 async function getGraphToken(){
-  try{const r=await fetch(`https://login.microsoftonline.com/${window.TENANT_ID||''}/oauth2/v2.0/token`,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`client_id=${window.CLIENT_ID||''}&client_secret=${window.CLIENT_SECRET||''}&scope=https://graph.microsoft.com/.default&grant_type=client_credentials`});const d=await r.json();return d.access_token;}catch{return '';}
+  try{
+    const r=await fetch('/token.php');
+    const d=await r.json();
+    return d.access_token||'';
+  }catch{return '';}
 }
 
 // ──────────────────────────────────────────────
@@ -1462,4 +1466,5 @@ async function getGraphToken(){
 </script>
 </body>
 </html>
+
 
