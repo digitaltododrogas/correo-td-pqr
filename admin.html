@@ -1070,10 +1070,8 @@ async function saveGestion() {
   selectEmail(id);
 }
 
-
 // Abrir/descargar adjunto
 function openAdjunto(adj) {
-  // Si tiene content_bytes (base64), generar blob y descargar
   if(adj.content_bytes) {
     try {
       const byteChars = atob(adj.content_bytes);
@@ -1085,13 +1083,10 @@ function openAdjunto(adj) {
       a.href=url; a.download=adj.nombre||'adjunto'; a.click();
       setTimeout(()=>URL.revokeObjectURL(url),2000);
       return;
-    } catch(e) { console.warn('Error decodificando adjunto',e); }
+    } catch(e) {}
   }
-  // Si tiene URL directa
-  if(adj.url || adj.content_url) {
-    window.open(adj.url||adj.content_url,'_blank'); return;
-  }
-  showToast('Adjunto no disponible para descarga','info');
+  if(adj.url||adj.content_url) { window.open(adj.url||adj.content_url,'_blank'); return; }
+  showToast('Adjunto no disponible','info');
 }
 
 // Reply — Outlook style
@@ -1109,18 +1104,15 @@ function toggleReply() {
           <span class="reply-to-label">Para:</span>
           <span class="reply-to-addr">${esc(email?.remitente||'')}</span>
         </div>
-        <button class="rtb-btn" style="font-size:16px;font-family:sans-serif" onclick="document.getElementById('replyBoxArea').innerHTML='';_replyFiles=[]" title="Cerrar">✕</button>
+        <button class="rtb-btn" style="font-size:16px;font-family:sans-serif" onclick="document.getElementById('replyBoxArea').innerHTML='';_replyFiles=[]">✕</button>
       </div>
       <div class="reply-toolbar">
-        <button class="rtb-btn" onclick="document.execCommand('bold')" title="Negrita"><b>B</b></button>
-        <button class="rtb-btn" onclick="document.execCommand('italic')" title="Cursiva"><i style="font-style:italic">I</i></button>
-        <button class="rtb-btn" onclick="document.execCommand('underline')" title="Subrayado"><u>U</u></button>
+        <button class="rtb-btn" onclick="document.execCommand('bold')"><b>B</b></button>
+        <button class="rtb-btn" onclick="document.execCommand('italic')"><i style="font-style:italic">I</i></button>
+        <button class="rtb-btn" onclick="document.execCommand('underline')"><u>U</u></button>
         <div class="rtb-sep"></div>
-        <button class="rtb-btn" onclick="document.execCommand('insertUnorderedList')" title="Lista">•≡</button>
-        <button class="rtb-btn" onclick="document.execCommand('insertOrderedList')" title="Lista numerada">1≡</button>
-        <div class="rtb-sep"></div>
-        <button class="rtb-btn" onclick="document.execCommand('justifyLeft')" title="Izquierda">⬅</button>
-        <button class="rtb-btn" onclick="document.execCommand('justifyCenter')" title="Centro">≡</button>
+        <button class="rtb-btn" onclick="document.execCommand('insertUnorderedList')">•≡</button>
+        <button class="rtb-btn" onclick="document.execCommand('insertOrderedList')">1≡</button>
         <div class="rtb-sep"></div>
         <select onchange="document.execCommand('fontSize',false,this.value);this.value=''" style="font-size:11px;border:1px solid var(--border);border-radius:4px;padding:2px 4px;background:var(--bg);color:var(--ink);font-family:'Poppins',sans-serif">
           <option value="">Tamaño</option>
@@ -1143,7 +1135,7 @@ function toggleReply() {
       <div class="reply-attachments" id="replyAttList"></div>
       <div class="reply-footer">
         <div class="reply-left-actions">
-          <label style="cursor:pointer" title="Adjuntar archivo">
+          <label style="cursor:pointer">
             <input type="file" id="replyFileInput" multiple style="display:none" onchange="addReplyFiles(this.files)">
             <div class="btn btn-ghost" style="display:flex;align-items:center;gap:5px;pointer-events:none">
               <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
@@ -1193,18 +1185,13 @@ async function sendReply() {
   const email = state.emails.find(e=>e.id===id);
   const editor = document.getElementById('replyEditor');
   const body = editor?.innerHTML?.trim();
-  if(!body || body === '') { showToast('Escribe un mensaje','info'); return; }
+  if(!body) { showToast('Escribe un mensaje','info'); return; }
   const btn = document.querySelector('.reply-right-actions .btn-primary');
   if(btn) { btn.disabled=true; btn.textContent='Enviando...'; }
   try {
     const token = await getGraphToken();
-    // Build attachments array from _replyFiles
     const attachments = await Promise.all((_replyFiles||[]).map(async file => {
-      const b64 = await new Promise(res => {
-        const r = new FileReader();
-        r.onload = () => res(r.result.split(',')[1]);
-        r.readAsDataURL(file);
-      });
+      const b64 = await new Promise(res => { const r=new FileReader(); r.onload=()=>res(r.result.split(',')[1]); r.readAsDataURL(file); });
       return { '@odata.type':'#microsoft.graph.fileAttachment', name:file.name, contentType:file.type||'application/octet-stream', contentBytes:b64 };
     }));
     const message = {
@@ -1220,14 +1207,9 @@ async function sendReply() {
     });
     if(r.ok||r.status===202) {
       showToast('Respuesta enviada ✓','success');
-      const preview = editor.innerText.substring(0,100);
-      await addHistorialEvent(id, email, 'correo_respondido', {por:'admin',observaciones:'Respuesta enviada: '+preview});
-      document.getElementById('replyBoxArea').innerHTML='';
-      _replyFiles=[];
-    } else {
-      const errText = await r.text();
-      throw new Error(errText);
-    }
+      await addHistorialEvent(id, email, 'correo_respondido', {por:'admin',observaciones:'Respuesta enviada: '+editor.innerText.substring(0,100)});
+      document.getElementById('replyBoxArea').innerHTML=''; _replyFiles=[];
+    } else throw new Error(await r.text());
   } catch(e) {
     showToast('Error al enviar: '+e.message.substring(0,80),'error');
     if(btn) { btn.disabled=false; btn.innerHTML='<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Enviar'; }
@@ -1480,3 +1462,4 @@ async function getGraphToken(){
 </script>
 </body>
 </html>
+
