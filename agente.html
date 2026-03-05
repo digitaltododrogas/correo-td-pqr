@@ -76,7 +76,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Poppins',sans-serif;min-
 .list-search input:focus{border-color:var(--blue);background:#fff}
 .list-search svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--ink3)}
 .email-list-items{flex:1;overflow-y:auto}
-.email-list-items::-webkit-scrollbar{width:3px}
+.email-list-items::-webkit-scrollbar{width:5px}
 .email-list-items::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
 .email-item{padding:11px 12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;position:relative}
 .email-item:hover{background:var(--bg)}
@@ -692,47 +692,150 @@ async function saveGestion() {
   finally { btn.disabled=false; btn.innerHTML='<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Guardar gestión'; }
 }
 
-// Reply
-function toggleReply() {
-  const area=document.getElementById('replyBoxArea');
-  if(area.innerHTML){ area.innerHTML=''; return; }
-  const email=state.emails.find(e=>e.id===state.selectedId);
-  area.innerHTML=`
-    <div class="reply-box">
-      <div style="font-size:11px;color:var(--ink3);margin-bottom:6px">Responder a: ${esc(email?.remitente||'')}</div>
-      <textarea class="reply-textarea" id="replyText" placeholder="Escribir respuesta..."></textarea>
-      <div style="display:flex;justify-content:flex-end;gap:6px;margin-top:8px">
-        <button class="btn btn-ghost" onclick="document.getElementById('replyBoxArea').innerHTML=''">Cancelar</button>
-        <button class="btn btn-primary" onclick="sendReply()">
-          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-          Enviar
-        </button>
-      </div>
-    </div>`;
-  document.getElementById('replyText').focus();
+// Reply — Outlook style
+let _replyFiles = [];
+
+function openAdjunto(adj) {
+  if(adj.content_bytes) {
+    try {
+      const byteChars = atob(adj.content_bytes);
+      const byteArr = new Uint8Array(byteChars.length);
+      for(let i=0;i<byteChars.length;i++) byteArr[i]=byteChars.charCodeAt(i);
+      const blob = new Blob([byteArr], {type: adj.tipo_contenido||'application/octet-stream'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href=url; a.download=adj.nombre||'adjunto'; a.click();
+      setTimeout(()=>URL.revokeObjectURL(url),2000);
+      return;
+    } catch(e) {}
+  }
+  if(adj.url || adj.content_url) { window.open(adj.url||adj.content_url,'_blank'); return; }
+  showToast('Adjunto no disponible','info');
 }
 
-async function sendReply() {
-  const id=state.selectedId;
-  const email=state.emails.find(e=>e.id===id);
-  const body=document.getElementById('replyText')?.value?.trim();
-  if(!body){ showToast('Escribe un mensaje','info'); return; }
-  try {
-    const token=await getGraphToken();
-    const r=await fetch(`https://graph.microsoft.com/v1.0/users/${window.GRAPH_USER_ID||''}/sendMail`,{
-      method:'POST',
-      headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
-      body:JSON.stringify({message:{subject:'RE: '+email.asunto,body:{contentType:'HTML',content:`<p>${body.replace(/\n/g,'<br>')}</p>`},toRecipients:[{emailAddress:{address:email.remitente}}]},saveToSentItems:true})
-    });
-    if(r.ok||r.status===202){
-      showToast('Respuesta enviada ✓','success');
-      // Log event
-      try{ await sb('historial_eventos','POST',{correo_id:id,message_id:email.message_id,evento:'correo_respondido',from_email:email.remitente,subject:email.asunto,metadata:{agente_id:AGENT_ID,agente_nombre:AGENT_NAME,por:'agente',observaciones:'Respuesta enviada: '+body.substring(0,80)}}); }catch{}
-      document.getElementById('replyBoxArea').innerHTML='';
-      await loadTicketTimeline(id);
-    } else throw new Error(await r.text());
-  } catch(e){ showToast('Error al enviar: '+e.message.substring(0,60),'error'); }
+function toggleReply() {
+  const area = document.getElementById('replyBoxArea');
+  if(area.innerHTML) { area.innerHTML=''; _replyFiles=[]; return; }
+  const email = state.emails.find(e=>e.id===state.selectedId);
+  _replyFiles = [];
+  area.innerHTML = `
+    <div class="reply-box" id="replyBox">
+      <div class="reply-header">
+        <div>
+          <span class="reply-to-label">Para:</span>
+          <span class="reply-to-addr">${esc(email?.remitente||'')}</span>
+        </div>
+        <button class="rtb-btn" style="font-size:16px;font-family:sans-serif" onclick="document.getElementById('replyBoxArea').innerHTML='';_replyFiles=[]" title="Cerrar">✕</button>
+      </div>
+      <div class="reply-toolbar">
+        <button class="rtb-btn" onclick="document.execCommand('bold')" title="Negrita"><b>B</b></button>
+        <button class="rtb-btn" onclick="document.execCommand('italic')" title="Cursiva"><i style="font-style:italic">I</i></button>
+        <button class="rtb-btn" onclick="document.execCommand('underline')" title="Subrayado"><u>U</u></button>
+        <div class="rtb-sep"></div>
+        <button class="rtb-btn" onclick="document.execCommand('insertUnorderedList')" title="Lista">•≡</button>
+        <button class="rtb-btn" onclick="document.execCommand('insertOrderedList')" title="Lista numerada">1≡</button>
+        <div class="rtb-sep"></div>
+        <select onchange="document.execCommand('fontSize',false,this.value);this.value=''" style="font-size:11px;border:1px solid var(--border);border-radius:4px;padding:2px 4px;background:var(--bg);color:var(--ink);font-family:'Poppins',sans-serif">
+          <option value="">Tamaño</option>
+          <option value="1">Pequeño</option>
+          <option value="3">Normal</option>
+          <option value="5">Grande</option>
+          <option value="7">Muy grande</option>
+        </select>
+        <select onchange="document.execCommand('foreColor',false,this.value);this.value=''" style="font-size:11px;border:1px solid var(--border);border-radius:4px;padding:2px 4px;background:var(--bg);color:var(--ink);font-family:'Poppins',sans-serif">
+          <option value="">Color</option>
+          <option value="#000000">Negro</option>
+          <option value="#2563eb">Azul</option>
+          <option value="#dc2626">Rojo</option>
+          <option value="#16a34a">Verde</option>
+          <option value="#ca8a04">Amarillo</option>
+        </select>
+      </div>
+      <div class="reply-editor" id="replyEditor" contenteditable="true" data-placeholder="Escribir respuesta..."></div>
+      <div class="reply-attachments" id="replyAttList"></div>
+      <div class="reply-footer">
+        <div class="reply-left-actions">
+          <label style="cursor:pointer" title="Adjuntar archivo">
+            <input type="file" id="replyFileInput" multiple style="display:none" onchange="addReplyFiles(this.files)">
+            <div class="btn btn-ghost" style="display:flex;align-items:center;gap:5px;pointer-events:none">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+              Adjuntar
+            </div>
+          </label>
+        </div>
+        <div class="reply-right-actions">
+          <button class="btn btn-ghost" onclick="document.getElementById('replyBoxArea').innerHTML='';_replyFiles=[]">Descartar</button>
+          <button class="btn btn-primary" onclick="sendReply()">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            Enviar
+          </button>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('replyEditor').focus();
 }
+
+function addReplyFiles(files) {
+  for(const file of files) {
+    if(_replyFiles.find(f=>f.name===file.name)) continue;
+    _replyFiles.push(file);
+  }
+  renderReplyFiles();
+}
+
+function removeReplyFile(name) {
+  _replyFiles = _replyFiles.filter(f=>f.name!==name);
+  renderReplyFiles();
+}
+
+function renderReplyFiles() {
+  const el = document.getElementById('replyAttList');
+  if(!el) return;
+  if(!_replyFiles.length) { el.innerHTML=''; return; }
+  el.innerHTML = _replyFiles.map(f=>`
+    <div class="reply-att-chip">
+      <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+      ${esc(f.name)} <span style="color:var(--ink3)">(${(f.size/1024).toFixed(0)}KB)</span>
+      <button onclick="removeReplyFile('${esc(f.name)}')" title="Quitar">✕</button>
+    </div>`).join('');
+}
+
+
+async function sendReply() {
+  const id = state.selectedId;
+  const email = state.emails.find(e=>e.id===id);
+  const editor = document.getElementById('replyEditor');
+  const body = editor?.innerHTML?.trim();
+  if(!body) { showToast('Escribe un mensaje','info'); return; }
+  const btn = document.querySelector('.reply-right-actions .btn-primary');
+  if(btn) { btn.disabled=true; btn.textContent='Enviando...'; }
+  try {
+    const token = await getGraphToken();
+    const attachments = await Promise.all((_replyFiles||[]).map(async file => {
+      const b64 = await new Promise(res => { const r=new FileReader(); r.onload=()=>res(r.result.split(',')[1]); r.readAsDataURL(file); });
+      return { '@odata.type':'#microsoft.graph.fileAttachment', name:file.name, contentType:file.type||'application/octet-stream', contentBytes:b64 };
+    }));
+    const message = {
+      subject: (email.asunto||'').startsWith('RE:') ? email.asunto : 'RE: '+email.asunto,
+      body: { contentType:'HTML', content: body },
+      toRecipients: [{ emailAddress:{ address: email.remitente } }]
+    };
+    if(attachments.length) message.attachments = attachments;
+    const r = await fetch(`https://graph.microsoft.com/v1.0/users/${window.GRAPH_USER_ID||''}/sendMail`,{
+      method:'POST', headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+      body: JSON.stringify({ message, saveToSentItems:true })
+    });
+    if(r.ok||r.status===202) {
+      showToast('Respuesta enviada ✓','success');
+      await addHistorialEvent(id, email, 'correo_respondido', {agente_id:AGENT_ID,agente_nombre:AGENT_NAME,por:'agente',observaciones:'Respuesta enviada: '+editor.innerText.substring(0,100)});
+      document.getElementById('replyBoxArea').innerHTML=''; _replyFiles=[];
+    } else throw new Error(await r.text());
+  } catch(e) {
+    showToast('Error al enviar: '+e.message.substring(0,80),'error');
+    if(btn) { btn.disabled=false; btn.innerHTML='<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Enviar'; }
+  }
+}
+
 
 // ──────────────────────────────────────────────
 // SYNC
