@@ -692,9 +692,7 @@ async function saveGestion() {
   finally { btn.disabled=false; btn.innerHTML='<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Guardar gestión'; }
 }
 
-// Reply — Outlook style
-let _replyFiles = [];
-
+// Abrir/descargar adjunto
 function openAdjunto(adj) {
   if(adj.content_bytes) {
     try {
@@ -709,31 +707,34 @@ function openAdjunto(adj) {
       return;
     } catch(e) {}
   }
-  if(adj.url || adj.content_url) { window.open(adj.url||adj.content_url,'_blank'); return; }
+  if(adj.url||adj.content_url) { window.open(adj.url||adj.content_url,'_blank'); return; }
   showToast('Adjunto no disponible','info');
 }
 
+// Reply — Outlook style
+let _replyFiles = [];
+
 function toggleReply() {
-  const area = document.getElementById('replyBoxArea');
-  if(area.innerHTML) { area.innerHTML=''; _replyFiles=[]; return; }
-  const email = state.emails.find(e=>e.id===state.selectedId);
-  _replyFiles = [];
-  area.innerHTML = `
+  const area=document.getElementById('replyBoxArea');
+  if(area.innerHTML){ area.innerHTML=''; _replyFiles=[]; return; }
+  const email=state.emails.find(e=>e.id===state.selectedId);
+  _replyFiles=[];
+  area.innerHTML=`
     <div class="reply-box" id="replyBox">
       <div class="reply-header">
         <div>
           <span class="reply-to-label">Para:</span>
           <span class="reply-to-addr">${esc(email?.remitente||'')}</span>
         </div>
-        <button class="rtb-btn" style="font-size:16px;font-family:sans-serif" onclick="document.getElementById('replyBoxArea').innerHTML='';_replyFiles=[]" title="Cerrar">✕</button>
+        <button class="rtb-btn" style="font-size:16px;font-family:sans-serif" onclick="document.getElementById('replyBoxArea').innerHTML='';_replyFiles=[]">✕</button>
       </div>
       <div class="reply-toolbar">
-        <button class="rtb-btn" onclick="document.execCommand('bold')" title="Negrita"><b>B</b></button>
-        <button class="rtb-btn" onclick="document.execCommand('italic')" title="Cursiva"><i style="font-style:italic">I</i></button>
-        <button class="rtb-btn" onclick="document.execCommand('underline')" title="Subrayado"><u>U</u></button>
+        <button class="rtb-btn" onclick="document.execCommand('bold')"><b>B</b></button>
+        <button class="rtb-btn" onclick="document.execCommand('italic')"><i style="font-style:italic">I</i></button>
+        <button class="rtb-btn" onclick="document.execCommand('underline')"><u>U</u></button>
         <div class="rtb-sep"></div>
-        <button class="rtb-btn" onclick="document.execCommand('insertUnorderedList')" title="Lista">•≡</button>
-        <button class="rtb-btn" onclick="document.execCommand('insertOrderedList')" title="Lista numerada">1≡</button>
+        <button class="rtb-btn" onclick="document.execCommand('insertUnorderedList')">•≡</button>
+        <button class="rtb-btn" onclick="document.execCommand('insertOrderedList')">1≡</button>
         <div class="rtb-sep"></div>
         <select onchange="document.execCommand('fontSize',false,this.value);this.value=''" style="font-size:11px;border:1px solid var(--border);border-radius:4px;padding:2px 4px;background:var(--bg);color:var(--ink);font-family:'Poppins',sans-serif">
           <option value="">Tamaño</option>
@@ -749,13 +750,14 @@ function toggleReply() {
           <option value="#dc2626">Rojo</option>
           <option value="#16a34a">Verde</option>
           <option value="#ca8a04">Amarillo</option>
+          <option value="#7c3aed">Morado</option>
         </select>
       </div>
       <div class="reply-editor" id="replyEditor" contenteditable="true" data-placeholder="Escribir respuesta..."></div>
       <div class="reply-attachments" id="replyAttList"></div>
       <div class="reply-footer">
         <div class="reply-left-actions">
-          <label style="cursor:pointer" title="Adjuntar archivo">
+          <label style="cursor:pointer">
             <input type="file" id="replyFileInput" multiple style="display:none" onchange="addReplyFiles(this.files)">
             <div class="btn btn-ghost" style="display:flex;align-items:center;gap:5px;pointer-events:none">
               <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
@@ -800,42 +802,42 @@ function renderReplyFiles() {
     </div>`).join('');
 }
 
-
 async function sendReply() {
-  const id = state.selectedId;
-  const email = state.emails.find(e=>e.id===id);
-  const editor = document.getElementById('replyEditor');
-  const body = editor?.innerHTML?.trim();
-  if(!body) { showToast('Escribe un mensaje','info'); return; }
-  const btn = document.querySelector('.reply-right-actions .btn-primary');
-  if(btn) { btn.disabled=true; btn.textContent='Enviando...'; }
+  const id=state.selectedId;
+  const email=state.emails.find(e=>e.id===id);
+  const editor=document.getElementById('replyEditor');
+  const body=editor?.innerHTML?.trim();
+  if(!body){ showToast('Escribe un mensaje','info'); return; }
+  const btn=document.querySelector('.reply-right-actions .btn-primary');
+  if(btn){ btn.disabled=true; btn.textContent='Enviando...'; }
   try {
-    const token = await getGraphToken();
-    const attachments = await Promise.all((_replyFiles||[]).map(async file => {
-      const b64 = await new Promise(res => { const r=new FileReader(); r.onload=()=>res(r.result.split(',')[1]); r.readAsDataURL(file); });
-      return { '@odata.type':'#microsoft.graph.fileAttachment', name:file.name, contentType:file.type||'application/octet-stream', contentBytes:b64 };
+    const token=await getGraphToken();
+    const attachments=await Promise.all((_replyFiles||[]).map(async file=>{
+      const b64=await new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.readAsDataURL(file);});
+      return{'@odata.type':'#microsoft.graph.fileAttachment',name:file.name,contentType:file.type||'application/octet-stream',contentBytes:b64};
     }));
-    const message = {
-      subject: (email.asunto||'').startsWith('RE:') ? email.asunto : 'RE: '+email.asunto,
-      body: { contentType:'HTML', content: body },
-      toRecipients: [{ emailAddress:{ address: email.remitente } }]
+    const message={
+      subject:(email.asunto||'').startsWith('RE:')?email.asunto:'RE: '+email.asunto,
+      body:{contentType:'HTML',content:body},
+      toRecipients:[{emailAddress:{address:email.remitente}}]
     };
-    if(attachments.length) message.attachments = attachments;
-    const r = await fetch(`https://graph.microsoft.com/v1.0/users/${window.GRAPH_USER_ID||''}/sendMail`,{
-      method:'POST', headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
-      body: JSON.stringify({ message, saveToSentItems:true })
+    if(attachments.length) message.attachments=attachments;
+    const r=await fetch(`https://graph.microsoft.com/v1.0/users/${window.GRAPH_USER_ID||''}/sendMail`,{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+      body:JSON.stringify({message,saveToSentItems:true})
     });
-    if(r.ok||r.status===202) {
+    if(r.ok||r.status===202){
       showToast('Respuesta enviada ✓','success');
-      await addHistorialEvent(id, email, 'correo_respondido', {agente_id:AGENT_ID,agente_nombre:AGENT_NAME,por:'agente',observaciones:'Respuesta enviada: '+editor.innerText.substring(0,100)});
+      try{ await sb('historial_eventos','POST',{correo_id:id,message_id:email.message_id,evento:'correo_respondido',from_email:email.remitente,subject:email.asunto,metadata:{agente_id:AGENT_ID,agente_nombre:AGENT_NAME,por:'agente',observaciones:'Respuesta enviada: '+editor.innerText.substring(0,80)}}); }catch{}
       document.getElementById('replyBoxArea').innerHTML=''; _replyFiles=[];
+      await loadTicketTimeline(id);
     } else throw new Error(await r.text());
-  } catch(e) {
+  } catch(e){
     showToast('Error al enviar: '+e.message.substring(0,80),'error');
-    if(btn) { btn.disabled=false; btn.innerHTML='<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Enviar'; }
+    if(btn){ btn.disabled=false; btn.innerHTML='<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Enviar'; }
   }
 }
-
 
 // ──────────────────────────────────────────────
 // SYNC
