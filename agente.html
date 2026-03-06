@@ -698,18 +698,31 @@ function toggleReply() {
   if(area.innerHTML){ area.innerHTML=''; return; }
   const email=state.emails.find(e=>e.id===state.selectedId);
   area.innerHTML=`
-    <div class="reply-box">
-      <div style="font-size:11px;color:var(--ink3);margin-bottom:6px">Responder a: ${esc(email?.remitente||'')}</div>
-      <textarea class="reply-textarea" id="replyText" placeholder="Escribir respuesta..."></textarea>
-      <div style="margin-top:8px;padding:8px;background:var(--bg2);border-radius:var(--r2);border:1.5px dashed var(--border)">
+    <div class="reply-box" style="border:1px solid var(--border);border-radius:var(--r);background:#fff;overflow:hidden;box-shadow:var(--shadow)">
+      <!-- Header campos Para y Asunto -->
+      <div style="border-bottom:1px solid var(--border)">
+        <div style="display:flex;align-items:center;padding:7px 12px;border-bottom:1px solid var(--border);gap:8px">
+          <span style="font-size:11px;font-weight:700;color:var(--ink3);min-width:44px">Para</span>
+          <input id="replyTo" value="${esc(email?.remitente||'')}" style="flex:1;border:none;outline:none;font-size:12px;font-family:'Franklin Gothic Book','Franklin Gothic Medium',Arial,sans-serif;color:var(--ink);background:transparent"/>
+        </div>
+        <div style="display:flex;align-items:center;padding:7px 12px;gap:8px">
+          <span style="font-size:11px;font-weight:700;color:var(--ink3);min-width:44px">Asunto</span>
+          <input id="replySubject" value="RE: ${esc(email?.asunto||'')}" style="flex:1;border:none;outline:none;font-size:12px;font-family:'Franklin Gothic Book','Franklin Gothic Medium',Arial,sans-serif;color:var(--ink);background:transparent"/>
+        </div>
+      </div>
+      <!-- Área de escritura -->
+      <div id="replyEditor" contenteditable="true" style="min-height:120px;padding:12px 14px;font-size:13px;font-family:'Franklin Gothic Book','Franklin Gothic Medium',Arial,sans-serif;color:var(--ink);outline:none;line-height:1.6" data-placeholder="Escribir respuesta..."></div>
+      <!-- Adjuntos -->
+      <div style="padding:8px 12px;background:var(--bg2);border-top:1px solid var(--border)">
         <label style="font-size:11px;font-weight:700;color:var(--ink3);display:flex;align-items:center;gap:6px;cursor:pointer;margin-bottom:4px">
           <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-          Adjuntar archivos <span style="font-weight:400;color:var(--ink3)">(máx. 3 MB por archivo)</span>
+          Adjuntar archivos <span style="font-weight:400">(máx. 3 MB por archivo)</span>
         </label>
-        <input type="file" id="replyFiles" multiple style="font-size:11px;font-family:'Poppins',sans-serif;color:var(--ink2);width:100%">
+        <input type="file" id="replyFiles" multiple style="font-size:11px;font-family:'Franklin Gothic Book',Arial,sans-serif;color:var(--ink2);width:100%">
         <div id="replyFilesPreview" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px"></div>
       </div>
-      <div style="display:flex;justify-content:flex-end;gap:6px;margin-top:8px">
+      <!-- Acciones -->
+      <div style="display:flex;justify-content:flex-end;gap:6px;padding:10px 12px;border-top:1px solid var(--border);background:var(--bg)">
         <button class="btn btn-ghost" onclick="document.getElementById('replyBoxArea').innerHTML=''">Cancelar</button>
         <button class="btn btn-primary" onclick="sendReply()">
           <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
@@ -717,25 +730,34 @@ function toggleReply() {
         </button>
       </div>
     </div>`;
-  document.getElementById('replyFiles').addEventListener('change', function() {
-    const preview = document.getElementById('replyFilesPreview');
-    preview.innerHTML = '';
-    Array.from(this.files).forEach(f => {
-      const size = f.size > 1048576 ? (f.size/1048576).toFixed(1)+' MB' : Math.round(f.size/1024)+' KB';
-      const pill = document.createElement('span');
-      pill.className = 'adj-pill';
-      pill.innerHTML = `${getFileIcon(f.name)} ${esc(f.name)} <span style="color:var(--ink3)">${size}</span>`;
+  // Placeholder para contenteditable
+  const editor=document.getElementById('replyEditor');
+  editor.addEventListener('focus',function(){if(this.innerHTML==='')this.innerHTML='';});
+  editor.style.setProperty('--ph','Escribir respuesta...');
+  // Preview adjuntos
+  document.getElementById('replyFiles').addEventListener('change',function(){
+    const preview=document.getElementById('replyFilesPreview');
+    preview.innerHTML='';
+    Array.from(this.files).forEach(f=>{
+      const size=f.size>1048576?(f.size/1048576).toFixed(1)+' MB':Math.round(f.size/1024)+' KB';
+      const pill=document.createElement('span');
+      pill.className='adj-pill';
+      pill.innerHTML=`${getFileIcon(f.name)} ${esc(f.name)} <span style="color:var(--ink3)">${size}</span>`;
       preview.appendChild(pill);
     });
   });
-  document.getElementById('replyText').focus();
+  editor.focus();
 }
 
 async function sendReply() {
   const id=state.selectedId;
   const email=state.emails.find(e=>e.id===id);
-  const body=document.getElementById('replyText')?.value?.trim();
-  if(!body){ showToast('Escribe un mensaje','info'); return; }
+  const toInput=document.getElementById('replyTo')?.value?.trim();
+  const subject=document.getElementById('replySubject')?.value?.trim();
+  const editor=document.getElementById('replyEditor');
+  const body=editor?.innerHTML?.trim();
+  if(!body||body==='<br>'){ showToast('Escribe un mensaje','info'); return; }
+  if(!toInput){ showToast('Escribe un destinatario','info'); return; }
 
   // Procesar adjuntos
   const filesInput=document.getElementById('replyFiles');
@@ -756,9 +778,9 @@ async function sendReply() {
   try {
     const token=await getGraphToken();
     const messagePayload={
-      subject:'RE: '+email.asunto,
-      body:{contentType:'HTML',content:`<p>${body.replace(/\n/g,'<br>')}</p>`},
-      toRecipients:[{emailAddress:{address:email.remitente}}],
+      subject: subject||('RE: '+email.asunto),
+      body:{contentType:'HTML',content:`<div style="font-family:'Franklin Gothic Book',Arial,sans-serif;font-size:13px">${body}</div>`},
+      toRecipients:[{emailAddress:{address:toInput}}],
     };
     if(attachments.length>0) messagePayload.attachments=attachments;
 
@@ -768,9 +790,9 @@ async function sendReply() {
       body:JSON.stringify({message:messagePayload,saveToSentItems:true})
     });
     if(r.ok||r.status===202){
-      const adjInfo=attachments.length>0?` (${attachments.length} adjunto${attachments.length>1?'s':''})` :'';
+      const adjInfo=attachments.length>0?` (${attachments.length} adjunto${attachments.length>1?'s':''})`:'';
       showToast('Respuesta enviada ✓'+adjInfo,'success');
-      try{ await sb('historial_eventos','POST',{correo_id:id,message_id:email.message_id,evento:'correo_respondido',from_email:email.remitente,subject:email.asunto,metadata:{agente_id:AGENT_ID,agente_nombre:AGENT_NAME,por:'agente',adjuntos:attachments.length,observaciones:'Respuesta enviada: '+body.substring(0,80)}}); }catch{}
+      try{ await sb('historial_eventos','POST',{correo_id:id,message_id:email.message_id,evento:'correo_respondido',from_email:email.remitente,subject:email.asunto,metadata:{agente_id:AGENT_ID,agente_nombre:AGENT_NAME,por:'agente',adjuntos:attachments.length,observaciones:'Respuesta enviada: '+body.replace(/<[^>]*>/g,'').substring(0,80)}}); }catch{}
       document.getElementById('replyBoxArea').innerHTML='';
       await loadTicketTimeline(id);
     } else throw new Error(await r.text());
