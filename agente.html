@@ -118,7 +118,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Poppins',sans-serif;min-
 .btn-ghost:hover{background:var(--bg);border-color:var(--ink3)}
 .btn-success{background:var(--green-l);color:var(--green)}
 .btn-success:hover{background:#bbf7d0}
-.ev-body{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:14px;font-size:13px;line-height:1.7;color:var(--ink);margin-bottom:12px;min-height:360px;max-height:calc(100vh - 260px);overflow-y:auto}
+.ev-body{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:14px;font-size:13px;line-height:1.7;color:var(--ink);margin-bottom:12px;max-height:320px;overflow-y:auto}
 .adj-section{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:12px}
 .adj-title{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--ink3);margin-bottom:8px}
 .adj-pill{display:inline-flex;align-items:center;gap:5px;background:#fff;border:1.5px solid var(--border);border-radius:var(--r2);padding:4px 10px;font-size:11px;font-weight:500;color:var(--ink2);cursor:pointer;transition:all .15s;margin:2px}
@@ -693,111 +693,45 @@ async function saveGestion() {
 }
 
 // Reply
-let _replyFiles = [];
 function toggleReply() {
   const area=document.getElementById('replyBoxArea');
-  if(area.innerHTML){ area.innerHTML=''; _replyFiles=[]; return; }
+  if(area.innerHTML){ area.innerHTML=''; return; }
   const email=state.emails.find(e=>e.id===state.selectedId);
-  _replyFiles=[];
-  const subj=(email?.asunto||'').startsWith('RE:')?esc(email.asunto):'RE: '+esc(email?.asunto||'');
   area.innerHTML=`
-    <div class="reply-box" id="replyBox" style="border:1px solid var(--border);border-radius:var(--r);background:#fff;margin-top:8px">
-      <div style="border-bottom:1px solid var(--border);padding:10px 14px;display:flex;flex-direction:column;gap:5px;background:var(--bg);border-radius:var(--r) var(--r) 0 0">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:11px;font-weight:600;color:var(--ink3);min-width:48px">PARA:</span>
-          <input id="rTo" type="text" value="${esc(email?.remitente||'')}" style="flex:1;border:none;border-bottom:1px solid var(--border);padding:2px 4px;font-size:12px;font-family:'Poppins',sans-serif;background:transparent;outline:none;color:var(--ink)">
-        </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:11px;font-weight:600;color:var(--ink3);min-width:48px">CC:</span>
-          <input id="rCc" type="text" placeholder="CC opcional" style="flex:1;border:none;border-bottom:1px solid var(--border);padding:2px 4px;font-size:12px;font-family:'Poppins',sans-serif;background:transparent;outline:none;color:var(--ink)">
-        </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:11px;font-weight:600;color:var(--ink3);min-width:48px">ASUNTO:</span>
-          <input id="rSubj" type="text" value="${subj}" style="flex:1;border:none;border-bottom:1px solid var(--border);padding:2px 4px;font-size:12px;font-family:'Poppins',sans-serif;background:transparent;outline:none;color:var(--ink)">
-        </div>
-      </div>
-      <div style="padding:12px 14px">
-        <textarea class="reply-textarea" id="replyText" placeholder="Escribir respuesta aquí..." style="min-height:120px;max-height:220px"></textarea>
-        <div style="border-top:1px solid #e5e7eb;margin:10px 0 8px;padding-top:8px;font-size:11px;color:#6b7280;font-family:'Poppins',sans-serif;line-height:1.6">
-          <strong style="color:#1e40af;display:block">Tododrogas S.A.S</strong>
-          Sistema PQR &middot; Soporte al Cliente<br>
-          &#128231; <a href="mailto:pqr@tododrogas.com.co" style="color:#2563eb;text-decoration:none">pqr@tododrogas.com.co</a> &nbsp;
-          &#127760; <a href="https://www.tododrogas.com.co" style="color:#2563eb;text-decoration:none">www.tododrogas.com.co</a><br>
-          <span style="font-size:10px;color:#9ca3af">Este mensaje es confidencial y de uso exclusivo del destinatario.</span>
-        </div>
-        <div id="rAttList" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"></div>
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <label style="cursor:pointer">
-            <input type="file" id="rFileInput" multiple style="display:none" onchange="addReplyFiles(this.files)">
-            <div class="btn btn-ghost" style="display:flex;align-items:center;gap:5px;pointer-events:none;font-size:12px">
-              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
-              Adjuntar
-            </div>
-          </label>
-          <div style="display:flex;gap:6px">
-            <button class="btn btn-ghost" onclick="document.getElementById('replyBoxArea').innerHTML='';_replyFiles=[]">Descartar</button>
-            <button class="btn btn-primary" onclick="sendReply()">
-              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-              Enviar
-            </button>
-          </div>
-        </div>
+    <div class="reply-box">
+      <div style="font-size:11px;color:var(--ink3);margin-bottom:6px">Responder a: ${esc(email?.remitente||'')}</div>
+      <textarea class="reply-textarea" id="replyText" placeholder="Escribir respuesta..."></textarea>
+      <div style="display:flex;justify-content:flex-end;gap:6px;margin-top:8px">
+        <button class="btn btn-ghost" onclick="document.getElementById('replyBoxArea').innerHTML=''">Cancelar</button>
+        <button class="btn btn-primary" onclick="sendReply()">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Enviar
+        </button>
       </div>
     </div>`;
   document.getElementById('replyText').focus();
 }
-
-function addReplyFiles(files) {
-  for(const f of files){ if(!_replyFiles.find(x=>x.name===f.name)) _replyFiles.push(f); }
-  const el=document.getElementById('rAttList');
-  if(!el) return;
-  el.innerHTML=_replyFiles.map(f=>`
-    <div style="display:flex;align-items:center;gap:4px;background:#f3f4f6;border-radius:4px;padding:2px 8px;font-size:11px">
-      ${getFileIcon(f.name)} ${esc(f.name)} <span style="color:var(--ink3)">(${(f.size/1024).toFixed(0)}KB)</span>
-      <button onclick="removeReplyFile('${esc(f.name)}')" style="border:none;background:none;cursor:pointer;color:var(--ink3);font-size:13px;padding:0 2px">&times;</button>
-    </div>`).join('');
-}
-
-function removeReplyFile(name){ _replyFiles=_replyFiles.filter(f=>f.name!==name); addReplyFiles([]); }
 
 async function sendReply() {
   const id=state.selectedId;
   const email=state.emails.find(e=>e.id===id);
   const body=document.getElementById('replyText')?.value?.trim();
   if(!body){ showToast('Escribe un mensaje','info'); return; }
-  const toAddr=(document.getElementById('rTo')?.value||email.remitente||'').trim();
-  const ccRaw=(document.getElementById('rCc')?.value||'').trim();
-  const subj=(document.getElementById('rSubj')?.value||'RE: '+(email.asunto||'')).trim();
-  const ccList=ccRaw?ccRaw.split(/[,;]+/).map(s=>s.trim()).filter(Boolean).map(a=>({emailAddress:{address:a}})):[];
-  const sig=`<br><br><hr style="border:none;border-top:1px solid #e5e7eb"><table style="font-size:12px;color:#4b5563;font-family:sans-serif;line-height:1.6"><tr><td><strong style="color:#1e40af">Tododrogas S.A.S</strong></td></tr><tr><td>Sistema PQR &middot; Soporte al Cliente</td></tr><tr><td><a href="mailto:pqr@tododrogas.com.co" style="color:#2563eb">pqr@tododrogas.com.co</a></td></tr><tr><td><a href="https://www.tododrogas.com.co" style="color:#2563eb">www.tododrogas.com.co</a></td></tr></table>`;
-  const htmlBody=`<p>${body.replace(/
-/g,'<br>')}</p>${sig}`;
-  const btn=document.querySelector('#replyBox .btn-primary');
-  if(btn){btn.disabled=true;btn.textContent='Enviando...';}
   try {
     const token=await getGraphToken();
-    const attachments=await Promise.all((_replyFiles||[]).map(async file=>{
-      const b64=await new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.readAsDataURL(file);});
-      return{'@odata.type':'#microsoft.graph.fileAttachment',name:file.name,contentType:file.type||'application/octet-stream',contentBytes:b64};
-    }));
-    const message={subject:subj,body:{contentType:'HTML',content:htmlBody},toRecipients:[{emailAddress:{address:toAddr}}]};
-    if(ccList.length) message.ccRecipients=ccList;
-    if(attachments.length) message.attachments=attachments;
     const r=await fetch(`https://graph.microsoft.com/v1.0/users/${window.GRAPH_USER_ID||''}/sendMail`,{
       method:'POST',
       headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
-      body:JSON.stringify({message,saveToSentItems:true})
+      body:JSON.stringify({message:{subject:'RE: '+email.asunto,body:{contentType:'HTML',content:`<p>${body.replace(/\n/g,'<br>')}</p>`},toRecipients:[{emailAddress:{address:email.remitente}}]},saveToSentItems:true})
     });
     if(r.ok||r.status===202){
       showToast('Respuesta enviada ✓','success');
+      // Log event
       try{ await sb('historial_eventos','POST',{correo_id:id,message_id:email.message_id,evento:'correo_respondido',from_email:email.remitente,subject:email.asunto,metadata:{agente_id:AGENT_ID,agente_nombre:AGENT_NAME,por:'agente',observaciones:'Respuesta enviada: '+body.substring(0,80)}}); }catch{}
-      document.getElementById('replyBoxArea').innerHTML=''; _replyFiles=[];
+      document.getElementById('replyBoxArea').innerHTML='';
       await loadTicketTimeline(id);
     } else throw new Error(await r.text());
-  } catch(e){
-    showToast('Error al enviar: '+e.message.substring(0,60),'error');
-    if(btn){btn.disabled=false;btn.innerHTML='<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Enviar';}
-  }
+  } catch(e){ showToast('Error al enviar: '+e.message.substring(0,60),'error'); }
 }
 
 // ──────────────────────────────────────────────
@@ -818,9 +752,6 @@ async function syncAll() {
 // ──────────────────────────────────────────────
 function estadoLabel(s){return {pendiente:'Pendiente',gestion:'En gestión',gestionado:'Gestionado',solucionado:'Solucionado',reabierto:'Reabierto'}[s]||s;}
 function closeModal(id){document.getElementById(id).classList.remove('show');}
-function openAdjunto(url,nombre,tipo){if(!url||url==='#')return;window.open(url,'_blank');}
-function openAdjuntoBase64(nombre,tipo,b64){if(!b64)return;try{const binary=atob(b64);const bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);const mimeType=tipo||guessMime(nombre);const blob=new Blob([bytes],{type:mimeType});const url=URL.createObjectURL(blob);const win=window.open(url,'_blank');if(!win){const a=document.createElement('a');a.href=url;a.download=nombre;a.click();}setTimeout(()=>URL.revokeObjectURL(url),60000);}catch(e){showToast('No se pudo abrir el archivo','error');}}
-function guessMime(n){const e=(n.split('.').pop()||'').toLowerCase();const m={pdf:'application/pdf',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',gif:'image/gif',webp:'image/webp',svg:'image/svg+xml',txt:'text/plain',html:'text/html',doc:'application/msword',docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',xls:'application/vnd.ms-excel',xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'};return m[e]||'application/octet-stream';}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function getFileIcon(n=''){const e=(n.split('.').pop()||'').toLowerCase();if(['pdf'].includes(e))return '📄';if(['doc','docx'].includes(e))return '📝';if(['xls','xlsx'].includes(e))return '📊';return '📎';}
 function showToast(msg,type='info'){
