@@ -142,7 +142,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Poppins',sans-serif;min-
 .btn-danger:hover{background:#fecaca}
 .btn-orange{background:var(--orange-l);color:var(--orange)}
 .btn-orange:hover{background:#fed7aa}
-.ev-body{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:16px;font-size:13px;line-height:1.7;color:var(--ink);margin-bottom:14px;max-height:520px;overflow-y:auto}
+.ev-body{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:16px;font-size:13px;line-height:1.7;color:var(--ink);margin-bottom:14px;min-height:220px;max-height:calc(100vh - 340px);overflow-y:auto}
 .ev-body iframe{width:100%;min-height:300px;border:none;border-radius:var(--r)}
 
 /* Adjuntos */
@@ -305,9 +305,59 @@ table.agents-tbl tr:hover td{background:var(--bg)}
 /* Drag over highlight */
 .email-item.drag-over{background:var(--blue-l)!important;border:2px dashed var(--blue)}
 .agent-row-config.drag-over{background:var(--blue-l)!important;border:2px dashed var(--blue)}
+
+/* ── SPLASH OVERLAY ── */
+.splash-overlay{position:fixed;inset:0;z-index:9999;background:#060a18;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .6s ease, visibility .6s ease}
+.splash-overlay.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.splash-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(37,99,235,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(37,99,235,.06) 1px,transparent 1px);background-size:40px 40px;animation:gridFloat 20s linear infinite}
+@keyframes gridFloat{from{transform:translateY(0)}to{transform:translateY(-40px)}}
+.splash-glow{position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(37,99,235,.15) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);filter:blur(60px);animation:pulseGlow 4s ease-in-out infinite}
+@keyframes pulseGlow{0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.2)}}
+.splash-content{position:relative;z-index:2;text-align:center;max-width:560px;padding:0 24px}
+.splash-eyebrow{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--blue);margin-bottom:20px;opacity:0;animation:fadeUp .6s ease .2s forwards}
+.splash-title{font-size:clamp(28px,5vw,44px);font-weight:800;color:#fff;line-height:1.15;margin-bottom:16px;opacity:0;animation:fadeUp .6s ease .4s forwards}
+.splash-title .highlight{color:var(--blue);display:inline;text-shadow:0 0 30px rgba(37,99,235,.4)}
+.splash-message{font-size:15px;color:rgba(255,255,255,.5);line-height:1.7;margin-bottom:32px;min-height:52px;opacity:0;animation:fadeUp .6s ease .6s forwards}
+.splash-message .msg-text{display:inline-block;animation:fadeMsg 1s ease forwards}
+@keyframes fadeMsg{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.splash-stats{display:flex;gap:40px;justify-content:center;margin-bottom:36px;opacity:0;animation:fadeUp .6s ease .8s forwards}
+.splash-stat-val{font-size:26px;font-weight:800;color:#fff;font-family:'DM Mono',monospace}
+.splash-stat-label{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:4px}
+.splash-dots{display:flex;gap:8px;justify-content:center;margin-bottom:32px;opacity:0;animation:fadeUp .6s ease 1s forwards}
+.splash-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.15);transition:all .3s}
+.splash-dot.active{background:var(--blue);box-shadow:0 0 10px rgba(37,99,235,.5)}
+.splash-enter{background:var(--blue);color:#fff;border:none;padding:12px 32px;border-radius:10px;font-size:14px;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;transition:all .2s;opacity:0;animation:fadeUp .6s ease 1.2s forwards;box-shadow:0 4px 20px rgba(37,99,235,.3)}
+.splash-enter:hover{background:var(--blue-d);transform:translateY(-1px);box-shadow:0 6px 30px rgba(37,99,235,.4)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.splash-particles{position:absolute;inset:0;overflow:hidden;z-index:1}
+.splash-particle{position:absolute;width:2px;height:2px;background:rgba(37,99,235,.4);border-radius:50%;animation:float-particle linear infinite}
+@keyframes float-particle{from{transform:translateY(100vh) scale(0);opacity:0}30%{opacity:1}to{transform:translateY(-10vh) scale(1);opacity:0}}
+
+/* ── LOADING MORE INDICATOR ── */
+.loading-more{text-align:center;padding:12px;font-size:11px;color:var(--ink3)}
+.loading-more .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
 </style>
 </head>
 <body>
+
+<!-- SPLASH OVERLAY -->
+<div class="splash-overlay" id="splashOverlay">
+  <div class="splash-grid"></div>
+  <div class="splash-glow"></div>
+  <div class="splash-particles" id="splashParticles"></div>
+  <div class="splash-content">
+    <div class="splash-eyebrow">Sistema PQR Inteligente</div>
+    <div class="splash-title">Tu correo ahora es <span class="highlight">inteligente</span></div>
+    <div class="splash-message" id="splashMsg"><span class="msg-text">Centraliza, gestiona y resuelve todas las PQR desde un solo lugar conectado a tu correo.</span></div>
+    <div class="splash-stats">
+      <div><div class="splash-stat-val">24/7</div><div class="splash-stat-label">Disponibilidad</div></div>
+      <div><div class="splash-stat-val">100%</div><div class="splash-stat-label">Trazable</div></div>
+      <div><div class="splash-stat-val">Real</div><div class="splash-stat-label">Tiempo</div></div>
+    </div>
+    <div class="splash-dots" id="splashDots"></div>
+    <button class="splash-enter" onclick="closeSplash()">Haz parte del cambio →</button>
+  </div>
+</div>
 
 <!-- TOPBAR -->
 <div class="topbar">
@@ -714,7 +764,8 @@ function setAgentFolder(agentId, el) {
 // ──────────────────────────────────────────────
 // EMAIL LIST RENDER
 // ──────────────────────────────────────────────
-function renderEmailList() {
+function renderEmailList(preserveScroll) {
+  if(!preserveScroll) _emailDisplayCount = EMAIL_PAGE_SIZE;
   let list = [...state.emails];
   const search = document.getElementById('searchInput')?.value?.toLowerCase()||'';
 
@@ -751,7 +802,10 @@ function renderEmailList() {
     return;
   }
 
-  el.innerHTML = list.map(e=>{
+  const totalCount = list.length;
+  const visible = list.slice(0, _emailDisplayCount);
+
+  el.innerHTML = visible.map(e=>{
     const agent = e.asignado_a ? state.agents.find(a=>a.id===e.asignado_a) : null;
     const prioColor = {alta:'#dc2626',media:'#ca8a04',baja:'#16a34a'}[e.prioridad||'']||'transparent';
     return `<div class="email-item${e.id===state.selectedId?' selected':''}${!e.is_read?' unread':''}"
@@ -772,6 +826,9 @@ function renderEmailList() {
       </div>
     </div>`;
   }).join('');
+  if(visible.length < totalCount) {
+    el.innerHTML += `<div class="loading-more"><span class="spinner"></span> Desplaza para ver más (${visible.length} de ${totalCount})</div>`;
+  }
 }
 
 function estadoLabel(s){
@@ -1072,18 +1129,29 @@ async function saveGestion() {
 
 // Abrir/descargar adjunto
 function openAdjunto(adj) {
+  const viewableTypes = ['application/pdf','image/png','image/jpeg','image/gif','image/webp','image/svg+xml','text/plain','text/html'];
+  const viewableExts = ['pdf','png','jpg','jpeg','gif','webp','svg','txt','html'];
+  const ext = ((adj.nombre||adj.name||'').split('.').pop()||'').toLowerCase();
+  const mime = adj.tipo_contenido||adj.contentType||'application/octet-stream';
+  const canView = viewableTypes.includes(mime) || viewableExts.includes(ext);
+
   if(adj.content_bytes) {
     try {
       const byteChars = atob(adj.content_bytes);
       const byteArr = new Uint8Array(byteChars.length);
       for(let i=0;i<byteChars.length;i++) byteArr[i]=byteChars.charCodeAt(i);
-      const blob = new Blob([byteArr], {type: adj.tipo_contenido||'application/octet-stream'});
+      const detectedMime = ext==='pdf'?'application/pdf': ext==='png'?'image/png': ext==='jpg'||ext==='jpeg'?'image/jpeg': mime;
+      const blob = new Blob([byteArr], {type: detectedMime});
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href=url; a.download=adj.nombre||'adjunto'; a.click();
-      setTimeout(()=>URL.revokeObjectURL(url),2000);
+      if(canView) {
+        window.open(url, '_blank');
+      } else {
+        const a = document.createElement('a');
+        a.href=url; a.download=adj.nombre||adj.name||'adjunto'; a.click();
+      }
+      setTimeout(()=>URL.revokeObjectURL(url), 60000);
       return;
-    } catch(e) {}
+    } catch(e) { console.error('Error opening attachment:', e); }
   }
   if(adj.url||adj.content_url) { window.open(adj.url||adj.content_url,'_blank'); return; }
   showToast('Adjunto no disponible','info');
@@ -1451,6 +1519,77 @@ async function getGraphToken(){
 }
 
 // ──────────────────────────────────────────────
+// SPLASH SCREEN
+// ──────────────────────────────────────────────
+const SPLASH_MESSAGES = [
+  'Centraliza, gestiona y resuelve todas las PQR desde un solo lugar conectado a tu correo.',
+  'Cada petición, queja y reclamo queda registrada con trazabilidad total. Sin perder un solo detalle.',
+  'Responde en tiempo real, asigna agentes y escala tickets con un solo clic.',
+  'Tu bandeja de correo transformada en un centro de comando inteligente para la atención al cliente.',
+  'Automatiza flujos, mide tiempos de respuesta y toma decisiones basadas en datos reales.'
+];
+let _splashIdx = 0, _splashInterval = null;
+
+function initSplash() {
+  const pc = document.getElementById('splashParticles');
+  if(pc) {
+    for(let i=0;i<20;i++){
+      const p=document.createElement('div');
+      p.className='splash-particle';
+      p.style.left=Math.random()*100+'%';
+      p.style.animationDuration=(4+Math.random()*6)+'s';
+      p.style.animationDelay=Math.random()*5+'s';
+      p.style.width=p.style.height=(1+Math.random()*2)+'px';
+      pc.appendChild(p);
+    }
+  }
+  const dots = document.getElementById('splashDots');
+  if(dots) dots.innerHTML = SPLASH_MESSAGES.map((_,i)=>`<div class="splash-dot${i===0?' active':''}"></div>`).join('');
+  _splashInterval = setInterval(()=>{
+    _splashIdx = (_splashIdx+1) % SPLASH_MESSAGES.length;
+    const el = document.getElementById('splashMsg');
+    if(el) el.innerHTML = `<span class="msg-text" key="${_splashIdx}">${SPLASH_MESSAGES[_splashIdx]}</span>`;
+    document.querySelectorAll('.splash-dot').forEach((d,i)=>d.classList.toggle('active',i===_splashIdx));
+  }, 4000);
+}
+
+function closeSplash() {
+  clearInterval(_splashInterval);
+  const overlay = document.getElementById('splashOverlay');
+  if(overlay) overlay.classList.add('hidden');
+  sessionStorage.setItem('pqr_splash_seen','1');
+}
+
+if(!sessionStorage.getItem('pqr_splash_seen')) {
+  initSplash();
+} else {
+  const overlay = document.getElementById('splashOverlay');
+  if(overlay) overlay.style.display='none';
+}
+
+// ──────────────────────────────────────────────
+// INFINITE SCROLL FOR EMAIL LIST
+// ──────────────────────────────────────────────
+const EMAIL_PAGE_SIZE = 30;
+let _emailDisplayCount = EMAIL_PAGE_SIZE;
+let _isLoadingMore = false;
+
+(function setupInfiniteScroll() {
+  const listEl = document.getElementById('emailList');
+  if(!listEl) return;
+  listEl.addEventListener('scroll', function() {
+    if(_isLoadingMore) return;
+    const {scrollTop, scrollHeight, clientHeight} = this;
+    if(scrollTop + clientHeight >= scrollHeight - 60) {
+      _isLoadingMore = true;
+      _emailDisplayCount += EMAIL_PAGE_SIZE;
+      renderEmailList();
+      _isLoadingMore = false;
+    }
+  });
+})();
+
+// ──────────────────────────────────────────────
 // INIT
 // ──────────────────────────────────────────────
 (async()=>{
@@ -1466,5 +1605,4 @@ async function getGraphToken(){
 </script>
 </body>
 </html>
-
 
