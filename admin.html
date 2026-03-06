@@ -624,6 +624,9 @@ async function loadEmails() {
     body_type: e.body_type || 'text',
     has_attachments: e.has_attachments || false,
     is_read: e.is_read || false,
+    to_recipients: e.to_recipients || [],
+    cc_recipients: e.cc_recipients || [],
+    sent_at: e.sent_at || e.received_at || e.created_at,
     raw: e,
   }));
   updateFolderCounts();
@@ -1062,19 +1065,34 @@ function toggleReply() {
   const email = state.emails.find(e=>e.id===state.selectedId);
   area.innerHTML = `
     <div class="reply-box" style="border:1px solid var(--border);border-radius:var(--r);background:#fff;overflow:hidden;box-shadow:var(--shadow)">
-      <!-- Header campos Para y Asunto -->
+      <!-- Header campos Para, CC y Asunto -->
       <div style="border-bottom:1px solid var(--border)">
         <div style="display:flex;align-items:center;padding:7px 12px;border-bottom:1px solid var(--border);gap:8px">
           <span style="font-size:11px;font-weight:700;color:var(--ink3);min-width:44px">Para</span>
           <input id="replyTo" value="${esc(email?.remitente||'')}" style="flex:1;border:none;outline:none;font-size:12px;font-family:'Franklin Gothic Book','Franklin Gothic Medium',Arial,sans-serif;color:var(--ink);background:transparent"/>
+        </div>
+        <div style="display:flex;align-items:center;padding:7px 12px;border-bottom:1px solid var(--border);gap:8px">
+          <span style="font-size:11px;font-weight:700;color:var(--ink3);min-width:44px">CC</span>
+          <input id="replyCC" value="${esc((email?.cc_recipients||[]).map(r=>r?.emailAddress?.address||r).filter(Boolean).join('; '))}" placeholder="Separar con punto y coma" style="flex:1;border:none;outline:none;font-size:12px;font-family:'Franklin Gothic Book','Franklin Gothic Medium',Arial,sans-serif;color:var(--ink);background:transparent"/>
         </div>
         <div style="display:flex;align-items:center;padding:7px 12px;gap:8px">
           <span style="font-size:11px;font-weight:700;color:var(--ink3);min-width:44px">Asunto</span>
           <input id="replySubject" value="RE: ${esc(email?.asunto||'')}" style="flex:1;border:none;outline:none;font-size:12px;font-family:'Franklin Gothic Book','Franklin Gothic Medium',Arial,sans-serif;color:var(--ink);background:transparent"/>
         </div>
       </div>
-      <!-- Área de escritura -->
+      <!-- Área de escritura + hilo histórico -->
       <div id="replyEditor" contenteditable="true" style="min-height:120px;padding:12px 14px;font-size:13px;font-family:'Franklin Gothic Book','Franklin Gothic Medium',Arial,sans-serif;color:var(--ink);outline:none;line-height:1.6"></div>
+      <div style="border-top:1px solid var(--border);padding:10px 14px;background:#fafafa">
+        <div style="font-size:11px;color:var(--ink3);margin-bottom:6px;font-family:'Franklin Gothic Book',Arial,sans-serif">───────── Mensaje original ─────────</div>
+        <div style="font-size:11px;color:var(--ink2);font-family:'Franklin Gothic Book',Arial,sans-serif;line-height:1.5">
+          <b>De:</b> ${esc(email?.remitente_nombre||'')} &lt;${esc(email?.remitente||'')}&gt;<br>
+          <b>Enviado:</b> ${email?.sent_at ? new Date(email.sent_at).toLocaleString('es-CO',{dateStyle:'full',timeStyle:'short'}) : ''}<br>
+          <b>Para:</b> ${esc((email?.to_recipients||[]).map(r=>r?.emailAddress?.address||r).filter(Boolean).join('; '))}<br>
+          <b>CC:</b> ${esc((email?.cc_recipients||[]).map(r=>r?.emailAddress?.address||r).filter(Boolean).join('; ') || '(ninguno)')}<br>
+          <b>Asunto:</b> ${esc(email?.asunto||'')}
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:var(--ink2);font-family:'Franklin Gothic Book',Arial,sans-serif;max-height:180px;overflow-y:auto;border-left:3px solid var(--border);padding-left:10px">${email?.body_content||email?.raw?.body_preview||''}</div>
+      </div>
       <!-- Adjuntos -->
       <div style="padding:8px 12px;background:var(--bg2);border-top:1px solid var(--border)">
         <label style="font-size:11px;font-weight:700;color:var(--ink3);display:flex;align-items:center;gap:6px;cursor:pointer;margin-bottom:4px">
@@ -1111,11 +1129,24 @@ async function sendReply() {
   const id = state.selectedId;
   const email = state.emails.find(e=>e.id===id);
   const toInput = document.getElementById('replyTo')?.value?.trim();
+  const ccInput = document.getElementById('replyCC')?.value?.trim();
   const subject = document.getElementById('replySubject')?.value?.trim();
   const editor = document.getElementById('replyEditor');
   const body = editor?.innerHTML?.trim();
   if(!body || body==='<br>') { showToast('Escribe un mensaje','info'); return; }
   if(!toInput) { showToast('Escribe un destinatario','info'); return; }
+
+  // Hilo histórico
+  const hiloHTML=`
+    <br><br>
+    <div style="border-left:3px solid #ccc;padding-left:10px;color:#555;font-family:'Franklin Gothic Book',Arial,sans-serif;font-size:12px">
+      <b>De:</b> ${esc(email?.remitente_nombre||'')} &lt;${esc(email?.remitente||'')}&gt;<br>
+      <b>Enviado:</b> ${email?.sent_at ? new Date(email.sent_at).toLocaleString('es-CO',{dateStyle:'full',timeStyle:'short'}) : ''}<br>
+      <b>Para:</b> ${esc((email?.to_recipients||[]).map(r=>r?.emailAddress?.address||r).filter(Boolean).join('; '))}<br>
+      <b>CC:</b> ${esc((email?.cc_recipients||[]).map(r=>r?.emailAddress?.address||r).filter(Boolean).join('; ')||'(ninguno)')}<br>
+      <b>Asunto:</b> ${esc(email?.asunto||'')}<br><br>
+      ${email?.body_content||''}
+    </div>`;
 
   // Procesar adjuntos
   const filesInput = document.getElementById('replyFiles');
@@ -1137,9 +1168,12 @@ async function sendReply() {
     const token = await getGraphToken();
     const messagePayload = {
       subject: subject || ('RE: '+email.asunto),
-      body: {contentType:'HTML', content:`<div style="font-family:'Franklin Gothic Book',Arial,sans-serif;font-size:13px">${body}</div>`},
+      body: {contentType:'HTML', content:`<div style="font-family:'Franklin Gothic Book',Arial,sans-serif;font-size:13px">${body}${hiloHTML}</div>`},
       toRecipients: [{emailAddress:{address:toInput}}],
     };
+    if(ccInput){
+      messagePayload.ccRecipients=ccInput.split(';').map(s=>s.trim()).filter(Boolean).map(a=>({emailAddress:{address:a}}));
+    }
     if(attachments.length > 0) messagePayload.attachments = attachments;
 
     const r = await fetch(`https://graph.microsoft.com/v1.0/users/${window.GRAPH_USER_ID||''}/sendMail`,{
