@@ -1,1 +1,89 @@
+{
+  "name": "FLUJO 1 — Recepción PQR Web",
+  "nodes": [
+    {
+      "id": "f1-webhook",
+      "name": "Webhook Recepción PQR",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pqr-recepcion",
+        "authentication": "headerAuth",
+        "responseMode": "lastNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "f1-generar-ticket",
+      "name": "Generar Ticket ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300],
+      "parameters": {
+        "jsCode": "const ahora = new Date();\nconst fecha = ahora.toISOString().slice(0,10).replace(/-/g,'');\nconst rand = Math.floor(Math.random() * 9000 + 1000);\nconst ticket_id = `TD-${fecha}-${rand}`;\n\nconst body = $input.first().json.body || $input.first().json;\n\nreturn [{\n  json: {\n    nombre:          body.nombre         || 'Anónimo',\n    correo:          body.correo         || '',\n    telefono:        body.telefono       || '',\n    tipo_pqr:        body.tipo_pqr       || 'peticion',\n    descripcion:     body.descripcion    || '',\n    canal_contacto:  body.canal_contacto || 'formulario_web',\n    origen:          body.origen         || 'web',\n    transcripcion:   body.transcripcion  || null,\n    audio_url:       body.audio_url      || null,\n    canvas_url:      body.canvas_url     || null,\n    ticket_id,\n    estado:          'pendiente',\n    prioridad:       'media',\n    datos_legales:   body.datos_legales  || {}\n  }\n}];"
+      }
+    },
+    {
+      "id": "f1-insert-supabase",
+      "name": "INSERT correo en Supabase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [680, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "https://yeiupcumvdvdswfhcoty.supabase.co/rest/v1/correos",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey",        "value": "={{ $credentials.supabaseServiceKey }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $credentials.supabaseServiceKey }}" },
+            { "name": "Content-Type",  "value": "application/json" },
+            { "name": "Prefer",        "value": "return=representation" }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "nombre",         "value": "={{ $json.nombre }}" },
+            { "name": "correo",         "value": "={{ $json.correo }}" },
+            { "name": "telefono_contacto", "value": "={{ $json.telefono }}" },
+            { "name": "tipo_pqr",       "value": "={{ $json.tipo_pqr }}" },
+            { "name": "descripcion",    "value": "={{ $json.descripcion }}" },
+            { "name": "canal_contacto", "value": "={{ $json.canal_contacto }}" },
+            { "name": "origen",         "value": "={{ $json.origen }}" },
+            { "name": "ticket_id",      "value": "={{ $json.ticket_id }}" },
+            { "name": "estado",         "value": "pendiente" },
+            { "name": "prioridad",      "value": "={{ $json.prioridad }}" },
+            { "name": "transcripcion",  "value": "={{ $json.transcripcion }}" },
+            { "name": "audio_url",      "value": "={{ $json.audio_url }}" },
+            { "name": "canvas_url",     "value": "={{ $json.canvas_url }}" },
+            { "name": "datos_legales",  "value": "={{ JSON.stringify($json.datos_legales) }}" }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "f1-responder",
+      "name": "Responder al formulario",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [900, 300],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"ticket_id\": \"{{ $('Generar Ticket ID').first().json.ticket_id }}\",\n  \"message\": \"PQR radicada exitosamente. Recibirás confirmación en tu correo.\"\n}",
+        "options": { "responseCode": 201 }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Recepción PQR":    { "main": [[{ "node": "Generar Ticket ID",         "type": "main", "index": 0 }]] },
+    "Generar Ticket ID":        { "main": [[{ "node": "INSERT correo en Supabase", "type": "main", "index": 0 }]] },
+    "INSERT correo en Supabase":{ "main": [[{ "node": "Responder al formulario",   "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "tags": [{ "name": "PQR-Core" }]
+}
 
