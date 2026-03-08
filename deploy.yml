@@ -3,11 +3,11 @@ name: Deploy PQR al VPS
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: TOKENS.env
 
     steps:
       - name: Checkout código
@@ -15,58 +15,53 @@ jobs:
 
       - name: Generar config.js con secrets
         run: |
-          cat > config.js << EOF
-          window.CONFIG = {
-            SUPABASE_URL:    '${{ secrets.SUPABASE_URL }}',
-            SUPABASE_KEY:    '${{ secrets.SUPABASE_KEY }}',
-            GRAPH_TENANT:    '${{ secrets.AZURE_TENANT_ID }}',
-            GRAPH_CLIENT_ID: '${{ secrets.AZURE_CLIENT_ID }}',
-            GRAPH_SECRET:    '${{ secrets.AZURE_CLIENT_SECRET }}',
-            GRAPH_USER_ID:   '${{ secrets.GRAPH_USER_ID }}',
-          };
-          EOF
+          mkdir -p public/assets/js
+          cat > public/assets/js/config.js << CONFIGEOF
+          window.SUPABASE_URL    = '${{ secrets.SUPABASE_URL }}';
+          window.SUPABASE_KEY    = '${{ secrets.SUPABASE_KEY }}';
+          window.TENANT_ID       = '${{ secrets.AZURE_TENANT_ID }}';
+          window.CLIENT_ID       = '${{ secrets.AZURE_CLIENT_ID }}';
+          window.CLIENT_SECRET   = '${{ secrets.AZURE_CLIENT_SECRET }}';
+          window.GRAPH_USER_ID   = '${{ secrets.GRAPH_USER_ID }}';
+          window.N8N_WEBHOOK_BASE = '${{ secrets.N8N_WEBHOOK_BASE }}';
+          CONFIGEOF
 
-      - name: Limpiar credenciales hardcodeadas del admin.html
+      - name: Verificar secrets presentes
         run: |
-          sed -i "s|const SUPABASE_URL = .*|const SUPABASE_URL = (window.CONFIG\|\|{}).SUPABASE_URL;|g" admin.html
-          sed -i "s|const SUPABASE_KEY = .*|const SUPABASE_KEY = (window.CONFIG\|\|{}).SUPABASE_KEY;|g" admin.html
-          sed -i "s|const GRAPH_TENANT.*=.*'[^']*'|const GRAPH_TENANT    = (window.CONFIG\|\|{}).GRAPH_TENANT|g" admin.html
-          sed -i "s|const GRAPH_CLIENT_ID.*=.*'[^']*'|const GRAPH_CLIENT_ID = (window.CONFIG\|\|{}).GRAPH_CLIENT_ID|g" admin.html
-          sed -i "s|const GRAPH_SECRET.*=.*'[^']*'|const GRAPH_SECRET    = (window.CONFIG\|\|{}).GRAPH_SECRET|g" admin.html
-          sed -i "s|const GRAPH_USER_ID.*=.*'[^']*'|const GRAPH_USER_ID   = (window.CONFIG\|\|{}).GRAPH_USER_ID|g" admin.html
+          if grep -qP ":\s*''" public/assets/js/config.js; then
+            echo "❌ ERROR: Hay secrets vacíos"
+            exit 1
+          else
+            echo "✅ config.js OK"
+          fi
 
-      - name: Limpiar credenciales hardcodeadas del agente.html
-        run: |
-          sed -i "s|const SUPABASE_URL = .*|const SUPABASE_URL = (window.CONFIG\|\|{}).SUPABASE_URL;|g" agente.html
-          sed -i "s|const SUPABASE_KEY = .*|const SUPABASE_KEY = (window.CONFIG\|\|{}).SUPABASE_KEY;|g" agente.html
-          sed -i "s|const GRAPH_TENANT.*=.*'[^']*'|const GRAPH_TENANT    = (window.CONFIG\|\|{}).GRAPH_TENANT|g" agente.html
-          sed -i "s|const GRAPH_CLIENT_ID.*=.*'[^']*'|const GRAPH_CLIENT_ID = (window.CONFIG\|\|{}).GRAPH_CLIENT_ID|g" agente.html
-          sed -i "s|const GRAPH_SECRET.*=.*'[^']*'|const GRAPH_SECRET    = (window.CONFIG\|\|{}).GRAPH_SECRET|g" agente.html
-          sed -i "s|const GRAPH_USER_ID.*=.*'[^']*'|const GRAPH_USER_ID   = (window.CONFIG\|\|{}).GRAPH_USER_ID|g" agente.html
-
-      - name: Subir archivos al VPS por SSH
+      - name: Preparar directorio en VPS
         uses: appleboy/ssh-action@v1
         with:
-          host: 187.124.71.241
+          host:     187.124.71.241
           username: root
-          password: ${{ secrets.VPS_PASSWORD }}
+          key:      ${{ secrets.VPS_SSH_KEY }}
           script: |
-            mkdir -p /var/www/pqr
-            echo "Servidor listo"
+            mkdir -p /var/www/pqr/assets/{css,js,img}
+            echo "✅ Directorios listos"
 
       - name: Copiar archivos al VPS
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: 187.124.71.241
+          host:     187.124.71.241
           username: root
-          password: ${{ secrets.VPS_PASSWORD }}
-          source: "admin.html,agente.html,config.js"
-          target: /var/www/pqr/
+          key:      ${{ secrets.VPS_SSH_KEY }}
+          source:   "public/"
+          target:   /var/www/pqr/
+          strip_components: 1
 
       - name: Recargar Nginx
         uses: appleboy/ssh-action@v1
         with:
-          host: 187.124.71.241
+          host:     187.124.71.241
           username: root
-          password: ${{ secrets.VPS_PASSWORD }}
-          script: systemctl reload nginx && echo "✅ Deploy completado"
+          key:      ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            nginx -t && systemctl reload nginx
+            echo "✅ Deploy completo"
+            ls -la /var/www/pqr/
