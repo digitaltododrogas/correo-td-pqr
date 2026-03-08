@@ -1,3 +1,16 @@
+# Credenciales reales — NUNCA subir al repo
 config.js
 *.env
+.env*
+
+# Sistema operativo
 .DS_Store
+Thumbs.db
+
+# Editores
+.vscode/
+*.swp
+*~
+
+# Node (por si acaso)
+node_modules/
