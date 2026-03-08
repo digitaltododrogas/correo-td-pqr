@@ -423,6 +423,7 @@ body{background:var(--ink);display:flex;min-height:100vh;}
   flex-shrink:0;transition:all .15s;box-shadow:0 4px 14px rgba(37,99,235,.35);}
 .send-btn:hover{transform:scale(1.06);}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -495,28 +496,28 @@ body{background:var(--ink);display:flex;min-height:100vh;}
     <!-- CANALES BAR -->
     <div class="stats-bar" style="flex-wrap:wrap;padding:16px 20px;gap:8px;justify-content:center;align-items:stretch;background:linear-gradient(180deg,#060b18 0%,#080d1a 100%);">
 
-      <a href="https://wa.me/573043412431" target="_blank" style="text-decoration:none;flex:1;min-width:100px;max-width:140px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border-radius:14px;border:1px solid rgba(37,99,235,.35);background:linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03));transition:all .25s;" onmouseover="this.style.borderColor='rgba(37,99,235,.7)';this.style.background='linear-gradient(135deg,rgba(37,99,235,.2),rgba(37,99,235,.08))';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(37,99,235,.35)';this.style.background='linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03))';this.style.transform='translateY(0)'">
+      <a id="canal-wa" href="https://wa.me/573043412431" target="_blank" style="text-decoration:none;flex:1;min-width:100px;max-width:140px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border-radius:14px;border:1px solid rgba(37,99,235,.35);background:linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03));transition:all .25s;" onmouseover="this.style.borderColor='rgba(37,99,235,.7)';this.style.background='linear-gradient(135deg,rgba(37,99,235,.2),rgba(37,99,235,.08))';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(37,99,235,.35)';this.style.background='linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03))';this.style.transform='translateY(0)'">
         <span style="font-size:22px;line-height:1;">💬</span>
         <span style="font-size:10px;font-weight:800;color:#fff;letter-spacing:.8px;text-transform:uppercase;">WhatsApp</span>
-        <span style="font-size:9px;color:rgba(99,179,237,.9);font-family:'JetBrains Mono',monospace;font-weight:600;">304 341 2431</span>
+        <span style="font-size:9px;color:rgba(99,179,237,.9);font-family:'JetBrains Mono',monospace;font-weight:600;"class="cp-val">304 341 2431</span>
       </a>
 
-      <a href="mailto:pqrsfd@tododrogas.com.co" style="text-decoration:none;flex:1;min-width:100px;max-width:140px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border-radius:14px;border:1px solid rgba(37,99,235,.35);background:linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03));transition:all .25s;" onmouseover="this.style.borderColor='rgba(37,99,235,.7)';this.style.background='linear-gradient(135deg,rgba(37,99,235,.2),rgba(37,99,235,.08))';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(37,99,235,.35)';this.style.background='linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03))';this.style.transform='translateY(0)'">
+      <a id="canal-correo" href="mailto:pqrsfd@tododrogas.com.co" style="text-decoration:none;flex:1;min-width:100px;max-width:140px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border-radius:14px;border:1px solid rgba(37,99,235,.35);background:linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03));transition:all .25s;" onmouseover="this.style.borderColor='rgba(37,99,235,.7)';this.style.background='linear-gradient(135deg,rgba(37,99,235,.2),rgba(37,99,235,.08))';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(37,99,235,.35)';this.style.background='linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03))';this.style.transform='translateY(0)'">
         <span style="font-size:22px;line-height:1;">✉️</span>
         <span style="font-size:10px;font-weight:800;color:#fff;letter-spacing:.8px;text-transform:uppercase;">Correo</span>
-        <span style="font-size:9px;color:rgba(99,179,237,.9);font-family:'JetBrains Mono',monospace;font-weight:600;">pqrsfd@tododrogas</span>
+        <span style="font-size:9px;color:rgba(99,179,237,.9);font-family:'JetBrains Mono',monospace;font-weight:600;"class="cp-val">pqrsfd@tododrogas</span>
       </a>
 
-      <a href="tel:6043222432" style="text-decoration:none;flex:1;min-width:100px;max-width:140px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border-radius:14px;border:1px solid rgba(37,99,235,.35);background:linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03));transition:all .25s;" onmouseover="this.style.borderColor='rgba(37,99,235,.7)';this.style.background='linear-gradient(135deg,rgba(37,99,235,.2),rgba(37,99,235,.08))';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(37,99,235,.35)';this.style.background='linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03))';this.style.transform='translateY(0)'">
+      <a id="canal-pbx" href="tel:6043222432" style="text-decoration:none;flex:1;min-width:100px;max-width:140px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border-radius:14px;border:1px solid rgba(37,99,235,.35);background:linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03));transition:all .25s;" onmouseover="this.style.borderColor='rgba(37,99,235,.7)';this.style.background='linear-gradient(135deg,rgba(37,99,235,.2),rgba(37,99,235,.08))';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(37,99,235,.35)';this.style.background='linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03))';this.style.transform='translateY(0)'">
         <span style="font-size:22px;line-height:1;">📞</span>
         <span style="font-size:10px;font-weight:800;color:#fff;letter-spacing:.8px;text-transform:uppercase;">PBX · Op. 2</span>
-        <span style="font-size:9px;color:rgba(99,179,237,.9);font-family:'JetBrains Mono',monospace;font-weight:600;">604 322 2432</span>
+        <span style="font-size:9px;color:rgba(99,179,237,.9);font-family:'JetBrains Mono',monospace;font-weight:600;"class="cp-val">604 322 2432</span>
       </a>
 
-      <a href="https://tododrogas.com.co" target="_blank" style="text-decoration:none;flex:1;min-width:100px;max-width:140px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border-radius:14px;border:1px solid rgba(37,99,235,.35);background:linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03));transition:all .25s;" onmouseover="this.style.borderColor='rgba(37,99,235,.7)';this.style.background='linear-gradient(135deg,rgba(37,99,235,.2),rgba(37,99,235,.08))';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(37,99,235,.35)';this.style.background='linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03))';this.style.transform='translateY(0)'">
+      <a id="canal-web" href="https://tododrogas.com.co" target="_blank" style="text-decoration:none;flex:1;min-width:100px;max-width:140px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border-radius:14px;border:1px solid rgba(37,99,235,.35);background:linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03));transition:all .25s;" onmouseover="this.style.borderColor='rgba(37,99,235,.7)';this.style.background='linear-gradient(135deg,rgba(37,99,235,.2),rgba(37,99,235,.08))';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(37,99,235,.35)';this.style.background='linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03))';this.style.transform='translateY(0)'">
         <span style="font-size:22px;line-height:1;">🌐</span>
         <span style="font-size:10px;font-weight:800;color:#fff;letter-spacing:.8px;text-transform:uppercase;">Página Web</span>
-        <span style="font-size:9px;color:rgba(99,179,237,.9);font-family:'JetBrains Mono',monospace;font-weight:600;">tododrogas.com.co</span>
+        <span style="font-size:9px;color:rgba(99,179,237,.9);font-family:'JetBrains Mono',monospace;font-weight:600;"class="cp-val">tododrogas.com.co</span>
       </a>
 
       <div style="flex:1;min-width:100px;max-width:140px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border-radius:14px;border:1px solid rgba(37,99,235,.35);background:linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03));">
@@ -617,41 +618,13 @@ body{background:var(--ink);display:flex;min-height:100vh;}
         </div>
         <div style="font-size:11px;color:rgba(96,165,250,.9);text-align:center;">Escanea el QR con tu celular o toca el botón</div>
       </div>
-      <div class="qr-frame" style="padding:14px;margin:0;">
+      <div class="qr-frame" style="padding:14px;margin:0;background:#fff;">
         <div class="scan-line"></div>
         <div class="qr-inner">
-          <svg width="130" height="130" viewBox="0 0 168 168" xmlns="http://www.w3.org/2000/svg">
-            <rect width="168" height="168" fill="white"/>
-            <rect x="8" y="8" width="48" height="48" rx="5" fill="#080d1a"/><rect x="14" y="14" width="36" height="36" rx="3" fill="white"/><rect x="20" y="20" width="24" height="24" rx="2" fill="#080d1a"/>
-            <rect x="112" y="8" width="48" height="48" rx="5" fill="#080d1a"/><rect x="118" y="14" width="36" height="36" rx="3" fill="white"/><rect x="124" y="20" width="24" height="24" rx="2" fill="#080d1a"/>
-            <rect x="8" y="112" width="48" height="48" rx="5" fill="#080d1a"/><rect x="14" y="118" width="36" height="36" rx="3" fill="white"/><rect x="20" y="124" width="24" height="24" rx="2" fill="#080d1a"/>
-            <g fill="#080d1a">
-              <rect x="66" y="8" width="8" height="8"/><rect x="78" y="8" width="8" height="8"/><rect x="90" y="8" width="8" height="8"/>
-              <rect x="66" y="20" width="8" height="8"/><rect x="90" y="20" width="8" height="8"/>
-              <rect x="66" y="32" width="8" height="8"/><rect x="78" y="32" width="8" height="8"/>
-              <rect x="8" y="66" width="8" height="8"/><rect x="20" y="66" width="8" height="8"/><rect x="44" y="66" width="8" height="8"/>
-              <rect x="8" y="78" width="8" height="8"/><rect x="32" y="78" width="8" height="8"/>
-              <rect x="8" y="90" width="8" height="8"/><rect x="20" y="90" width="8" height="8"/><rect x="44" y="90" width="8" height="8"/>
-              <rect x="66" y="66" width="8" height="8"/><rect x="78" y="66" width="8" height="8"/><rect x="90" y="66" width="8" height="8"/><rect x="102" y="66" width="8" height="8"/>
-              <rect x="78" y="78" width="8" height="8"/><rect x="102" y="78" width="8" height="8"/>
-              <rect x="66" y="90" width="8" height="8"/><rect x="90" y="90" width="8" height="8"/>
-              <rect x="112" y="66" width="8" height="8"/><rect x="136" y="66" width="8" height="8"/><rect x="152" y="66" width="8" height="8"/>
-              <rect x="124" y="78" width="8" height="8"/><rect x="148" y="78" width="8" height="8"/>
-              <rect x="112" y="90" width="8" height="8"/><rect x="124" y="90" width="8" height="8"/><rect x="152" y="90" width="8" height="8"/>
-              <rect x="66" y="112" width="8" height="8"/><rect x="90" y="112" width="8" height="8"/><rect x="102" y="112" width="8" height="8"/>
-              <rect x="66" y="124" width="8" height="8"/><rect x="78" y="124" width="8" height="8"/>
-              <rect x="90" y="136" width="8" height="8"/><rect x="102" y="136" width="8" height="8"/>
-              <rect x="112" y="112" width="8" height="8"/><rect x="136" y="112" width="8" height="8"/>
-              <rect x="124" y="124" width="8" height="8"/><rect x="148" y="124" width="8" height="8"/>
-              <rect x="112" y="136" width="8" height="8"/><rect x="124" y="136" width="8" height="8"/>
-              <rect x="112" y="148" width="8" height="8"/><rect x="136" y="148" width="8" height="8"/>
-            </g>
-            <rect x="72" y="72" width="24" height="24" rx="5" fill="#2563eb"/>
-            <text x="84" y="87" text-anchor="middle" font-size="9" fill="white" font-weight="800" font-family="Sora,sans-serif">PQR</text>
-          </svg>
+          <div id="qr-radicar-el" style="width:130px;height:130px;display:flex;align-items:center;justify-content:center;"></div>
         </div>
       </div>
-      <div class="qr-url">tododrogas.com/pqr · Escanea con tu cámara</div>
+      <div class="qr-url" id="qr-radicar-url">tododrogas.com/pqr · Escanea con tu cámara</div>
       <button class="btn-radicar" onclick="goToForm()" style="margin-top:4px;">
         <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
         Radicar mi solicitud aquí
@@ -744,16 +717,92 @@ let FRASES = [
   { text:'Elige el canal que más te convenga: correo, chat, audio o escritura', hl:false },
 ];
 
-// Intentar cargar desde Supabase / localStorage
-try {
-  const saved = localStorage.getItem('pqr_config');
-  if(saved){
-    const cfg = JSON.parse(saved);
-    if(cfg.frases && cfg.frases.length){
-      FRASES = cfg.frases.map((f,i) => ({text: f.text, hl: i===0}));
-    }
+// ── CONFIG SUPABASE ──────────────────────────────────────
+const SB_URL = 'https://yeiupcumvdvdswfhcoty.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InllaXVwY3VtdmR2ZHN3ZmhjdHkiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc0MDAwMDAwMCwiZXhwIjoyMDU1NTYwMDAwfQ.2M5OXYOm03yIJTypGn-C1dQVBl-QnZX1IkBz_pNAmxk';
+
+const QR_DEFAULT_URL = 'https://td-pruebas.online/pqr_form.html';
+
+function generarQR(url) {
+  const el = document.getElementById('qr-radicar-el');
+  if (!el) return;
+  el.innerHTML = '';
+  new QRCode(el, {
+    text: url || QR_DEFAULT_URL,
+    width: 130, height: 130,
+    colorDark: '#080d1a',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+  const label = document.getElementById('qr-radicar-url');
+  if (label) {
+    try {
+      const u = new URL(url || QR_DEFAULT_URL);
+      label.textContent = u.hostname + ' · Escanea con tu cámara';
+    } catch(e) {}
   }
-} catch(e){}
+}
+
+async function cargarConfigSupabase() {
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/config_sistema?id=eq.main&select=data`, {
+      headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY }
+    });
+    if (!r.ok) throw new Error('no config');
+    const rows = await r.json();
+    if (!rows.length || !rows[0].data) throw new Error('vacío');
+    const cfg = rows[0].data;
+
+    // Frases del carrusel
+    if (cfg.frases && cfg.frases.length) {
+      FRASES = cfg.frases.map((f, i) => ({ text: f.text, hl: i === 0 }));
+      renderCarousel();
+    }
+
+    // QR de radicación
+    const qrUrl = cfg.qrUrl || QR_DEFAULT_URL;
+    generarQR(qrUrl);
+
+    // Horario
+    if (cfg.canales && cfg.canales.horario) {
+      const badge = document.querySelector('.horario-badge span');
+      if (badge) badge.textContent = cfg.canales.horario;
+    }
+
+    // Canales barra inferior
+    if (cfg.canales) {
+      const c = cfg.canales;
+      const wa = document.getElementById('canal-wa');
+      const co = document.getElementById('canal-correo');
+      const pb = document.getElementById('canal-pbx');
+      const we = document.getElementById('canal-web');
+      if (wa && c.whatsapp) { wa.href = `https://wa.me/${c.whatsapp}`; }
+      if (wa && c.whatsappLabel) { const s = wa.querySelector('.cp-val'); if(s) s.textContent = c.whatsappLabel; }
+      if (co && c.correo) { co.href = `mailto:${c.correo}`; const s = co.querySelector('.cp-val'); if(s) s.textContent = c.correo; }
+      if (pb && c.pbx) { pb.href = `tel:${c.pbx}`; }
+      if (pb && c.pbxLabel) { const s = pb.querySelector('.cp-val'); if(s) s.textContent = c.pbxLabel; }
+      if (we && c.web) { we.href = c.web; }
+      if (we && c.webLabel) { const s = we.querySelector('.cp-val'); if(s) s.textContent = c.webLabel; }
+    }
+
+  } catch(e) {
+    // Fallback: generar QR con URL por defecto
+    generarQR(QR_DEFAULT_URL);
+    // Fallback localStorage
+    try {
+      const saved = localStorage.getItem('pqr_config');
+      if (saved) {
+        const cfg = JSON.parse(saved);
+        if (cfg.qrUrl) generarQR(cfg.qrUrl);
+        if (cfg.frases && cfg.frases.length) {
+          FRASES = cfg.frases.map((f,i) => ({text:f.text, hl:i===0}));
+        }
+      }
+    } catch(e2) {}
+  }
+}
+
+
 
 let cIdx = 0;
 let cTimer = null;
@@ -1035,6 +1084,7 @@ async function processVoice(chunks){
 
 // ── INIT ──
 startCarousel();
+cargarConfigSupabase();
 </script>
 </body>
 </html>
