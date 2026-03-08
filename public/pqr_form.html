@@ -438,6 +438,7 @@ html,body{height:100%;font-family:'Poppins',sans-serif;overflow:hidden;backgroun
 .toast.error{background:rgba(220,38,38,.88);color:#fff;}
 .toast.info{background:rgba(37,99,235,.88);color:#fff;}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -665,44 +666,11 @@ html,body{height:100%;font-family:'Poppins',sans-serif;overflow:hidden;backgroun
       <!-- QR SIEMPRE VISIBLE -->
       <div class="qr-block">
         <div class="qr-block-title">Escanea o radica aquí</div>
-        <div class="qr-frame-sm">
+        <div class="qr-frame-sm" style="background:#fff;padding:8px;">
           <div class="scan-line"></div>
-          <svg width="120" height="120" viewBox="0 0 168 168" xmlns="http://www.w3.org/2000/svg">
-            <rect width="168" height="168" fill="white"/>
-            <rect x="8" y="8" width="48" height="48" rx="5" fill="#0a0e1a"/>
-            <rect x="14" y="14" width="36" height="36" rx="3" fill="white"/>
-            <rect x="20" y="20" width="24" height="24" rx="2" fill="#0a0e1a"/>
-            <rect x="112" y="8" width="48" height="48" rx="5" fill="#0a0e1a"/>
-            <rect x="118" y="14" width="36" height="36" rx="3" fill="white"/>
-            <rect x="124" y="20" width="24" height="24" rx="2" fill="#0a0e1a"/>
-            <rect x="8" y="112" width="48" height="48" rx="5" fill="#0a0e1a"/>
-            <rect x="14" y="118" width="36" height="36" rx="3" fill="white"/>
-            <rect x="20" y="124" width="24" height="24" rx="2" fill="#0a0e1a"/>
-            <g fill="#0a0e1a">
-              <rect x="66" y="8" width="8" height="8"/><rect x="78" y="8" width="8" height="8"/><rect x="90" y="8" width="8" height="8"/>
-              <rect x="66" y="20" width="8" height="8"/><rect x="90" y="20" width="8" height="8"/>
-              <rect x="66" y="32" width="8" height="8"/><rect x="78" y="32" width="8" height="8"/>
-              <rect x="8" y="66" width="8" height="8"/><rect x="20" y="66" width="8" height="8"/><rect x="44" y="66" width="8" height="8"/>
-              <rect x="8" y="78" width="8" height="8"/><rect x="32" y="78" width="8" height="8"/>
-              <rect x="8" y="90" width="8" height="8"/><rect x="20" y="90" width="8" height="8"/><rect x="44" y="90" width="8" height="8"/>
-              <rect x="66" y="66" width="8" height="8"/><rect x="78" y="66" width="8" height="8"/><rect x="90" y="66" width="8" height="8"/><rect x="102" y="66" width="8" height="8"/>
-              <rect x="78" y="78" width="8" height="8"/><rect x="102" y="78" width="8" height="8"/>
-              <rect x="66" y="90" width="8" height="8"/><rect x="90" y="90" width="8" height="8"/>
-              <rect x="112" y="66" width="8" height="8"/><rect x="136" y="66" width="8" height="8"/>
-              <rect x="124" y="78" width="8" height="8"/><rect x="148" y="78" width="8" height="8"/>
-              <rect x="112" y="90" width="8" height="8"/><rect x="124" y="90" width="8" height="8"/>
-              <rect x="66" y="112" width="8" height="8"/><rect x="90" y="112" width="8" height="8"/>
-              <rect x="66" y="124" width="8" height="8"/><rect x="78" y="124" width="8" height="8"/>
-              <rect x="90" y="136" width="8" height="8"/><rect x="102" y="136" width="8" height="8"/>
-              <rect x="112" y="112" width="8" height="8"/><rect x="136" y="112" width="8" height="8"/>
-              <rect x="124" y="124" width="8" height="8"/><rect x="148" y="124" width="8" height="8"/>
-              <rect x="112" y="136" width="8" height="8"/><rect x="124" y="136" width="8" height="8"/>
-            </g>
-            <rect x="72" y="72" width="24" height="24" rx="5" fill="#2563eb"/>
-            <text x="84" y="87" text-anchor="middle" font-size="9" fill="white" font-weight="800" font-family="Poppins,sans-serif">PQR</text>
-          </svg>
+          <div id="qr-form-el" style="width:120px;height:120px;display:flex;align-items:center;justify-content:center;"></div>
         </div>
-        <div class="qr-url-sm">tododrogas.com/pqr</div>
+        <div class="qr-url-sm" id="qr-form-url">td-pruebas.online/pqr</div>
         <div class="canal-sel-badge">
           <div class="csb-dot"></div>
           <span id="canalBadge">Canal: —</span>
@@ -1322,5 +1290,55 @@ function showToast(msg,type='info'){
 document.body.style.opacity='0'; document.body.style.transition='opacity .4s ease';
 setTimeout(()=>{document.body.style.opacity='1';},50);
 </script>
+
+<script>
+// ── QR DINÁMICO — mismo que bienvenida ──────────────────────
+const SB_URL_FORM = 'https://yeiupcumvdvdswfhcoty.supabase.co';
+const SB_KEY_FORM = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InllaXVwY3VtdmR2ZHN3ZmhjdHkiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc0MDAwMDAwMCwiZXhwIjoyMDU1NTYwMDAwfQ.2M5OXYOm03yIJTypGn-C1dQVBl-QnZX1IkBz_pNAmxk';
+const QR_FORM_DEFAULT = 'https://td-pruebas.online/pqr_form.html';
+
+function generarQRForm(url) {
+  const el = document.getElementById('qr-form-el');
+  if (!el) return;
+  el.innerHTML = '';
+  new QRCode(el, {
+    text: url || QR_FORM_DEFAULT,
+    width: 120, height: 120,
+    colorDark: '#0a0e1a',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+  const label = document.getElementById('qr-form-url');
+  if (label) {
+    try {
+      const u = new URL(url || QR_FORM_DEFAULT);
+      label.textContent = u.hostname + u.pathname.replace('/pqr_form.html','') + '/pqr';
+    } catch(e) {}
+  }
+}
+
+async function initQRForm() {
+  try {
+    const r = await fetch(`${SB_URL_FORM}/rest/v1/config_sistema?id=eq.main&select=data`, {
+      headers: { apikey: SB_KEY_FORM, Authorization: 'Bearer ' + SB_KEY_FORM }
+    });
+    if (!r.ok) throw new Error();
+    const rows = await r.json();
+    const qrUrl = rows[0]?.data?.qrUrl || QR_FORM_DEFAULT;
+    generarQRForm(qrUrl);
+  } catch(e) {
+    // Fallback localStorage o URL por defecto
+    try {
+      const cfg = JSON.parse(localStorage.getItem('pqr_config') || '{}');
+      generarQRForm(cfg.qrUrl || QR_FORM_DEFAULT);
+    } catch(e2) {
+      generarQRForm(QR_FORM_DEFAULT);
+    }
+  }
+}
+
+initQRForm();
+</script>
+
 </body>
 </html>
