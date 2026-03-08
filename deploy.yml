@@ -17,7 +17,7 @@ jobs:
         run: |
           cat > config.js << EOF
           window.CONFIG = {
-            SUPABASE_URL:    '${{ secrets.SUPABASE_UR }}',
+            SUPABASE_URL:    '${{ secrets.SUPABASE_URL }}',
             SUPABASE_KEY:    '${{ secrets.SUPABASE_KEY }}',
             GRAPH_TENANT:    '${{ secrets.AZURE_TENANT_ID }}',
             GRAPH_CLIENT_ID: '${{ secrets.AZURE_CLIENT_ID }}',
