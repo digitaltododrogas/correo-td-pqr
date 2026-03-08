@@ -1,0 +1,86 @@
+{
+  "name": "FLUJO 9 — Canal Verbal/Audio (Whisper)",
+  "nodes": [
+    {
+      "id": "f9-wh",
+      "name": "Webhook Audio",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 300],
+      "parameters": { "httpMethod": "POST", "path": "pqr-audio", "responseMode": "lastNode", "options": {} }
+    },
+    {
+      "id": "f9-upload",
+      "name": "Subir audio a Supabase Storage",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [420, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://yeiupcumvdvdswfhcoty.supabase.co/storage/v1/object/audios/audio_{{ Date.now() }}.webm",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $credentials.supabaseServiceKey }}" },
+            { "name": "Content-Type",  "value": "audio/webm" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.body.audio_base64 }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "f9-whisper",
+      "name": "Whisper — Transcribir audio",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [640, 300],
+      "parameters": {
+        "operation": "transcribe",
+        "binaryPropertyName": "data",
+        "options": { "language": "es", "responseFormat": "json" }
+      }
+    },
+    {
+      "id": "f9-call-f1",
+      "name": "Llamar Flujo 1 — Radicar PQR",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [860, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "https://td-pruebas.online/webhook/pqr-recepcion",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{ "name": "Content-Type", "value": "application/json" }]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"nombre\":         \"{{ $('Webhook Audio').first().json.body.nombre }}\",\n  \"correo\":         \"{{ $('Webhook Audio').first().json.body.correo }}\",\n  \"telefono\":       \"{{ $('Webhook Audio').first().json.body.telefono }}\",\n  \"tipo_pqr\":       \"peticion\",\n  \"descripcion\":    \"{{ $json.text }}\",\n  \"canal_contacto\": \"verbal_audio\",\n  \"origen\":         \"audio\",\n  \"transcripcion\":  \"{{ $json.text }}\",\n  \"audio_url\":      \"{{ $('Subir audio a Supabase Storage').first().json.Key }}\"\n}",
+        "options": {}
+      }
+    },
+    {
+      "id": "f9-respond",
+      "name": "Responder con transcripción",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1080, 300],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"ticket_id\": \"{{ $json.ticket_id }}\",\n  \"transcripcion\": \"{{ $('Whisper — Transcribir audio').first().json.text }}\"\n}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Audio":                       { "main": [[{ "node": "Subir audio a Supabase Storage","type": "main", "index": 0 }]] },
+    "Subir audio a Supabase Storage":      { "main": [[{ "node": "Whisper — Transcribir audio",   "type": "main", "index": 0 }]] },
+    "Whisper — Transcribir audio":         { "main": [[{ "node": "Llamar Flujo 1 — Radicar PQR",  "type": "main", "index": 0 }]] },
+    "Llamar Flujo 1 — Radicar PQR":        { "main": [[{ "node": "Responder con transcripción",   "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "tags": [{ "name": "PQR-Canales" }]
+}
