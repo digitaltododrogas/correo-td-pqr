@@ -205,17 +205,34 @@ body{background:var(--ink);display:flex;min-height:100vh;}
   letter-spacing:.8px;text-transform:uppercase;margin-top:3px;}
 
 /* ════ RIGHT PANEL ════ */
+/* Canales contacto */
+.canales-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-top:4px;}
+.canal-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  padding:10px 6px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg2);
+  cursor:pointer;transition:all .2s;text-decoration:none;}
+.canal-btn:hover{border-color:var(--blue);background:rgba(37,99,235,.08);transform:translateY(-2px);}
+.canal-icon{font-size:20px;}
+.canal-label{font-size:10px;font-weight:700;color:var(--ink2);letter-spacing:.5px;text-align:center;}
+.canal-detail{font-size:9px;color:var(--ink3);text-align:center;}
+/* QR doble */
+.qr-duo{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;}
+.qr-card{display:flex;flex-direction:column;align-items:center;gap:4px;
+  background:var(--bg2);border:1.5px solid var(--border);border-radius:14px;padding:10px 8px;}
+.qr-card-label{font-size:9px;font-weight:700;letter-spacing:1px;color:var(--ink3);text-transform:uppercase;}
+.qr-card .qr-frame{margin:0;width:100%;}
+.qr-card-url{font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--blue);text-align:center;}
 .right{
-  width:390px;min-width:350px;
+  width:430px;min-width:390px;
   background:var(--surface);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:36px 28px;
+  display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+  overflow-y:auto;
+  padding:28px 28px 24px;
   box-shadow:-10px 0 48px rgba(8,13,26,.14);
   gap:0;
 }
 .rp-eyebrow{font-size:9px;font-weight:700;letter-spacing:1.5px;
   text-transform:uppercase;color:var(--ink3);margin-bottom:8px;}
-.rp-title{font-size:24px;font-weight:800;color:var(--ink);
+.rp-title{font-size:32px;font-weight:800;color:var(--ink);
   letter-spacing:-.4px;margin-bottom:6px;text-align:center;}
 .rp-sub{font-size:13px;color:var(--ink3);text-align:center;
   line-height:1.6;margin-bottom:20px;}
@@ -475,84 +492,178 @@ body{background:var(--ink);display:flex;min-height:100vh;}
       </div>
     </div>
 
-    <!-- STATS BAR -->
-    <div class="stats-bar">
-      <div class="sitem"><div class="sv">15d</div><div class="sl">Plazo máx.</div></div>
-      <div class="sitem"><div class="sv">5</div><div class="sl">Canales</div></div>
-      <div class="sitem"><div class="sv">100%</div><div class="sl">Trazabilidad</div></div>
-      <div class="sitem"><div class="sv">24/7</div><div class="sl">Nova online</div></div>
+    <!-- CANALES BAR -->
+    <div class="stats-bar" style="flex-wrap:wrap;padding:16px 20px;gap:8px;justify-content:center;align-items:stretch;background:linear-gradient(180deg,#060b18 0%,#080d1a 100%);">
+
+      <a href="https://wa.me/573043412431" target="_blank" style="text-decoration:none;flex:1;min-width:100px;max-width:140px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border-radius:14px;border:1px solid rgba(37,99,235,.35);background:linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03));transition:all .25s;" onmouseover="this.style.borderColor='rgba(37,99,235,.7)';this.style.background='linear-gradient(135deg,rgba(37,99,235,.2),rgba(37,99,235,.08))';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(37,99,235,.35)';this.style.background='linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03))';this.style.transform='translateY(0)'">
+        <span style="font-size:22px;line-height:1;">💬</span>
+        <span style="font-size:10px;font-weight:800;color:#fff;letter-spacing:.8px;text-transform:uppercase;">WhatsApp</span>
+        <span style="font-size:9px;color:rgba(99,179,237,.9);font-family:'JetBrains Mono',monospace;font-weight:600;">304 341 2431</span>
+      </a>
+
+      <a href="mailto:pqrsfd@tododrogas.com.co" style="text-decoration:none;flex:1;min-width:100px;max-width:140px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border-radius:14px;border:1px solid rgba(37,99,235,.35);background:linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03));transition:all .25s;" onmouseover="this.style.borderColor='rgba(37,99,235,.7)';this.style.background='linear-gradient(135deg,rgba(37,99,235,.2),rgba(37,99,235,.08))';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(37,99,235,.35)';this.style.background='linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03))';this.style.transform='translateY(0)'">
+        <span style="font-size:22px;line-height:1;">✉️</span>
+        <span style="font-size:10px;font-weight:800;color:#fff;letter-spacing:.8px;text-transform:uppercase;">Correo</span>
+        <span style="font-size:9px;color:rgba(99,179,237,.9);font-family:'JetBrains Mono',monospace;font-weight:600;">pqrsfd@tododrogas</span>
+      </a>
+
+      <a href="tel:6043222432" style="text-decoration:none;flex:1;min-width:100px;max-width:140px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border-radius:14px;border:1px solid rgba(37,99,235,.35);background:linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03));transition:all .25s;" onmouseover="this.style.borderColor='rgba(37,99,235,.7)';this.style.background='linear-gradient(135deg,rgba(37,99,235,.2),rgba(37,99,235,.08))';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(37,99,235,.35)';this.style.background='linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03))';this.style.transform='translateY(0)'">
+        <span style="font-size:22px;line-height:1;">📞</span>
+        <span style="font-size:10px;font-weight:800;color:#fff;letter-spacing:.8px;text-transform:uppercase;">PBX · Op. 2</span>
+        <span style="font-size:9px;color:rgba(99,179,237,.9);font-family:'JetBrains Mono',monospace;font-weight:600;">604 322 2432</span>
+      </a>
+
+      <a href="https://tododrogas.com.co" target="_blank" style="text-decoration:none;flex:1;min-width:100px;max-width:140px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border-radius:14px;border:1px solid rgba(37,99,235,.35);background:linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03));transition:all .25s;" onmouseover="this.style.borderColor='rgba(37,99,235,.7)';this.style.background='linear-gradient(135deg,rgba(37,99,235,.2),rgba(37,99,235,.08))';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(37,99,235,.35)';this.style.background='linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03))';this.style.transform='translateY(0)'">
+        <span style="font-size:22px;line-height:1;">🌐</span>
+        <span style="font-size:10px;font-weight:800;color:#fff;letter-spacing:.8px;text-transform:uppercase;">Página Web</span>
+        <span style="font-size:9px;color:rgba(99,179,237,.9);font-family:'JetBrains Mono',monospace;font-weight:600;">tododrogas.com.co</span>
+      </a>
+
+      <div style="flex:1;min-width:100px;max-width:140px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border-radius:14px;border:1px solid rgba(37,99,235,.35);background:linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03));">
+        <span style="font-size:22px;line-height:1;">🗣️</span>
+        <span style="font-size:10px;font-weight:800;color:#fff;letter-spacing:.8px;text-transform:uppercase;">Verbal</span>
+        <span style="font-size:9px;color:rgba(99,179,237,.9);font-family:'JetBrains Mono',monospace;font-weight:600;">Presencial</span>
+      </div>
+
+      <div style="flex:1;min-width:100px;max-width:140px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border-radius:14px;border:1px solid rgba(37,99,235,.35);background:linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03));">
+        <span style="font-size:22px;line-height:1;">📥</span>
+        <span style="font-size:10px;font-weight:800;color:#fff;letter-spacing:.8px;text-transform:uppercase;">Buzón Físico</span>
+        <span style="font-size:9px;color:rgba(99,179,237,.9);font-family:'JetBrains Mono',monospace;font-weight:600;">Presencial</span>
+      </div>
+
+      <div style="flex:1;min-width:100px;max-width:140px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border-radius:14px;border:1px solid rgba(37,99,235,.35);background:linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03));">
+        <span style="font-size:22px;line-height:1;">📲</span>
+        <span style="font-size:10px;font-weight:800;color:#fff;letter-spacing:.8px;text-transform:uppercase;">Código QR</span>
+        <span style="font-size:9px;color:rgba(99,179,237,.9);font-family:'JetBrains Mono',monospace;font-weight:600;">Digital</span>
+      </div>
+
+      <div style="width:100%;border-top:1px solid rgba(255,255,255,.06);padding-top:10px;text-align:center;">
+        <span style="font-size:9px;font-weight:800;color:rgba(255,255,255,.45);letter-spacing:2px;text-transform:uppercase;font-family:'JetBrains Mono',monospace;">◈ 11 CANALES DE ATENCIÓN AL CIUDADANO ◈</span>
+      </div>
+
     </div>
   </div>
-
   <!-- ════ RIGHT ════ -->
   <div class="right">
-    <div class="rp-eyebrow">Sistema de atención al cliente</div>
-    <div class="rp-title">¡Bienvenido!</div>
-    <p class="rp-sub">Escanea el QR con tu celular o toca el botón para radicar desde esta pantalla.</p>
 
-    <div class="horario-badge">
-      <div class="h-dot"></div>
-      Lun-Vier 7 a.m-5:30 p.m. · Nova 24/7
-    </div>
-
-    <div class="qr-frame">
-      <div class="scan-line"></div>
-      <div class="qr-inner">
-        <svg width="156" height="156" viewBox="0 0 168 168" xmlns="http://www.w3.org/2000/svg">
-          <rect width="168" height="168" fill="white"/>
-          <rect x="8" y="8" width="48" height="48" rx="5" fill="#080d1a"/>
-          <rect x="14" y="14" width="36" height="36" rx="3" fill="white"/>
-          <rect x="20" y="20" width="24" height="24" rx="2" fill="#080d1a"/>
-          <rect x="112" y="8" width="48" height="48" rx="5" fill="#080d1a"/>
-          <rect x="118" y="14" width="36" height="36" rx="3" fill="white"/>
-          <rect x="124" y="20" width="24" height="24" rx="2" fill="#080d1a"/>
-          <rect x="8" y="112" width="48" height="48" rx="5" fill="#080d1a"/>
-          <rect x="14" y="118" width="36" height="36" rx="3" fill="white"/>
-          <rect x="20" y="124" width="24" height="24" rx="2" fill="#080d1a"/>
-          <g fill="#080d1a">
-            <rect x="66" y="8" width="8" height="8"/><rect x="78" y="8" width="8" height="8"/><rect x="90" y="8" width="8" height="8"/>
-            <rect x="66" y="20" width="8" height="8"/><rect x="90" y="20" width="8" height="8"/>
-            <rect x="66" y="32" width="8" height="8"/><rect x="78" y="32" width="8" height="8"/>
-            <rect x="8" y="66" width="8" height="8"/><rect x="20" y="66" width="8" height="8"/><rect x="44" y="66" width="8" height="8"/>
-            <rect x="8" y="78" width="8" height="8"/><rect x="32" y="78" width="8" height="8"/>
-            <rect x="8" y="90" width="8" height="8"/><rect x="20" y="90" width="8" height="8"/><rect x="44" y="90" width="8" height="8"/>
-            <rect x="66" y="66" width="8" height="8"/><rect x="78" y="66" width="8" height="8"/><rect x="90" y="66" width="8" height="8"/><rect x="102" y="66" width="8" height="8"/>
-            <rect x="78" y="78" width="8" height="8"/><rect x="102" y="78" width="8" height="8"/>
-            <rect x="66" y="90" width="8" height="8"/><rect x="90" y="90" width="8" height="8"/>
-            <rect x="112" y="66" width="8" height="8"/><rect x="136" y="66" width="8" height="8"/><rect x="152" y="66" width="8" height="8"/>
-            <rect x="124" y="78" width="8" height="8"/><rect x="148" y="78" width="8" height="8"/>
-            <rect x="112" y="90" width="8" height="8"/><rect x="124" y="90" width="8" height="8"/><rect x="152" y="90" width="8" height="8"/>
-            <rect x="66" y="112" width="8" height="8"/><rect x="90" y="112" width="8" height="8"/><rect x="102" y="112" width="8" height="8"/>
-            <rect x="66" y="124" width="8" height="8"/><rect x="78" y="124" width="8" height="8"/>
-            <rect x="90" y="136" width="8" height="8"/><rect x="102" y="136" width="8" height="8"/>
-            <rect x="112" y="112" width="8" height="8"/><rect x="136" y="112" width="8" height="8"/>
-            <rect x="124" y="124" width="8" height="8"/><rect x="148" y="124" width="8" height="8"/>
-            <rect x="112" y="136" width="8" height="8"/><rect x="124" y="136" width="8" height="8"/>
-            <rect x="112" y="148" width="8" height="8"/><rect x="136" y="148" width="8" height="8"/>
-          </g>
-          <rect x="72" y="72" width="24" height="24" rx="5" fill="#2563eb"/>
-          <text x="84" y="87" text-anchor="middle" font-size="9" fill="white" font-weight="800" font-family="Sora,sans-serif">PQR</text>
-        </svg>
+    <!-- CABECERA -->
+    <div style="text-align:center;width:100%;">
+      <div class="rp-eyebrow">Sistema de atención al cliente</div>
+      <div class="rp-title">¡Bienvenido!</div>
+      <div class="horario-badge" style="margin:10px auto 0;background:linear-gradient(135deg,rgba(37,99,235,.15),rgba(37,99,235,.05));border-color:rgba(37,99,235,.5);box-shadow:0 4px 18px rgba(29,78,216,.35);">
+        <div class="h-dot" style="background:#3b82f6;box-shadow:0 0 6px #3b82f6;"></div>
+        <span style="color:#4d7fc4;font-weight:600;">Lun-Vier 7 a.m-5:30 p.m. · Nova 24/7</span>
       </div>
     </div>
 
-    <div class="qr-url">tododrogas.com/pqr · Escanea con tu cámara</div>
+    <!-- ZONA ENCUESTA -->
+    <div style="width:100%;display:flex;flex-direction:column;align-items:center;gap:6px;">
+      <!-- ETIQUETA ENCUESTA -->
+      <div style="width:100%;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 14px;border-radius:12px;background:linear-gradient(135deg,rgba(37,99,235,.15),rgba(37,99,235,.05));border:1px solid rgba(37,99,235,.4);">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:18px;">⭐</span>
+          <div style="font-size:14px;font-weight:900;color:#fff;background:#2563eb;padding:2px 10px;border-radius:6px;letter-spacing:.3px;">Encuesta de satisfacción</div>
+        </div>
+        <div style="font-size:11px;color:rgba(96,165,250,.9);text-align:center;">Escanea el QR con tu celular o toca el botón</div>
+      </div>
+      <div class="qr-frame" style="padding:14px;margin:0;">
+        <div class="qr-inner">
+          <svg width="130" height="130" viewBox="0 0 168 168" xmlns="http://www.w3.org/2000/svg">
+            <rect width="168" height="168" fill="white"/>
+            <rect x="8" y="8" width="48" height="48" rx="5" fill="#080d1a"/><rect x="14" y="14" width="36" height="36" rx="3" fill="white"/><rect x="20" y="20" width="24" height="24" rx="2" fill="#080d1a"/>
+            <rect x="112" y="8" width="48" height="48" rx="5" fill="#080d1a"/><rect x="118" y="14" width="36" height="36" rx="3" fill="white"/><rect x="124" y="20" width="24" height="24" rx="2" fill="#080d1a"/>
+            <rect x="8" y="112" width="48" height="48" rx="5" fill="#080d1a"/><rect x="14" y="118" width="36" height="36" rx="3" fill="white"/><rect x="20" y="124" width="24" height="24" rx="2" fill="#080d1a"/>
+            <g fill="#080d1a">
+              <rect x="78" y="8" width="8" height="8"/><rect x="66" y="20" width="8" height="8"/><rect x="90" y="20" width="8" height="8"/>
+              <rect x="78" y="32" width="8" height="8"/><rect x="66" y="32" width="8" height="8"/>
+              <rect x="20" y="66" width="8" height="8"/><rect x="32" y="66" width="8" height="8"/><rect x="44" y="66" width="8" height="8"/>
+              <rect x="8" y="78" width="8" height="8"/><rect x="44" y="78" width="8" height="8"/>
+              <rect x="20" y="90" width="8" height="8"/><rect x="32" y="90" width="8" height="8"/>
+              <rect x="66" y="66" width="8" height="8"/><rect x="90" y="66" width="8" height="8"/><rect x="102" y="66" width="8" height="8"/>
+              <rect x="66" y="78" width="8" height="8"/><rect x="78" y="78" width="8" height="8"/>
+              <rect x="90" y="90" width="8" height="8"/><rect x="102" y="90" width="8" height="8"/>
+              <rect x="112" y="78" width="8" height="8"/><rect x="136" y="66" width="8" height="8"/>
+              <rect x="124" y="66" width="8" height="8"/><rect x="152" y="78" width="8" height="8"/>
+              <rect x="112" y="90" width="8" height="8"/><rect x="136" y="90" width="8" height="8"/>
+              <rect x="78" y="112" width="8" height="8"/><rect x="102" y="112" width="8" height="8"/>
+              <rect x="66" y="124" width="8" height="8"/><rect x="90" y="124" width="8" height="8"/>
+              <rect x="78" y="136" width="8" height="8"/><rect x="102" y="136" width="8" height="8"/>
+              <rect x="112" y="112" width="8" height="8"/><rect x="148" y="112" width="8" height="8"/>
+              <rect x="124" y="124" width="8" height="8"/><rect x="136" y="136" width="8" height="8"/>
+              <rect x="112" y="148" width="8" height="8"/><rect x="148" y="148" width="8" height="8"/>
+            </g>
+            <rect x="72" y="72" width="24" height="24" rx="5" fill="#f59e0b"/>
+            <text x="84" y="87" text-anchor="middle" font-size="13" fill="white" font-weight="800" font-family="Sora,sans-serif">★</text>
+          </svg>
+        </div>
+      </div>
+      <div class="qr-url">Encuesta de satisfacción · Escanea con tu cámara</div>
+    </div>
 
-    <div class="or-div">
+    <!-- DIVISOR -->
+    <div class="or-div" style="width:100%;margin:0;">
       <div class="or-line"></div>
-      <span class="or-txt">O DESDE ESTA PANTALLA</span>
+      <span class="or-txt" style="white-space:nowrap;font-size:9px;">O DESDE ESTE QR · REALIZA LA RADICACIÓN</span>
       <div class="or-line"></div>
     </div>
 
-    <button class="btn-radicar" onclick="goToForm()">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-      Radicar mi solicitud aquí
-    </button>
+    <!-- ZONA RADICAR -->
+    <div style="width:100%;display:flex;flex-direction:column;align-items:center;gap:6px;">
+      <!-- ETIQUETA RADICAR -->
+      <div style="width:100%;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 14px;border-radius:12px;background:linear-gradient(135deg,rgba(37,99,235,.15),rgba(37,99,235,.05));border:1px solid rgba(37,99,235,.4);">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="font-size:18px;">📋</span>
+          <div style="font-size:14px;font-weight:900;color:#fff;background:#2563eb;padding:2px 10px;border-radius:6px;letter-spacing:.3px;">Radicar tu solicitud PQRSF</div>
+        </div>
+        <div style="font-size:11px;color:rgba(96,165,250,.9);text-align:center;">Escanea el QR con tu celular o toca el botón</div>
+      </div>
+      <div class="qr-frame" style="padding:14px;margin:0;">
+        <div class="scan-line"></div>
+        <div class="qr-inner">
+          <svg width="130" height="130" viewBox="0 0 168 168" xmlns="http://www.w3.org/2000/svg">
+            <rect width="168" height="168" fill="white"/>
+            <rect x="8" y="8" width="48" height="48" rx="5" fill="#080d1a"/><rect x="14" y="14" width="36" height="36" rx="3" fill="white"/><rect x="20" y="20" width="24" height="24" rx="2" fill="#080d1a"/>
+            <rect x="112" y="8" width="48" height="48" rx="5" fill="#080d1a"/><rect x="118" y="14" width="36" height="36" rx="3" fill="white"/><rect x="124" y="20" width="24" height="24" rx="2" fill="#080d1a"/>
+            <rect x="8" y="112" width="48" height="48" rx="5" fill="#080d1a"/><rect x="14" y="118" width="36" height="36" rx="3" fill="white"/><rect x="20" y="124" width="24" height="24" rx="2" fill="#080d1a"/>
+            <g fill="#080d1a">
+              <rect x="66" y="8" width="8" height="8"/><rect x="78" y="8" width="8" height="8"/><rect x="90" y="8" width="8" height="8"/>
+              <rect x="66" y="20" width="8" height="8"/><rect x="90" y="20" width="8" height="8"/>
+              <rect x="66" y="32" width="8" height="8"/><rect x="78" y="32" width="8" height="8"/>
+              <rect x="8" y="66" width="8" height="8"/><rect x="20" y="66" width="8" height="8"/><rect x="44" y="66" width="8" height="8"/>
+              <rect x="8" y="78" width="8" height="8"/><rect x="32" y="78" width="8" height="8"/>
+              <rect x="8" y="90" width="8" height="8"/><rect x="20" y="90" width="8" height="8"/><rect x="44" y="90" width="8" height="8"/>
+              <rect x="66" y="66" width="8" height="8"/><rect x="78" y="66" width="8" height="8"/><rect x="90" y="66" width="8" height="8"/><rect x="102" y="66" width="8" height="8"/>
+              <rect x="78" y="78" width="8" height="8"/><rect x="102" y="78" width="8" height="8"/>
+              <rect x="66" y="90" width="8" height="8"/><rect x="90" y="90" width="8" height="8"/>
+              <rect x="112" y="66" width="8" height="8"/><rect x="136" y="66" width="8" height="8"/><rect x="152" y="66" width="8" height="8"/>
+              <rect x="124" y="78" width="8" height="8"/><rect x="148" y="78" width="8" height="8"/>
+              <rect x="112" y="90" width="8" height="8"/><rect x="124" y="90" width="8" height="8"/><rect x="152" y="90" width="8" height="8"/>
+              <rect x="66" y="112" width="8" height="8"/><rect x="90" y="112" width="8" height="8"/><rect x="102" y="112" width="8" height="8"/>
+              <rect x="66" y="124" width="8" height="8"/><rect x="78" y="124" width="8" height="8"/>
+              <rect x="90" y="136" width="8" height="8"/><rect x="102" y="136" width="8" height="8"/>
+              <rect x="112" y="112" width="8" height="8"/><rect x="136" y="112" width="8" height="8"/>
+              <rect x="124" y="124" width="8" height="8"/><rect x="148" y="124" width="8" height="8"/>
+              <rect x="112" y="136" width="8" height="8"/><rect x="124" y="136" width="8" height="8"/>
+              <rect x="112" y="148" width="8" height="8"/><rect x="136" y="148" width="8" height="8"/>
+            </g>
+            <rect x="72" y="72" width="24" height="24" rx="5" fill="#2563eb"/>
+            <text x="84" y="87" text-anchor="middle" font-size="9" fill="white" font-weight="800" font-family="Sora,sans-serif">PQR</text>
+          </svg>
+        </div>
+      </div>
+      <div class="qr-url">tododrogas.com/pqr · Escanea con tu cámara</div>
+      <button class="btn-radicar" onclick="goToForm()" style="margin-top:4px;">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Radicar mi solicitud aquí
+      </button>
+    </div>
 
-    <p class="footer-note">
+    <!-- FOOTER -->
+    <p class="footer-note" style="margin:0;text-align:center;">
       Tododrogas CIA S.A.S · Sistema PQR © 2026<br>
       <strong>Confidencial · Tu información está protegida</strong>
     </p>
+
   </div>
 </div>
 
