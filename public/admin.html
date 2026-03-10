@@ -202,21 +202,38 @@ body{background:var(--bg);color:var(--ink);font-family:'Poppins',sans-serif;heig
 .timeline-item:hover .tl-content{opacity:.8}
 
 /* ── METRICS PAGE ── */
-.metrics-page{flex:1;overflow-y:auto;padding:24px}
-.page-title{font-size:20px;font-weight:700;color:var(--ink);margin-bottom:4px}
-.page-sub{font-size:13px;color:var(--ink3);margin-bottom:20px}
-.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
-.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;position:relative;overflow:hidden;transition:box-shadow .2s}
+.metrics-page{flex:1;overflow-y:auto;padding:0;display:flex;flex-direction:column;min-height:0}
+.metrics-topbar{padding:18px 24px 0;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
+.metrics-topbar-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.metrics-tabs{display:flex;gap:0}
+.mtab{padding:10px 22px;font-size:12px;font-weight:600;color:var(--ink3);border:none;background:none;cursor:pointer;font-family:'Poppins',sans-serif;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
+.mtab:hover{color:var(--ink)}
+.mtab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.metrics-content{flex:1;overflow-y:auto;padding:22px 24px;min-height:0}
+.metrics-content::-webkit-scrollbar{width:6px}
+.metrics-content::-webkit-scrollbar-thumb{background:#c1c9d8;border-radius:4px}
+.mtab-page{display:none}
+.mtab-page.active{display:block}
+.page-title{font-size:18px;font-weight:700;color:var(--ink);margin-bottom:3px}
+.page-sub{font-size:12px;color:var(--ink3);margin-bottom:18px}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;position:relative;overflow:hidden;transition:box-shadow .2s}
 .kpi:hover{box-shadow:var(--shadow-l)}
-.kpi-label{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--ink3);margin-bottom:8px}
-.kpi-val{font-size:32px;font-weight:700;font-family:'DM Mono',monospace;color:var(--ink);line-height:1}
-.kpi-sub{font-size:11px;color:var(--ink3);margin-top:5px}
+.kpi-label{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--ink3);margin-bottom:6px}
+.kpi-val{font-size:28px;font-weight:700;font-family:'DM Mono',monospace;color:var(--ink);line-height:1}
+.kpi-val.ok{color:var(--green)}
+.kpi-val.warn{color:#ca8a04}
+.kpi-val.danger{color:var(--red)}
+.kpi-sub{font-size:11px;color:var(--ink3);margin-top:4px}
 .kpi-accent{position:absolute;top:0;right:0;width:4px;height:100%;border-radius:0 var(--r) var(--r) 0}
-.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.charts-grid-wide{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:18px}
 .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px}
-.chart-title{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:12px}
+.chart-title{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:2px}
+.chart-sub{font-size:10px;color:var(--ink3);margin-bottom:10px}
 .chart-wrap{position:relative;height:180px}
-.agents-table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.chart-wrap-lg{position:relative;height:210px}
+.agents-table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:18px}
 .table-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)}
 .table-title{font-size:13px;font-weight:700;color:var(--ink)}
 table.agents-tbl{width:100%;border-collapse:collapse}
@@ -224,9 +241,13 @@ table.agents-tbl th{background:var(--bg2);padding:8px 16px;font-size:10px;font-w
 table.agents-tbl td{padding:10px 16px;font-size:12px;color:var(--ink2);border-bottom:1px solid var(--border)}
 table.agents-tbl tr:last-child td{border-bottom:none}
 table.agents-tbl tr:hover td{background:var(--bg)}
-.agent-av-sm{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff}
+.agent-av-sm{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0}
 .load-bar{height:5px;background:var(--bg2);border-radius:99px;overflow:hidden;width:80px}
 .load-bar-fill{height:100%;border-radius:99px}
+.sla-pill{display:inline-flex;align-items:center;gap:3px;padding:2px 9px;border-radius:99px;font-size:10px;font-weight:700}
+.sla-ok{background:#dcfce7;color:#16a34a}
+.sla-warn{background:#fef9c3;color:#ca8a04}
+.sla-danger{background:#fee2e2;color:#dc2626}
 
 /* ── CONFIG PAGE ── */
 .config-page{flex:1;overflow-y:auto;padding:24px;display:flex;gap:20px;align-items:flex-start}
@@ -449,41 +470,169 @@ table.agents-tbl tr:hover td{background:var(--bg)}
   <!-- ══ PAGE: MÉTRICAS ══ -->
   <div class="page" id="page-metricas">
     <div class="metrics-page">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-        <div>
-          <div class="page-title">Métricas del sistema</div>
-          <div class="page-sub">Resumen de actividad y carga de agentes</div>
+
+      <!-- Topbar con tabs -->
+      <div class="metrics-topbar">
+        <div class="metrics-topbar-row">
+          <div>
+            <div class="page-title">Analytics PQRS</div>
+            <div style="font-size:11px;color:var(--ink3)">Tododrogas · actualizado <span id="metLastUpdate">—</span></div>
+          </div>
+          <button onclick="exportarExcel()" style="display:flex;align-items:center;gap:7px;background:#16a34a;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;box-shadow:0 2px 8px rgba(22,163,74,.2);transition:background .15s" onmouseover="this.style.background='#15803d'" onmouseout="this.style.background='#16a34a'">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Exportar Power BI (.xlsx)
+          </button>
         </div>
-        <button onclick="exportarExcel()" style="display:flex;align-items:center;gap:7px;background:#16a34a;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;box-shadow:0 2px 8px rgba(22,163,74,.25);transition:all .15s" onmouseover="this.style.background='#15803d'" onmouseout="this.style.background='#16a34a'">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Exportar para Power BI (.xlsx)
-        </button>
-      </div>
-      <div class="kpi-grid">
-        <div class="kpi"><div class="kpi-label">Total correos</div><div class="kpi-val" id="mKpiTotal">—</div><div class="kpi-sub">En el sistema</div><div class="kpi-accent" style="background:var(--blue)"></div></div>
-        <div class="kpi"><div class="kpi-label">Pendientes</div><div class="kpi-val" id="mKpiPend">—</div><div class="kpi-sub">Sin gestionar</div><div class="kpi-accent" style="background:var(--yellow)"></div></div>
-        <div class="kpi"><div class="kpi-label">En gestión</div><div class="kpi-val" id="mKpiGest">—</div><div class="kpi-sub">Activos</div><div class="kpi-accent" style="background:var(--orange)"></div></div>
-        <div class="kpi"><div class="kpi-label">Solucionados</div><div class="kpi-val" id="mKpiSol">—</div><div class="kpi-sub">Completados</div><div class="kpi-accent" style="background:var(--green)"></div></div>
-      </div>
-      <div class="charts-grid">
-        <div class="chart-card">
-          <div class="chart-title">Distribución por estado</div>
-          <div class="chart-wrap"><canvas id="chartEstados"></canvas></div>
-        </div>
-        <div class="chart-card">
-          <div class="chart-title">Carga por agente</div>
-          <div class="chart-wrap"><canvas id="chartAgentes"></canvas></div>
+        <div class="metrics-tabs">
+          <button class="mtab active" onclick="showMTab('overview',this)">📊 Resumen</button>
+          <button class="mtab" onclick="showMTab('operaciones',this)">🔍 Operaciones</button>
+          <button class="mtab" onclick="showMTab('agentes',this)">👥 Agentes</button>
+          <button class="mtab" onclick="showMTab('sla',this)">⚖️ SLA & Riesgo</button>
         </div>
       </div>
-      <div class="agents-table-card">
-        <div class="table-head">
-          <div class="table-title">Carga detallada por agente</div>
+
+      <div class="metrics-content">
+
+        <!-- ══ TAB 1: RESUMEN ══ -->
+        <div class="mtab-page active" id="mtab-overview">
+          <div class="page-sub" style="margin-top:4px">Vista ejecutiva · ¿Cómo está funcionando el servicio hoy?</div>
+          <div class="kpi-grid">
+            <div class="kpi"><div class="kpi-label">Total PQRS</div><div class="kpi-val" id="mKpiTotal">—</div><div class="kpi-sub">En el sistema</div><div class="kpi-accent" style="background:var(--blue)"></div></div>
+            <div class="kpi"><div class="kpi-label">Pendientes</div><div class="kpi-val warn" id="mKpiPend">—</div><div class="kpi-sub">Sin gestionar</div><div class="kpi-accent" style="background:#ca8a04"></div></div>
+            <div class="kpi"><div class="kpi-label">En gestión</div><div class="kpi-val" id="mKpiGest">—</div><div class="kpi-sub">Activos</div><div class="kpi-accent" style="background:var(--orange)"></div></div>
+            <div class="kpi"><div class="kpi-label">Resueltos</div><div class="kpi-val ok" id="mKpiSol">—</div><div class="kpi-sub">Completados</div><div class="kpi-accent" style="background:var(--green)"></div></div>
+          </div>
+          <div class="kpi-grid">
+            <div class="kpi"><div class="kpi-label">Backlog activo</div><div class="kpi-val" id="mKpiBacklog">—</div><div class="kpi-sub">Pend. + En gestión</div><div class="kpi-accent" style="background:#7c3aed"></div></div>
+            <div class="kpi"><div class="kpi-label">Tasa de resolución</div><div class="kpi-val ok" id="mKpiTasa">—</div><div class="kpi-sub">% del total resuelto</div><div class="kpi-accent" style="background:var(--green)"></div></div>
+            <div class="kpi"><div class="kpi-label">Alta prioridad</div><div class="kpi-val danger" id="mKpiAlta">—</div><div class="kpi-sub">Urgentes sin resolver</div><div class="kpi-accent" style="background:var(--red)"></div></div>
+            <div class="kpi"><div class="kpi-label">Reaperturas</div><div class="kpi-val" id="mKpiReab">—</div><div class="kpi-sub">Tickets reabiertos</div><div class="kpi-accent" style="background:var(--orange)"></div></div>
+          </div>
+          <div class="charts-grid-wide">
+            <div class="chart-card">
+              <div class="chart-title">Tendencia PQRS — últimos 14 días</div>
+              <div class="chart-sub">Volumen recibido por día</div>
+              <div class="chart-wrap-lg"><canvas id="chartTendencia"></canvas></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">Distribución por estado</div>
+              <div class="chart-sub">Inventario actual</div>
+              <div class="chart-wrap-lg"><canvas id="chartEstados"></canvas></div>
+            </div>
+          </div>
+          <div class="charts-grid">
+            <div class="chart-card">
+              <div class="chart-title">PQRS por prioridad</div>
+              <div class="chart-sub">Alta · Media · Baja · Sin definir</div>
+              <div class="chart-wrap"><canvas id="chartPrioridad"></canvas></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">Recibidos vs Resueltos — por semana</div>
+              <div class="chart-sub">Comparativo últimas 6 semanas</div>
+              <div class="chart-wrap"><canvas id="chartResolucion"></canvas></div>
+            </div>
+          </div>
         </div>
-        <table class="agents-tbl">
-          <thead><tr><th>Agente</th><th>Pendientes</th><th>En gestión</th><th>Solucionados</th><th>Carga total</th></tr></thead>
-          <tbody id="agentsTableBody"></tbody>
-        </table>
-      </div>
+
+        <!-- ══ TAB 2: OPERACIONES ══ -->
+        <div class="mtab-page" id="mtab-operaciones">
+          <div class="page-sub" style="margin-top:4px">Análisis operativo · ¿Dónde se originan los problemas?</div>
+          <div class="charts-grid">
+            <div class="chart-card">
+              <div class="chart-title">Tipos de gestión registrados</div>
+              <div class="chart-sub">Acciones más frecuentes por agentes</div>
+              <div class="chart-wrap-lg"><canvas id="chartAcciones"></canvas></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">Volumen por hora del día</div>
+              <div class="chart-sub">¿A qué horas llegan más PQRS?</div>
+              <div class="chart-wrap-lg"><canvas id="chartHoras"></canvas></div>
+            </div>
+          </div>
+          <div class="charts-grid">
+            <div class="chart-card">
+              <div class="chart-title">PQRS por día de la semana</div>
+              <div class="chart-sub">Lun–Dom · promedio histórico</div>
+              <div class="chart-wrap"><canvas id="chartDiaSemana"></canvas></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">Prioridad del backlog activo</div>
+              <div class="chart-sub">Solo tickets pendientes y en gestión</div>
+              <div class="chart-wrap"><canvas id="chartPrioBacklog"></canvas></div>
+            </div>
+          </div>
+          <div class="agents-table-card">
+            <div class="table-head">
+              <div class="table-title">Top 10 remitentes con más PQRS</div>
+              <span style="font-size:11px;color:var(--ink3)">Mayor volumen histórico</span>
+            </div>
+            <table class="agents-tbl">
+              <thead><tr><th>#</th><th>Nombre</th><th>Email remitente</th><th>Total</th><th>Pendientes</th><th>Resueltos</th></tr></thead>
+              <tbody id="topRemitentesBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ══ TAB 3: AGENTES ══ -->
+        <div class="mtab-page" id="mtab-agentes">
+          <div class="page-sub" style="margin-top:4px">Productividad del equipo · ¿Quién resuelve más y quién necesita apoyo?</div>
+          <div class="charts-grid-wide">
+            <div class="chart-card">
+              <div class="chart-title">Tickets resueltos por agente</div>
+              <div class="chart-sub">Solucionados totales asignados</div>
+              <div class="chart-wrap-lg"><canvas id="chartAgentSol"></canvas></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">Carga actual por agente</div>
+              <div class="chart-sub">Pendientes + En gestión ahora</div>
+              <div class="chart-wrap-lg"><canvas id="chartAgentes"></canvas></div>
+            </div>
+          </div>
+          <div class="agents-table-card">
+            <div class="table-head">
+              <div class="table-title">Detalle de productividad por agente</div>
+            </div>
+            <table class="agents-tbl">
+              <thead><tr><th>Agente</th><th>Total asig.</th><th>Pendientes</th><th>En gestión</th><th>Resueltos</th><th>Gestiones reg.</th><th>% Resolución</th><th>Carga</th></tr></thead>
+              <tbody id="agentsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ══ TAB 4: SLA & RIESGO ══ -->
+        <div class="mtab-page" id="mtab-sla">
+          <div class="page-sub" style="margin-top:4px">Cumplimiento legal · ¿Estamos dentro de los tiempos de respuesta?</div>
+          <div class="kpi-grid">
+            <div class="kpi"><div class="kpi-label">En riesgo SLA</div><div class="kpi-val warn" id="mSlaRiesgo">—</div><div class="kpi-sub">&gt;24h sin resolución</div><div class="kpi-accent" style="background:#ca8a04"></div></div>
+            <div class="kpi"><div class="kpi-label">Vencidos SLA</div><div class="kpi-val danger" id="mSlaVencidos">—</div><div class="kpi-sub">&gt;72h sin resolución</div><div class="kpi-accent" style="background:var(--red)"></div></div>
+            <div class="kpi"><div class="kpi-label">Alta sin gestionar</div><div class="kpi-val danger" id="mSlaAltaPend">—</div><div class="kpi-sub">Prioridad alta pendiente</div><div class="kpi-accent" style="background:var(--red)"></div></div>
+            <div class="kpi"><div class="kpi-label">Reaperturas</div><div class="kpi-val" id="mSlaReab">—</div><div class="kpi-sub">Tickets reabiertos</div><div class="kpi-accent" style="background:var(--orange)"></div></div>
+          </div>
+          <div class="charts-grid">
+            <div class="chart-card">
+              <div class="chart-title">Antigüedad del backlog activo</div>
+              <div class="chart-sub">Tramos de tiempo — tickets sin resolver</div>
+              <div class="chart-wrap-lg"><canvas id="chartAntiguedad"></canvas></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">Distribución por tramo SLA</div>
+              <div class="chart-sub">Verde = ok · Amarillo = riesgo · Rojo = vencido</div>
+              <div class="chart-wrap-lg"><canvas id="chartTramos"></canvas></div>
+            </div>
+          </div>
+          <div class="agents-table-card">
+            <div class="table-head">
+              <div class="table-title">🔴 Tickets en riesgo o vencidos</div>
+              <span id="slaRiesgoCount" style="font-size:11px;color:var(--red);font-weight:600">—</span>
+            </div>
+            <table class="agents-tbl">
+              <thead><tr><th>Asunto</th><th>Remitente</th><th>Agente</th><th>Prioridad</th><th>Estado</th><th>Recibido</th><th>Tiempo transcurrido</th><th>SLA</th></tr></thead>
+              <tbody id="slaRiesgoBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /metrics-content -->
     </div>
   </div>
 
@@ -606,7 +755,375 @@ const state = {
   editingAgentId: null,
 };
 
-let chartEstados = null, chartAgentes = null;
+// Chart instances
+let chartEstados=null,chartAgentes=null,chartTendencia=null,chartPrioridad=null,
+    chartResolucion=null,chartAcciones=null,chartHoras=null,chartDiaSemana=null,
+    chartPrioBacklog=null,chartAgentSol=null,chartAntiguedad=null,chartTramos=null;
+
+function destroyChart(c){if(c){try{c.destroy();}catch{}}return null;}
+
+// ── Tab navigation ──────────────────────────
+function showMTab(tab, el) {
+  document.querySelectorAll('.mtab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.mtab-page').forEach(p=>p.classList.remove('active'));
+  if(el) el.classList.add('active');
+  document.getElementById('mtab-'+tab).classList.add('active');
+  renderMTab(tab);
+}
+function renderMTab(tab){
+  if(tab==='overview')    renderOverview();
+  if(tab==='operaciones') renderOperaciones();
+  if(tab==='agentes')     renderAgentes();
+  if(tab==='sla')         renderSLA();
+}
+
+// ── Entry point ─────────────────────────────
+function updateMetrics() {
+  document.getElementById('metLastUpdate').textContent =
+    new Date().toLocaleString('es-CO',{dateStyle:'short',timeStyle:'short'});
+  renderOverview();
+}
+
+// ── TAB 1: RESUMEN ──────────────────────────
+function renderOverview() {
+  const E=state.emails, H=state.historial;
+  const total=E.length, pend=E.filter(e=>e.estado==='pendiente').length,
+        gest=E.filter(e=>e.estado==='gestion').length,
+        sol=E.filter(e=>e.estado==='solucionado'||e.estado==='gestionado').length;
+  const backlog=pend+gest;
+  const alta=E.filter(e=>e.prioridad==='alta'&&e.estado!=='solucionado'&&e.estado!=='gestionado').length;
+  const reab=H.filter(h=>(h.evento||h.accion||'').toLowerCase().includes('reabiert')).length;
+  document.getElementById('mKpiTotal').textContent=total;
+  document.getElementById('mKpiPend').textContent=pend;
+  document.getElementById('mKpiGest').textContent=gest;
+  document.getElementById('mKpiSol').textContent=sol;
+  document.getElementById('mKpiBacklog').textContent=backlog;
+  document.getElementById('mKpiTasa').textContent=total>0?Math.round(sol/total*100)+'%':'0%';
+  document.getElementById('mKpiAlta').textContent=alta;
+  document.getElementById('mKpiReab').textContent=reab;
+
+  // Tendencia 14 días
+  const days=14,tLabels=[],tData=[];
+  for(let i=days-1;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    tLabels.push(d.toLocaleDateString('es-CO',{day:'2-digit',month:'2-digit'}));
+    tData.push(E.filter(e=>{const f=new Date(e.fecha);return f.toDateString()===d.toDateString();}).length);
+  }
+  chartTendencia=destroyChart(chartTendencia);
+  chartTendencia=new Chart(document.getElementById('chartTendencia').getContext('2d'),{
+    type:'line',data:{labels:tLabels,datasets:[{label:'PQRS',data:tData,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,.07)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#2563eb',tension:.4,fill:true}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{family:'DM Mono',size:10}}},x:{ticks:{font:{family:'Poppins',size:9}}}}}
+  });
+
+  // Doughnut estados
+  chartEstados=destroyChart(chartEstados);
+  chartEstados=new Chart(document.getElementById('chartEstados').getContext('2d'),{
+    type:'doughnut',
+    data:{labels:['Pendiente','En Gestión','Gestionado','Solucionado'],
+      datasets:[{data:['pendiente','gestion','gestionado','solucionado'].map(s=>E.filter(e=>e.estado===s).length),
+        backgroundColor:['#fef9c3','#eff4ff','#fff7ed','#dcfce7'],borderColor:['#ca8a04','#2563eb','#ea580c','#16a34a'],borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'right',labels:{font:{family:'Poppins',size:11},padding:10}}}}
+  });
+
+  // Prioridad
+  chartPrioridad=destroyChart(chartPrioridad);
+  chartPrioridad=new Chart(document.getElementById('chartPrioridad').getContext('2d'),{
+    type:'bar',
+    data:{labels:['Alta','Media','Baja','Sin definir'],
+      datasets:[{data:[E.filter(e=>e.prioridad==='alta').length,E.filter(e=>e.prioridad==='media').length,E.filter(e=>e.prioridad==='baja').length,E.filter(e=>!e.prioridad).length],
+        backgroundColor:['#fee2e2','#fef9c3','#dcfce7','#f1f5f9'],borderColor:['#dc2626','#ca8a04','#16a34a','#94a3b8'],borderWidth:2,borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{family:'DM Mono',size:10}}},x:{ticks:{font:{family:'Poppins',size:11}}}}}
+  });
+
+  // Recibidos vs Resueltos por semana
+  const wk=6,wL=[],wR=[],wS=[];
+  for(let i=wk-1;i>=0;i--){
+    const ini=new Date();ini.setDate(ini.getDate()-i*7-6);
+    const fin=new Date();fin.setDate(fin.getDate()-i*7);
+    wL.push(i===0?'Esta sem':`Sem -${i}`);
+    wR.push(E.filter(e=>{const d=new Date(e.fecha);return d>=ini&&d<=fin;}).length);
+    wS.push(E.filter(e=>{const d=new Date(e.fecha);return d>=ini&&d<=fin&&(e.estado==='solucionado'||e.estado==='gestionado');}).length);
+  }
+  chartResolucion=destroyChart(chartResolucion);
+  chartResolucion=new Chart(document.getElementById('chartResolucion').getContext('2d'),{
+    type:'bar',data:{labels:wL,datasets:[
+      {label:'Recibidos',data:wR,backgroundColor:'#eff4ff',borderColor:'#2563eb',borderWidth:2,borderRadius:4},
+      {label:'Resueltos',data:wS,backgroundColor:'#dcfce7',borderColor:'#16a34a',borderWidth:2,borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{family:'Poppins',size:10},padding:10}}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{family:'DM Mono',size:10}}},x:{ticks:{font:{family:'Poppins',size:10}}}}}
+  });
+}
+
+// ── TAB 2: OPERACIONES ──────────────────────
+function renderOperaciones() {
+  const E=state.emails, H=state.historial;
+
+  // Acciones más frecuentes
+  const acc={};
+  H.forEach(h=>{const a=h.evento||h.accion||'Otro';acc[a]=(acc[a]||0)+1;});
+  const topAcc=Object.entries(acc).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  chartAcciones=destroyChart(chartAcciones);
+  chartAcciones=new Chart(document.getElementById('chartAcciones').getContext('2d'),{
+    type:'bar',
+    data:{labels:topAcc.map(a=>a[0].length>20?a[0].substring(0,20)+'…':a[0]),datasets:[{data:topAcc.map(a=>a[1]),backgroundColor:'#eff4ff',borderColor:'#2563eb',borderWidth:2,borderRadius:5}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{font:{family:'DM Mono',size:10}}},y:{ticks:{font:{family:'Poppins',size:10}}}}}
+  });
+
+  // Por hora del día
+  const hrs=Array(24).fill(0);
+  E.forEach(e=>{if(e.fecha)hrs[new Date(e.fecha).getHours()]++;});
+  chartHoras=destroyChart(chartHoras);
+  chartHoras=new Chart(document.getElementById('chartHoras').getContext('2d'),{
+    type:'bar',
+    data:{labels:Array.from({length:24},(_,i)=>i+'h'),datasets:[{data:hrs,backgroundColor:hrs.map(v=>v===Math.max(...hrs)?'#2563eb':'#eff4ff'),borderColor:'#2563eb',borderWidth:1,borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{family:'DM Mono',size:9}}},x:{ticks:{font:{family:'Poppins',size:9}}}}}
+  });
+
+  // Por día de la semana
+  const dias=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'],dc=Array(7).fill(0);
+  E.forEach(e=>{if(e.fecha){const d=new Date(e.fecha).getDay();dc[d===0?6:d-1]++;}});
+  chartDiaSemana=destroyChart(chartDiaSemana);
+  chartDiaSemana=new Chart(document.getElementById('chartDiaSemana').getContext('2d'),{
+    type:'bar',
+    data:{labels:dias,datasets:[{data:dc,backgroundColor:dc.map((_,i)=>i<5?'#eff4ff':'#fef9c3'),borderColor:dc.map((_,i)=>i<5?'#2563eb':'#ca8a04'),borderWidth:2,borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{family:'DM Mono',size:10}}},x:{ticks:{font:{family:'Poppins',size:11}}}}}
+  });
+
+  // Prioridad en backlog activo
+  const act=E.filter(e=>e.estado==='pendiente'||e.estado==='gestion');
+  chartPrioBacklog=destroyChart(chartPrioBacklog);
+  chartPrioBacklog=new Chart(document.getElementById('chartPrioBacklog').getContext('2d'),{
+    type:'doughnut',
+    data:{labels:['Alta','Media','Baja','Sin definir'],
+      datasets:[{data:[act.filter(e=>e.prioridad==='alta').length,act.filter(e=>e.prioridad==='media').length,act.filter(e=>e.prioridad==='baja').length,act.filter(e=>!e.prioridad).length],
+        backgroundColor:['#fee2e2','#fef9c3','#dcfce7','#f1f5f9'],borderColor:['#dc2626','#ca8a04','#16a34a','#94a3b8'],borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'right',labels:{font:{family:'Poppins',size:11},padding:8}}}}
+  });
+
+  // Top remitentes
+  const rem={};
+  E.forEach(e=>{const k=e.remitente||'?';if(!rem[k])rem[k]={nom:e.remitente_nombre||'',em:k,t:0,p:0,s:0};rem[k].t++;if(e.estado==='pendiente')rem[k].p++;if(e.estado==='solucionado'||e.estado==='gestionado')rem[k].s++;});
+  const topRem=Object.values(rem).sort((a,b)=>b.t-a.t).slice(0,10);
+  document.getElementById('topRemitentesBody').innerHTML=topRem.map((r,i)=>`<tr>
+    <td><strong style="color:var(--ink3)">${i+1}</strong></td>
+    <td><strong>${esc(r.nom||'—')}</strong></td>
+    <td style="font-family:'DM Mono',monospace;font-size:11px">${esc(r.em)}</td>
+    <td><strong>${r.t}</strong></td>
+    <td><span class="badge pendiente">${r.p}</span></td>
+    <td><span class="badge solucionado">${r.s}</span></td>
+  </tr>`).join('')||'<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--ink3)">Sin datos</td></tr>';
+}
+
+// ── TAB 3: AGENTES ──────────────────────────
+function renderAgentes() {
+  const E=state.emails, H=state.historial;
+  const act=state.agents.filter(a=>a.activo===true||a.activo===1||a.activo==='true');
+
+  // Chart resueltos por agente
+  chartAgentSol=destroyChart(chartAgentSol);
+  chartAgentSol=new Chart(document.getElementById('chartAgentSol').getContext('2d'),{
+    type:'bar',
+    data:{labels:act.map(a=>(a.nombre||'').split(' ')[0]),
+      datasets:[{data:act.map(a=>E.filter(e=>e.asignado_a===a.id&&(e.estado==='solucionado'||e.estado==='gestionado')).length),
+        backgroundColor:'#dcfce7',borderColor:'#16a34a',borderWidth:2,borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{family:'DM Mono',size:10}}},x:{ticks:{font:{family:'Poppins',size:11}}}}}
+  });
+
+  // Chart carga actual
+  chartAgentes=destroyChart(chartAgentes);
+  chartAgentes=new Chart(document.getElementById('chartAgentes').getContext('2d'),{
+    type:'bar',
+    data:{labels:act.map(a=>(a.nombre||'').split(' ')[0]),
+      datasets:[{data:act.map(a=>E.filter(e=>e.asignado_a===a.id&&(e.estado==='pendiente'||e.estado==='gestion')).length),
+        backgroundColor:'#eff4ff',borderColor:'#2563eb',borderWidth:2,borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{family:'DM Mono',size:10}}},x:{ticks:{font:{family:'Poppins',size:11}}}}}
+  });
+
+  // Tabla detalle
+  const maxC=Math.max(...act.map(a=>E.filter(e=>e.asignado_a===a.id).length),1);
+  document.getElementById('agentsTableBody').innerHTML=act.map((a,i)=>{
+    const tot=E.filter(e=>e.asignado_a===a.id).length;
+    const pend=E.filter(e=>e.asignado_a===a.id&&e.estado==='pendiente').length;
+    const gest=E.filter(e=>e.asignado_a===a.id&&e.estado==='gestion').length;
+    const sol=E.filter(e=>e.asignado_a===a.id&&(e.estado==='solucionado'||e.estado==='gestionado')).length;
+    const gr=H.filter(h=>(h.metadata?.agente_id||h.agente_id)===a.id).length;
+    const pct=tot>0?Math.round(sol/tot*100):0;
+    const carga=pend+gest;
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:9px">
+        <div class="agent-av-sm" style="background:${COLORS[i%COLORS.length]}">${(a.nombre||'?').charAt(0).toUpperCase()}</div>
+        <strong>${esc(a.nombre)}</strong>
+      </div></td>
+      <td>${tot}</td>
+      <td><span class="badge pendiente">${pend}</span></td>
+      <td><span class="badge gestion">${gest}</span></td>
+      <td><span class="badge solucionado">${sol}</span></td>
+      <td style="font-family:'DM Mono',monospace">${gr}</td>
+      <td><span class="sla-pill ${pct>=70?'sla-ok':pct>=40?'sla-warn':'sla-danger'}">${pct}%</span></td>
+      <td><div style="display:flex;align-items:center;gap:8px">
+        <div class="load-bar"><div class="load-bar-fill" style="width:${Math.round(carga/maxC*100)}%;background:${COLORS[i%COLORS.length]}"></div></div>
+        <span style="font-size:10px;color:var(--ink3)">${carga}</span>
+      </div></td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--ink3)">Sin agentes</td></tr>';
+}
+
+// ── TAB 4: SLA & RIESGO ─────────────────────
+function renderSLA() {
+  const now=new Date(), E=state.emails;
+  const act=E.filter(e=>e.estado==='pendiente'||e.estado==='gestion');
+  const conH=act.map(e=>({...e,horas:Math.round((now-new Date(e.fecha))/3600000)}));
+  const riesgo=conH.filter(e=>e.horas>=24&&e.horas<72);
+  const vencidos=conH.filter(e=>e.horas>=72);
+  const altaPend=E.filter(e=>e.prioridad==='alta'&&e.estado==='pendiente').length;
+  const reab=state.historial.filter(h=>(h.evento||h.accion||'').toLowerCase().includes('reabiert')).length;
+
+  document.getElementById('mSlaRiesgo').textContent=riesgo.length;
+  document.getElementById('mSlaVencidos').textContent=vencidos.length;
+  document.getElementById('mSlaAltaPend').textContent=altaPend;
+  document.getElementById('mSlaReab').textContent=reab;
+  const tot=riesgo.length+vencidos.length;
+  document.getElementById('slaRiesgoCount').textContent=tot>0?`${tot} ticket${tot>1?'s':''} requieren atención inmediata`:'✅ Sin tickets en riesgo';
+
+  // Chart antigüedad
+  const tr=[{l:'<4h',a:0,b:4},{l:'4–12h',a:4,b:12},{l:'12–24h',a:12,b:24},{l:'24–48h',a:24,b:48},{l:'48–72h',a:48,b:72},{l:'>72h',a:72,b:99999}];
+  chartAntiguedad=destroyChart(chartAntiguedad);
+  chartAntiguedad=new Chart(document.getElementById('chartAntiguedad').getContext('2d'),{
+    type:'bar',
+    data:{labels:tr.map(t=>t.l),datasets:[{data:tr.map(t=>conH.filter(e=>e.horas>=t.a&&e.horas<t.b).length),
+      backgroundColor:['#dcfce7','#dcfce7','#fef9c3','#fef9c3','#fee2e2','#fee2e2'],
+      borderColor:['#16a34a','#16a34a','#ca8a04','#ca8a04','#dc2626','#dc2626'],borderWidth:2,borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{family:'DM Mono',size:10}}},x:{ticks:{font:{family:'Poppins',size:11}}}}}
+  });
+
+  // Chart doughnut tramos
+  chartTramos=destroyChart(chartTramos);
+  chartTramos=new Chart(document.getElementById('chartTramos').getContext('2d'),{
+    type:'doughnut',
+    data:{labels:tr.map(t=>t.l),datasets:[{data:tr.map(t=>conH.filter(e=>e.horas>=t.a&&e.horas<t.b).length),
+      backgroundColor:['#dcfce7','#bbf7d0','#fef9c3','#fde68a','#fee2e2','#fca5a5'],
+      borderColor:['#16a34a','#16a34a','#ca8a04','#ca8a04','#dc2626','#dc2626'],borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'right',labels:{font:{family:'Poppins',size:11},padding:8}}}}
+  });
+
+  // Tabla riesgo
+  const tabla=[...vencidos,...riesgo].sort((a,b)=>b.horas-a.horas).slice(0,25);
+  document.getElementById('slaRiesgoBody').innerHTML=tabla.map(e=>{
+    const ag=state.agents.find(a=>a.id===e.asignado_a);
+    const esV=e.horas>=72;
+    const disp=e.horas>=24?Math.floor(e.horas/24)+'d '+Math.round(e.horas%24)+'h':e.horas+'h';
+    return `<tr>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600">${esc(e.asunto)}</td>
+      <td style="font-size:11px">${esc(e.remitente_nombre||e.remitente)}</td>
+      <td>${ag?esc(ag.nombre):'<span style="color:var(--ink3)">Sin asignar</span>'}</td>
+      <td><span class="sla-pill ${e.prioridad==='alta'?'sla-danger':e.prioridad==='media'?'sla-warn':'sla-ok'}">${e.prioridad||'—'}</span></td>
+      <td><span class="badge ${e.estado}">${estadoLabel(e.estado)}</span></td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px">${e.fecha?new Date(e.fecha).toLocaleDateString('es-CO'):''}</td>
+      <td style="font-family:'DM Mono',monospace;font-weight:700;color:${esV?'var(--red)':'#ca8a04'}">${disp}</td>
+      <td><span class="sla-pill ${esV?'sla-danger':'sla-warn'}">${esV?'🔴 Vencido':'🟡 Riesgo'}</span></td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--green);font-weight:600">✅ Sin tickets en riesgo</td></tr>';
+}
+
+// ── EXPORT EXCEL PARA POWER BI ──────────────
+async function exportarExcel() {
+  const btn=event.currentTarget, orig=btn.innerHTML;
+  btn.innerHTML='⏳ Generando...'; btn.disabled=true;
+  try {
+    let H=[];
+    try{H=await sb('historial_eventos?order=created_at.asc&limit=5000')||[];}
+    catch{try{H=await sb('historial?order=fecha.asc&limit=5000')||[];}catch{}}
+
+    const wb=XLSX.utils.book_new();
+
+    // HOJA 1 — Gestiones detalle
+    const h1=H.map(ev=>{
+      const meta=ev.metadata||{}, f=ev.created_at||ev.fecha||'';
+      const fo=f?new Date(f):null;
+      const email=state.emails.find(e=>e.id===ev.correo_id);
+      const ag=state.agents.find(a=>a.id===meta.agente_id);
+      return {
+        'ID_Gestion':ev.id||'','ID_Correo':ev.correo_id||'',
+        'Fecha':fo?fo.toLocaleDateString('es-CO'):'','Hora':fo?fo.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit',second:'2-digit'}):'',
+        'Fecha_Hora':fo?fo.toLocaleString('es-CO'):'',
+        'Dia_Semana':fo?['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][fo.getDay()]:'',
+        'Agente_ID':meta.agente_id||'','Agente_Nombre':meta.agente_nombre||ev.agente_nombre||'','Agente_Email':ag?ag.email||'':'',
+        'Accion':ev.evento||ev.accion||'','Observaciones':meta.observaciones||ev.detalle||ev.observaciones||'','Por':meta.por||'',
+        'Asunto_Correo':email?.asunto||ev.subject||'','Remitente':email?.remitente||ev.from_email||'','Remitente_Nombre':email?.remitente_nombre||'',
+        'Estado_Ticket':email?.estado||'','Prioridad':email?.prioridad||'',
+        'Fecha_Recepcion':email?.fecha?new Date(email.fecha).toLocaleDateString('es-CO'):'',
+        'Adjuntos':email?.has_attachments?'Sí':'No'
+      };
+    });
+    const ws1=XLSX.utils.json_to_sheet(h1.length?h1:[{'Sin datos':'No hay gestiones'}]);
+    ws1['!cols']=[{wch:12},{wch:12},{wch:13},{wch:11},{wch:20},{wch:10},{wch:12},{wch:20},{wch:26},{wch:22},{wch:38},{wch:10},{wch:38},{wch:28},{wch:22},{wch:13},{wch:11},{wch:14},{wch:10}];
+    XLSX.utils.book_append_sheet(wb,ws1,'Gestiones_Detalle');
+
+    // HOJA 2 — Correos / tickets
+    const h2=state.emails.map(email=>{
+      const ag=state.agents.find(a=>a.id===email.asignado_a);
+      const fR=email.fecha?new Date(email.fecha):null;
+      const gest=H.filter(h=>h.correo_id===email.id).sort((a,b)=>new Date(a.created_at||a.fecha)-new Date(b.created_at||b.fecha));
+      const pg=gest[0]?new Date(gest[0].created_at||gest[0].fecha):null;
+      const ug=gest[gest.length-1]?new Date(gest[gest.length-1].created_at||gest[gest.length-1].fecha):null;
+      const mResp=fR&&pg?Math.round((pg-fR)/60000):'';
+      return {
+        'ID_Correo':email.id||'','Message_ID':email.message_id||'','Asunto':email.asunto||'',
+        'Remitente_Email':email.remitente||'','Remitente_Nombre':email.remitente_nombre||'',
+        'Fecha_Recepcion':fR?fR.toLocaleDateString('es-CO'):'','Hora_Recepcion':fR?fR.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}):'',
+        'Dia_Semana':fR?['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][fR.getDay()]:'',
+        'Estado':email.estado||'','Prioridad':email.prioridad||'',
+        'Agente_ID':email.asignado_a||'','Agente_Nombre':ag?ag.nombre||'':'','Agente_Email':ag?ag.email||'':'',
+        'Total_Gestiones':gest.length,
+        'Fecha_Primera_Gestion':pg?pg.toLocaleDateString('es-CO'):'','Hora_Primera_Gestion':pg?pg.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}):'',
+        'Fecha_Ultima_Gestion':ug?ug.toLocaleDateString('es-CO'):'','Hora_Ultima_Gestion':ug?ug.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}):'',
+        'Min_Primera_Respuesta':mResp,'Adjuntos':email.has_attachments?'Sí':'No'
+      };
+    });
+    const ws2=XLSX.utils.json_to_sheet(h2.length?h2:[{'Sin datos':'No hay correos'}]);
+    ws2['!cols']=[{wch:12},{wch:24},{wch:42},{wch:28},{wch:22},{wch:14},{wch:12},{wch:10},{wch:13},{wch:11},{wch:12},{wch:22},{wch:26},{wch:14},{wch:14},{wch:14},{wch:14},{wch:14},{wch:20},{wch:10}];
+    XLSX.utils.book_append_sheet(wb,ws2,'Correos_Tickets');
+
+    // HOJA 3 — Resumen agentes
+    const h3=state.agents.map(ag=>{
+      const corr=state.emails.filter(e=>e.asignado_a===ag.id);
+      const gA=H.filter(h=>(h.metadata?.agente_id||h.agente_id)===ag.id);
+      const pend=corr.filter(e=>e.estado==='pendiente').length;
+      const gest=corr.filter(e=>e.estado==='gestion').length;
+      const sol=corr.filter(e=>e.estado==='solucionado'||e.estado==='gestionado').length;
+      const tot=corr.length;
+      const tiempos=corr.map(email=>{
+        const fR=email.fecha?new Date(email.fecha):null;
+        const pg=gA.filter(h=>h.correo_id===email.id).sort((a,b)=>new Date(a.created_at||a.fecha)-new Date(b.created_at||b.fecha))[0];
+        if(fR&&pg){const m=Math.round((new Date(pg.created_at||pg.fecha)-fR)/60000);return m>=0?m:null;}
+        return null;
+      }).filter(v=>v!==null);
+      const prom=tiempos.length?Math.round(tiempos.reduce((a,b)=>a+b,0)/tiempos.length):'';
+      return {
+        'Agente_ID':ag.id||'','Agente_Nombre':ag.nombre||'','Agente_Email':ag.email||'','Estado':ag.activo?'Activo':'Inactivo',
+        'Total_Correos':tot,'Pendientes':pend,'En_Gestion':gest,'Solucionados':sol,'Gestiones_Registradas':gA.length,
+        'Prom_Min_Primera_Resp':prom,'Pct_Resolucion':tot>0?Math.round(sol/tot*100)+'%':'0%'
+      };
+    });
+    const ws3=XLSX.utils.json_to_sheet(h3.length?h3:[{'Sin datos':'No hay agentes'}]);
+    ws3['!cols']=[{wch:12},{wch:22},{wch:28},{wch:10},{wch:13},{wch:11},{wch:11},{wch:13},{wch:20},{wch:22},{wch:16}];
+    XLSX.utils.book_append_sheet(wb,ws3,'Resumen_Agentes');
+
+    // HOJA 4 — Catálogo acciones
+    const ac=[...new Set(H.map(h=>h.evento||h.accion||'').filter(Boolean))].map(a=>({
+      'Accion':a,'Tipo':a.toLowerCase().includes('solucion')?'Cierre':a.toLowerCase().includes('respond')?'Comunicación':a.toLowerCase().includes('escal')?'Escalado':'Gestión'
+    }));
+    const ws4=XLSX.utils.json_to_sheet(ac.length?ac:[{'Accion':'Sin datos','Tipo':''}]);
+    ws4['!cols']=[{wch:32},{wch:16}];
+    XLSX.utils.book_append_sheet(wb,ws4,'Acciones_Catalogo');
+
+    const fecha=new Date().toLocaleDateString('es-CO').replace(/\//g,'-');
+    XLSX.writeFile(wb,`PQR_Tododrogas_${fecha}.xlsx`);
+    showToast('Excel exportado ✓','success');
+  } catch(e){
+    showToast('Error al exportar: '+e.message.substring(0,60),'error');
+    console.error(e);
+  } finally {btn.innerHTML=orig;btn.disabled=false;}
+}
 
 // ──────────────────────────────────────────────
 // NAVIGATION
@@ -1365,251 +1882,8 @@ async function onDropToAgent(e, agentId, agentName) {
 }
 
 // ──────────────────────────────────────────────
-// METRICS
+// SYNC
 // ──────────────────────────────────────────────
-function updateMetrics() {
-  document.getElementById('mKpiTotal').textContent = state.emails.length;
-  document.getElementById('mKpiPend').textContent = state.emails.filter(e=>e.estado==='pendiente').length;
-  document.getElementById('mKpiGest').textContent = state.emails.filter(e=>e.estado==='gestion').length;
-  document.getElementById('mKpiSol').textContent = state.emails.filter(e=>e.estado==='solucionado'||e.estado==='gestionado').length;
-
-  // Chart 1
-  const ctx1 = document.getElementById('chartEstados').getContext('2d');
-  const counts = ['pendiente','gestion','gestionado','solucionado'].map(s=>state.emails.filter(e=>e.estado===s).length);
-  if(chartEstados) chartEstados.destroy();
-  chartEstados = new Chart(ctx1,{
-    type:'doughnut',
-    data:{
-      labels:['Pendiente','En Gestión','Gestionado','Solucionado'],
-      datasets:[{data:counts,backgroundColor:['#fef9c3','#eff4ff','#fff7ed','#dcfce7'],borderColor:['#ca8a04','#2563eb','#ea580c','#16a34a'],borderWidth:2}]
-    },
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{family:'Poppins',size:11},padding:12}}}}
-  });
-
-  // Chart 2
-  const ctx2 = document.getElementById('chartAgentes').getContext('2d');
-  const activos = state.agents.filter(a=>a.activo===true||a.activo===1||a.activo==='true').slice(0,8);
-  const cargas = activos.map(a=>state.emails.filter(e=>e.asignado_a===a.id&&(e.estado==='gestion'||e.estado==='pendiente')).length);
-  if(chartAgentes) chartAgentes.destroy();
-  chartAgentes = new Chart(ctx2,{
-    type:'bar',
-    data:{
-      labels:activos.map(a=>(a.nombre||'').split(' ')[0]),
-      datasets:[{label:'Activos',data:cargas,backgroundColor:'#eff4ff',borderColor:'#2563eb',borderWidth:2,borderRadius:6}]
-    },
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{family:'DM Mono',size:10}}},x:{ticks:{font:{family:'Poppins',size:11}}}}}
-  });
-
-  // Agent table
-  const tbody = document.getElementById('agentsTableBody');
-  const maxCarga = Math.max(...activos.map(a=>state.emails.filter(e=>e.asignado_a===a.id).length),1);
-  tbody.innerHTML = activos.map((a,i)=>{
-    const pend = state.emails.filter(e=>e.asignado_a===a.id&&e.estado==='pendiente').length;
-    const gest = state.emails.filter(e=>e.asignado_a===a.id&&e.estado==='gestion').length;
-    const sol = state.emails.filter(e=>e.asignado_a===a.id&&e.estado==='solucionado').length;
-    const total = pend+gest+sol;
-    const pct = Math.round(total/maxCarga*100);
-    const ini=(a.nombre||'?').charAt(0).toUpperCase();
-    return `<tr>
-      <td><div style="display:flex;align-items:center;gap:10px">
-        <div class="agent-av-sm" style="background:${COLORS[i%COLORS.length]}">${ini}</div>
-        ${esc(a.nombre)}
-      </div></td>
-      <td><span class="badge pendiente">${pend}</span></td>
-      <td><span class="badge gestion">${gest}</span></td>
-      <td><span class="badge solucionado">${sol}</span></td>
-      <td><div class="load-bar"><div class="load-bar-fill" style="width:${pct}%;background:${COLORS[i%COLORS.length]}"></div></div></td>
-    </tr>`;
-  }).join('');
-}
-
-// ──────────────────────────────────────────────
-// EXPORT EXCEL POWER BI
-// ──────────────────────────────────────────────
-async function exportarExcel() {
-  const btn = event.currentTarget;
-  const original = btn.innerHTML;
-  btn.innerHTML = '⏳ Generando...';
-  btn.disabled = true;
-
-  try {
-    // ── Cargar historial completo para el export ──
-    let historial = [];
-    try {
-      historial = await sb('historial_eventos?order=created_at.asc&limit=5000') || [];
-    } catch {
-      try { historial = await sb('historial?order=fecha.asc&limit=5000') || []; } catch {}
-    }
-
-    const wb = XLSX.utils.book_new();
-
-    // ════════════════════════════════════════
-    // HOJA 1: GESTIONES_DETALLE
-    // Cada fila = una gestión registrada por un agente
-    // ════════════════════════════════════════
-    const rowsGestiones = historial.map(ev => {
-      const meta = ev.metadata || {};
-      const fecha = ev.created_at || ev.fecha || '';
-      const fechaObj = fecha ? new Date(fecha) : null;
-      const email = state.emails.find(e => e.id === ev.correo_id || e.message_id === ev.message_id);
-      const agente = state.agents.find(a => a.id === meta.agente_id);
-
-      return {
-        'ID_Gestion':        ev.id || '',
-        'ID_Correo':         ev.correo_id || '',
-        'Message_ID':        ev.message_id || '',
-        'Fecha_Gestion':     fechaObj ? fechaObj.toLocaleDateString('es-CO') : '',
-        'Hora_Gestion':      fechaObj ? fechaObj.toLocaleTimeString('es-CO', {hour:'2-digit',minute:'2-digit',second:'2-digit'}) : '',
-        'Fecha_Hora_Completa': fechaObj ? fechaObj.toLocaleString('es-CO') : '',
-        'Dia_Semana':        fechaObj ? ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'][fechaObj.getDay()] : '',
-        'Agente_ID':         meta.agente_id || '',
-        'Agente_Nombre':     meta.agente_nombre || ev.agente_nombre || '',
-        'Agente_Email':      agente ? (agente.email || '') : '',
-        'Accion_Gestion':    ev.evento || ev.accion || '',
-        'Observaciones':     meta.observaciones || ev.detalle || ev.observaciones || '',
-        'Por':               meta.por || '',
-        'Asunto_Correo':     ev.subject || email?.asunto || '',
-        'Remitente_Correo':  ev.from_email || email?.remitente || '',
-        'Remitente_Nombre':  email?.remitente_nombre || '',
-        'Estado_Ticket':     email?.estado || '',
-        'Prioridad_Ticket':  email?.prioridad || '',
-        'Fecha_Recepcion':   email?.fecha ? new Date(email.fecha).toLocaleDateString('es-CO') : '',
-        'Hora_Recepcion':    email?.fecha ? new Date(email.fecha).toLocaleTimeString('es-CO', {hour:'2-digit',minute:'2-digit'}) : '',
-        'Tiene_Adjuntos':    email?.has_attachments ? 'Sí' : 'No',
-      };
-    });
-
-    const ws1 = XLSX.utils.json_to_sheet(rowsGestiones.length ? rowsGestiones : [{'Sin datos':'No hay gestiones registradas'}]);
-    // Anchos de columna optimizados para Power BI
-    ws1['!cols'] = [
-      {wch:12},{wch:12},{wch:24},{wch:14},{wch:12},{wch:22},{wch:12},
-      {wch:14},{wch:20},{wch:26},{wch:22},{wch:20},{wch:40},
-      {wch:10},{wch:40},{wch:30},{wch:24},{wch:14},{wch:12},{wch:14},{wch:12},{wch:12}
-    ];
-    XLSX.utils.book_append_sheet(wb, ws1, 'Gestiones_Detalle');
-
-    // ════════════════════════════════════════
-    // HOJA 2: CORREOS_TICKETS
-    // Cada fila = un correo/ticket
-    // ════════════════════════════════════════
-    const rowsCorreos = state.emails.map(email => {
-      const agente = state.agents.find(a => a.id === email.asignado_a);
-      const fechaRec = email.fecha ? new Date(email.fecha) : null;
-      const gestiones = historial.filter(h => h.correo_id === email.id);
-      const primeraGestion = gestiones.length ? new Date(gestiones[0].created_at || gestiones[0].fecha) : null;
-      const ultimaGestion  = gestiones.length ? new Date(gestiones[gestiones.length-1].created_at || gestiones[gestiones.length-1].fecha) : null;
-
-      // Tiempo de primera respuesta en minutos
-      let minPrimeraResp = '';
-      if(fechaRec && primeraGestion) {
-        minPrimeraResp = Math.round((primeraGestion - fechaRec) / 60000);
-      }
-
-      return {
-        'ID_Correo':              email.id || '',
-        'Message_ID':             email.message_id || '',
-        'Asunto':                 email.asunto || '',
-        'Remitente_Email':        email.remitente || '',
-        'Remitente_Nombre':       email.remitente_nombre || '',
-        'Fecha_Recepcion':        fechaRec ? fechaRec.toLocaleDateString('es-CO') : '',
-        'Hora_Recepcion':         fechaRec ? fechaRec.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}) : '',
-        'Dia_Semana_Recepcion':   fechaRec ? ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'][fechaRec.getDay()] : '',
-        'Estado_Actual':          email.estado || '',
-        'Prioridad':              email.prioridad || '',
-        'Agente_Asignado_ID':     email.asignado_a || '',
-        'Agente_Asignado_Nombre': agente ? (agente.nombre || '') : '',
-        'Agente_Asignado_Email':  agente ? (agente.email || '') : '',
-        'Total_Gestiones':        gestiones.length,
-        'Fecha_Primera_Gestion':  primeraGestion ? primeraGestion.toLocaleDateString('es-CO') : '',
-        'Hora_Primera_Gestion':   primeraGestion ? primeraGestion.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}) : '',
-        'Fecha_Ultima_Gestion':   ultimaGestion  ? ultimaGestion.toLocaleDateString('es-CO') : '',
-        'Hora_Ultima_Gestion':    ultimaGestion  ? ultimaGestion.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}) : '',
-        'Min_Hasta_Primera_Gestion': minPrimeraResp,
-        'Tiene_Adjuntos':         email.has_attachments ? 'Sí' : 'No',
-        'Leido':                  email.is_read ? 'Sí' : 'No',
-      };
-    });
-
-    const ws2 = XLSX.utils.json_to_sheet(rowsCorreos.length ? rowsCorreos : [{'Sin datos':'No hay correos'}]);
-    ws2['!cols'] = [
-      {wch:12},{wch:24},{wch:40},{wch:30},{wch:24},{wch:14},{wch:12},{wch:14},
-      {wch:14},{wch:12},{wch:14},{wch:22},{wch:26},{wch:14},{wch:16},{wch:16},
-      {wch:16},{wch:16},{wch:22},{wch:12},{wch:10}
-    ];
-    XLSX.utils.book_append_sheet(wb, ws2, 'Correos_Tickets');
-
-    // ════════════════════════════════════════
-    // HOJA 3: RESUMEN_AGENTES
-    // Resumen por agente para KPIs en Power BI
-    // ════════════════════════════════════════
-    const rowsAgentes = state.agents.map(agente => {
-      const correos = state.emails.filter(e => e.asignado_a === agente.id);
-      const gestAgente = historial.filter(h => (h.metadata?.agente_id || h.agente_id) === agente.id);
-
-      const pend = correos.filter(e => e.estado==='pendiente').length;
-      const gest = correos.filter(e => e.estado==='gestion').length;
-      const sol  = correos.filter(e => e.estado==='solucionado').length;
-      const total = correos.length;
-
-      // Promedio minutos primera gestión
-      let tiemposResp = [];
-      correos.forEach(email => {
-        const fechaRec = email.fecha ? new Date(email.fecha) : null;
-        const primeraG = gestAgente.filter(h => h.correo_id === email.id)
-          .sort((a,b) => new Date(a.created_at||a.fecha) - new Date(b.created_at||b.fecha))[0];
-        if(fechaRec && primeraG) {
-          const mins = Math.round((new Date(primeraG.created_at||primeraG.fecha) - fechaRec) / 60000);
-          if(mins >= 0) tiemposResp.push(mins);
-        }
-      });
-      const promResp = tiemposResp.length ? Math.round(tiemposResp.reduce((a,b)=>a+b,0)/tiemposResp.length) : '';
-
-      return {
-        'Agente_ID':            agente.id || '',
-        'Agente_Nombre':        agente.nombre || '',
-        'Agente_Email':         agente.email || '',
-        'Estado_Agente':        agente.activo ? 'Activo' : 'Inactivo',
-        'Total_Correos':        total,
-        'Pendientes':           pend,
-        'En_Gestion':           gest,
-        'Solucionados':         sol,
-        'Total_Gestiones_Reg':  gestAgente.length,
-        'Prom_Min_Primera_Resp': promResp,
-        'Pct_Solucionados':     total > 0 ? Math.round(sol/total*100)+'%' : '0%',
-      };
-    });
-
-    const ws3 = XLSX.utils.json_to_sheet(rowsAgentes.length ? rowsAgentes : [{'Sin datos':'No hay agentes'}]);
-    ws3['!cols'] = [{wch:14},{wch:22},{wch:28},{wch:14},{wch:14},{wch:12},{wch:12},{wch:14},{wch:18},{wch:22},{wch:16}];
-    XLSX.utils.book_append_sheet(wb, ws3, 'Resumen_Agentes');
-
-    // ════════════════════════════════════════
-    // HOJA 4: ACCIONES_CATALOGO
-    // Catálogo de acciones para relacionar en Power BI
-    // ════════════════════════════════════════
-    const accionesCat = [...new Set(historial.map(h => h.evento || h.accion || '').filter(Boolean))].map(acc => ({
-      'Accion': acc,
-      'Tipo': acc.toLowerCase().includes('solucion') ? 'Cierre' :
-              acc.toLowerCase().includes('respond') ? 'Comunicación' :
-              acc.toLowerCase().includes('escal') ? 'Escalado' : 'Gestión',
-    }));
-    const ws4 = XLSX.utils.json_to_sheet(accionesCat.length ? accionesCat : [{'Accion':'Sin datos','Tipo':''}]);
-    ws4['!cols'] = [{wch:30},{wch:18}];
-    XLSX.utils.book_append_sheet(wb, ws4, 'Acciones_Catalogo');
-
-    // ── Generar y descargar ──
-    const fecha = new Date().toLocaleDateString('es-CO').replace(/\//g,'-');
-    XLSX.writeFile(wb, `PQR_Tododrogas_${fecha}.xlsx`);
-    showToast('Excel exportado ✓','success');
-
-  } catch(e) {
-    showToast('Error al exportar: '+e.message.substring(0,60),'error');
-    console.error(e);
-  } finally {
-    btn.innerHTML = original;
-    btn.disabled = false;
-  }
-}
 async function syncAll() {
   const btn=document.getElementById('syncBtn'),icon=document.getElementById('syncIcon');
   btn.classList.add('loading');
