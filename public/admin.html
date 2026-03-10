@@ -6,6 +6,7 @@
 <title>PQR Admin · Tododrogas</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="config.js" onerror="console.warn('config.js not found')"></script>
 <style>
 :root {
@@ -448,8 +449,16 @@ table.agents-tbl tr:hover td{background:var(--bg)}
   <!-- ══ PAGE: MÉTRICAS ══ -->
   <div class="page" id="page-metricas">
     <div class="metrics-page">
-      <div class="page-title">Métricas del sistema</div>
-      <div class="page-sub">Resumen de actividad y carga de agentes</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <div>
+          <div class="page-title">Métricas del sistema</div>
+          <div class="page-sub">Resumen de actividad y carga de agentes</div>
+        </div>
+        <button onclick="exportarExcel()" style="display:flex;align-items:center;gap:7px;background:#16a34a;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;box-shadow:0 2px 8px rgba(22,163,74,.25);transition:all .15s" onmouseover="this.style.background='#15803d'" onmouseout="this.style.background='#16a34a'">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Exportar para Power BI (.xlsx)
+        </button>
+      </div>
       <div class="kpi-grid">
         <div class="kpi"><div class="kpi-label">Total correos</div><div class="kpi-val" id="mKpiTotal">—</div><div class="kpi-sub">En el sistema</div><div class="kpi-accent" style="background:var(--blue)"></div></div>
         <div class="kpi"><div class="kpi-label">Pendientes</div><div class="kpi-val" id="mKpiPend">—</div><div class="kpi-sub">Sin gestionar</div><div class="kpi-accent" style="background:var(--yellow)"></div></div>
@@ -1415,8 +1424,192 @@ function updateMetrics() {
 }
 
 // ──────────────────────────────────────────────
-// SYNC
+// EXPORT EXCEL POWER BI
 // ──────────────────────────────────────────────
+async function exportarExcel() {
+  const btn = event.currentTarget;
+  const original = btn.innerHTML;
+  btn.innerHTML = '⏳ Generando...';
+  btn.disabled = true;
+
+  try {
+    // ── Cargar historial completo para el export ──
+    let historial = [];
+    try {
+      historial = await sb('historial_eventos?order=created_at.asc&limit=5000') || [];
+    } catch {
+      try { historial = await sb('historial?order=fecha.asc&limit=5000') || []; } catch {}
+    }
+
+    const wb = XLSX.utils.book_new();
+
+    // ════════════════════════════════════════
+    // HOJA 1: GESTIONES_DETALLE
+    // Cada fila = una gestión registrada por un agente
+    // ════════════════════════════════════════
+    const rowsGestiones = historial.map(ev => {
+      const meta = ev.metadata || {};
+      const fecha = ev.created_at || ev.fecha || '';
+      const fechaObj = fecha ? new Date(fecha) : null;
+      const email = state.emails.find(e => e.id === ev.correo_id || e.message_id === ev.message_id);
+      const agente = state.agents.find(a => a.id === meta.agente_id);
+
+      return {
+        'ID_Gestion':        ev.id || '',
+        'ID_Correo':         ev.correo_id || '',
+        'Message_ID':        ev.message_id || '',
+        'Fecha_Gestion':     fechaObj ? fechaObj.toLocaleDateString('es-CO') : '',
+        'Hora_Gestion':      fechaObj ? fechaObj.toLocaleTimeString('es-CO', {hour:'2-digit',minute:'2-digit',second:'2-digit'}) : '',
+        'Fecha_Hora_Completa': fechaObj ? fechaObj.toLocaleString('es-CO') : '',
+        'Dia_Semana':        fechaObj ? ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'][fechaObj.getDay()] : '',
+        'Agente_ID':         meta.agente_id || '',
+        'Agente_Nombre':     meta.agente_nombre || ev.agente_nombre || '',
+        'Agente_Email':      agente ? (agente.email || '') : '',
+        'Accion_Gestion':    ev.evento || ev.accion || '',
+        'Observaciones':     meta.observaciones || ev.detalle || ev.observaciones || '',
+        'Por':               meta.por || '',
+        'Asunto_Correo':     ev.subject || email?.asunto || '',
+        'Remitente_Correo':  ev.from_email || email?.remitente || '',
+        'Remitente_Nombre':  email?.remitente_nombre || '',
+        'Estado_Ticket':     email?.estado || '',
+        'Prioridad_Ticket':  email?.prioridad || '',
+        'Fecha_Recepcion':   email?.fecha ? new Date(email.fecha).toLocaleDateString('es-CO') : '',
+        'Hora_Recepcion':    email?.fecha ? new Date(email.fecha).toLocaleTimeString('es-CO', {hour:'2-digit',minute:'2-digit'}) : '',
+        'Tiene_Adjuntos':    email?.has_attachments ? 'Sí' : 'No',
+      };
+    });
+
+    const ws1 = XLSX.utils.json_to_sheet(rowsGestiones.length ? rowsGestiones : [{'Sin datos':'No hay gestiones registradas'}]);
+    // Anchos de columna optimizados para Power BI
+    ws1['!cols'] = [
+      {wch:12},{wch:12},{wch:24},{wch:14},{wch:12},{wch:22},{wch:12},
+      {wch:14},{wch:20},{wch:26},{wch:22},{wch:20},{wch:40},
+      {wch:10},{wch:40},{wch:30},{wch:24},{wch:14},{wch:12},{wch:14},{wch:12},{wch:12}
+    ];
+    XLSX.utils.book_append_sheet(wb, ws1, 'Gestiones_Detalle');
+
+    // ════════════════════════════════════════
+    // HOJA 2: CORREOS_TICKETS
+    // Cada fila = un correo/ticket
+    // ════════════════════════════════════════
+    const rowsCorreos = state.emails.map(email => {
+      const agente = state.agents.find(a => a.id === email.asignado_a);
+      const fechaRec = email.fecha ? new Date(email.fecha) : null;
+      const gestiones = historial.filter(h => h.correo_id === email.id);
+      const primeraGestion = gestiones.length ? new Date(gestiones[0].created_at || gestiones[0].fecha) : null;
+      const ultimaGestion  = gestiones.length ? new Date(gestiones[gestiones.length-1].created_at || gestiones[gestiones.length-1].fecha) : null;
+
+      // Tiempo de primera respuesta en minutos
+      let minPrimeraResp = '';
+      if(fechaRec && primeraGestion) {
+        minPrimeraResp = Math.round((primeraGestion - fechaRec) / 60000);
+      }
+
+      return {
+        'ID_Correo':              email.id || '',
+        'Message_ID':             email.message_id || '',
+        'Asunto':                 email.asunto || '',
+        'Remitente_Email':        email.remitente || '',
+        'Remitente_Nombre':       email.remitente_nombre || '',
+        'Fecha_Recepcion':        fechaRec ? fechaRec.toLocaleDateString('es-CO') : '',
+        'Hora_Recepcion':         fechaRec ? fechaRec.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}) : '',
+        'Dia_Semana_Recepcion':   fechaRec ? ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'][fechaRec.getDay()] : '',
+        'Estado_Actual':          email.estado || '',
+        'Prioridad':              email.prioridad || '',
+        'Agente_Asignado_ID':     email.asignado_a || '',
+        'Agente_Asignado_Nombre': agente ? (agente.nombre || '') : '',
+        'Agente_Asignado_Email':  agente ? (agente.email || '') : '',
+        'Total_Gestiones':        gestiones.length,
+        'Fecha_Primera_Gestion':  primeraGestion ? primeraGestion.toLocaleDateString('es-CO') : '',
+        'Hora_Primera_Gestion':   primeraGestion ? primeraGestion.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}) : '',
+        'Fecha_Ultima_Gestion':   ultimaGestion  ? ultimaGestion.toLocaleDateString('es-CO') : '',
+        'Hora_Ultima_Gestion':    ultimaGestion  ? ultimaGestion.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'}) : '',
+        'Min_Hasta_Primera_Gestion': minPrimeraResp,
+        'Tiene_Adjuntos':         email.has_attachments ? 'Sí' : 'No',
+        'Leido':                  email.is_read ? 'Sí' : 'No',
+      };
+    });
+
+    const ws2 = XLSX.utils.json_to_sheet(rowsCorreos.length ? rowsCorreos : [{'Sin datos':'No hay correos'}]);
+    ws2['!cols'] = [
+      {wch:12},{wch:24},{wch:40},{wch:30},{wch:24},{wch:14},{wch:12},{wch:14},
+      {wch:14},{wch:12},{wch:14},{wch:22},{wch:26},{wch:14},{wch:16},{wch:16},
+      {wch:16},{wch:16},{wch:22},{wch:12},{wch:10}
+    ];
+    XLSX.utils.book_append_sheet(wb, ws2, 'Correos_Tickets');
+
+    // ════════════════════════════════════════
+    // HOJA 3: RESUMEN_AGENTES
+    // Resumen por agente para KPIs en Power BI
+    // ════════════════════════════════════════
+    const rowsAgentes = state.agents.map(agente => {
+      const correos = state.emails.filter(e => e.asignado_a === agente.id);
+      const gestAgente = historial.filter(h => (h.metadata?.agente_id || h.agente_id) === agente.id);
+
+      const pend = correos.filter(e => e.estado==='pendiente').length;
+      const gest = correos.filter(e => e.estado==='gestion').length;
+      const sol  = correos.filter(e => e.estado==='solucionado').length;
+      const total = correos.length;
+
+      // Promedio minutos primera gestión
+      let tiemposResp = [];
+      correos.forEach(email => {
+        const fechaRec = email.fecha ? new Date(email.fecha) : null;
+        const primeraG = gestAgente.filter(h => h.correo_id === email.id)
+          .sort((a,b) => new Date(a.created_at||a.fecha) - new Date(b.created_at||b.fecha))[0];
+        if(fechaRec && primeraG) {
+          const mins = Math.round((new Date(primeraG.created_at||primeraG.fecha) - fechaRec) / 60000);
+          if(mins >= 0) tiemposResp.push(mins);
+        }
+      });
+      const promResp = tiemposResp.length ? Math.round(tiemposResp.reduce((a,b)=>a+b,0)/tiemposResp.length) : '';
+
+      return {
+        'Agente_ID':            agente.id || '',
+        'Agente_Nombre':        agente.nombre || '',
+        'Agente_Email':         agente.email || '',
+        'Estado_Agente':        agente.activo ? 'Activo' : 'Inactivo',
+        'Total_Correos':        total,
+        'Pendientes':           pend,
+        'En_Gestion':           gest,
+        'Solucionados':         sol,
+        'Total_Gestiones_Reg':  gestAgente.length,
+        'Prom_Min_Primera_Resp': promResp,
+        'Pct_Solucionados':     total > 0 ? Math.round(sol/total*100)+'%' : '0%',
+      };
+    });
+
+    const ws3 = XLSX.utils.json_to_sheet(rowsAgentes.length ? rowsAgentes : [{'Sin datos':'No hay agentes'}]);
+    ws3['!cols'] = [{wch:14},{wch:22},{wch:28},{wch:14},{wch:14},{wch:12},{wch:12},{wch:14},{wch:18},{wch:22},{wch:16}];
+    XLSX.utils.book_append_sheet(wb, ws3, 'Resumen_Agentes');
+
+    // ════════════════════════════════════════
+    // HOJA 4: ACCIONES_CATALOGO
+    // Catálogo de acciones para relacionar en Power BI
+    // ════════════════════════════════════════
+    const accionesCat = [...new Set(historial.map(h => h.evento || h.accion || '').filter(Boolean))].map(acc => ({
+      'Accion': acc,
+      'Tipo': acc.toLowerCase().includes('solucion') ? 'Cierre' :
+              acc.toLowerCase().includes('respond') ? 'Comunicación' :
+              acc.toLowerCase().includes('escal') ? 'Escalado' : 'Gestión',
+    }));
+    const ws4 = XLSX.utils.json_to_sheet(accionesCat.length ? accionesCat : [{'Accion':'Sin datos','Tipo':''}]);
+    ws4['!cols'] = [{wch:30},{wch:18}];
+    XLSX.utils.book_append_sheet(wb, ws4, 'Acciones_Catalogo');
+
+    // ── Generar y descargar ──
+    const fecha = new Date().toLocaleDateString('es-CO').replace(/\//g,'-');
+    XLSX.writeFile(wb, `PQR_Tododrogas_${fecha}.xlsx`);
+    showToast('Excel exportado ✓','success');
+
+  } catch(e) {
+    showToast('Error al exportar: '+e.message.substring(0,60),'error');
+    console.error(e);
+  } finally {
+    btn.innerHTML = original;
+    btn.disabled = false;
+  }
+}
 async function syncAll() {
   const btn=document.getElementById('syncBtn'),icon=document.getElementById('syncIcon');
   btn.classList.add('loading');
