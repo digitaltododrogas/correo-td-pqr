@@ -35,7 +35,7 @@
   --r:12px; --r2:8px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:'Poppins',sans-serif;min-height:100vh;display:flex;flex-direction:column;overflow:hidden}
+body{background:var(--bg);color:var(--ink);font-family:'Poppins',sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
 
 /* ── TOPBAR ── */
 .topbar{background:var(--ink);color:#fff;height:52px;display:flex;align-items:center;padding:0 20px;gap:16px;position:sticky;top:0;z-index:200;flex-shrink:0}
@@ -60,7 +60,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Poppins',sans-serif;min-
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* ── LAYOUT ── */
-.app-body{display:flex;flex:1;height:calc(100vh - 52px);overflow:hidden}
+.app-body{display:flex;flex:1;min-height:0;overflow:hidden}
 
 /* ── PAGES ── */
 .page{display:none;flex:1;overflow:hidden;min-height:0}
@@ -89,7 +89,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Poppins',sans-serif;min-
 .list-filters{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
 .filter-chip{padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;background:var(--bg2);color:var(--ink3);border:none;cursor:pointer;font-family:'Poppins',sans-serif;transition:all .15s}
 .filter-chip.active{background:var(--blue-l);color:var(--blue)}
-.email-list-items{flex:1;overflow-y:scroll;min-height:0}
+.email-list-items{flex:1;overflow-y:auto;min-height:0}
 .email-list-items::-webkit-scrollbar{width:8px}
 .email-list-items::-webkit-scrollbar-track{background:var(--bg2)}
 .email-list-items::-webkit-scrollbar-thumb{background:#b0b8cc;border-radius:4px;border:2px solid var(--bg2)}
@@ -406,26 +406,18 @@ table.agents-tbl tr:hover td{background:var(--bg)}
           <div class="mgmt-label">Estado</div>
           <span id="mgmtEstadoBadge" class="badge pendiente" style="font-size:12px;padding:4px 12px"></span>
           <div class="mgmt-btn-row" style="margin-top:10px">
-            <div id="btnAccionesAdmin">
-              <button class="btn btn-primary" onclick="openGestionModal()" style="width:100%;justify-content:center;margin-bottom:6px">
-                <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Añadir gestión
-              </button>
-              <button class="btn btn-success" onclick="marcarSolucionado()" style="width:100%;justify-content:center">
-                <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-                Solucionado
-              </button>
-            </div>
-            <div id="btnReabrirAdmin" style="display:none">
-              <div style="background:var(--green-l);border:1px solid #bbf7d0;border-radius:var(--r2);padding:10px 12px;margin-bottom:8px;text-align:center">
-                <div style="font-size:16px;margin-bottom:3px">✅</div>
-                <div style="font-size:11px;font-weight:700;color:var(--green)">Ticket solucionado</div>
-              </div>
-              <button class="btn btn-danger" onclick="reabrirTicket()" style="width:100%;justify-content:center">
-                <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
-                Reabrir ticket
-              </button>
-            </div>
+            <button class="btn btn-primary" onclick="openGestionModal()">
+              <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Añadir gestión
+            </button>
+            <button class="btn btn-success" onclick="marcarSolucionado()">
+              <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              Solucionado
+            </button>
+            <button class="btn btn-danger" onclick="reabrirTicket()">
+              <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+              Reabrir ticket
+            </button>
           </div>
         </div>
         <div class="mgmt-section">
@@ -810,7 +802,6 @@ async function selectEmail(id) {
       ${agent?`<span class="meta-chip">Agente: ${esc(agent.nombre)}</span>`:''}
     </div>
     <div class="ev-actions">
-      ${email.estado === 'solucionado' ? `
       <button class="btn btn-ghost" onclick="toggleReply()">
         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 00-4-4H4"/></svg>
         Responder
@@ -819,18 +810,6 @@ async function selectEmail(id) {
         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Gestión
       </button>
-      <button class="btn btn-danger" onclick="reabrirTicket()">
-        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
-        Reabrir ticket
-      </button>` : `
-      <button class="btn btn-ghost" onclick="toggleReply()">
-        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 00-4-4H4"/></svg>
-        Responder
-      </button>
-      <button class="btn btn-ghost" onclick="openGestionModal()">
-        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Gestión
-      </button>`}
     </div>
     <div id="replyBoxArea"></div>
     <div class="ev-body" id="evBody">
@@ -849,11 +828,6 @@ async function selectEmail(id) {
   document.querySelectorAll('.priority-btn').forEach(b=>{
     b.classList.toggle('active-prio', b.dataset.p===email.prioridad);
   });
-
-  // Mostrar botones según estado
-  const isSolucionado = email.estado === 'solucionado';
-  document.getElementById('btnAccionesAdmin').style.display = isSolucionado ? 'none' : 'block';
-  document.getElementById('btnReabrirAdmin').style.display  = isSolucionado ? 'block' : 'none';
 
   // Load timeline
   await loadTicketTimeline(id, email.message_id);
