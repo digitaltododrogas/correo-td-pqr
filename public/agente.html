@@ -508,6 +508,9 @@ async function selectEmail(id) {
       <span class="meta-chip">${formatDate(new Date(email.fecha),true)}</span>
     </div>
     <div class="ev-actions">
+      ${email.estado==='solucionado' ? `
+        <span style="display:inline-flex;align-items:center;gap:5px;background:var(--green-l);color:var(--green);font-size:11px;font-weight:700;padding:5px 12px;border-radius:var(--r2)">🔒 Ticket cerrado · solo lectura</span>
+      ` : `
       <button class="btn btn-ghost" onclick="toggleReply()">
         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 00-4-4H4"/></svg>
         Responder
@@ -516,6 +519,7 @@ async function selectEmail(id) {
         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Añadir gestión
       </button>
+      `}
     </div>
     <div id="replyBoxArea"></div>
     <div class="ev-body">
@@ -529,6 +533,30 @@ async function selectEmail(id) {
   document.getElementById('mgmtEstadoBadge').className='badge '+email.estado;
   document.getElementById('mgmtEstadoBadge').textContent=estadoLabel(email.estado);
   document.querySelectorAll('.priority-btn').forEach(b=>b.classList.toggle('active-prio', b.dataset.p===email.prioridad));
+
+  // Bloquear panel si está solucionado
+  const mgmtSection = document.querySelector('#mgmtRight .mgmt-section');
+  const btnAñadir = mgmtSection ? mgmtSection.querySelector('.btn-primary') : null;
+  const btnSol = mgmtSection ? mgmtSection.querySelector('.btn-success') : null;
+  let lockMsg = document.getElementById('mgmtSolucionadoMsg');
+  if(email.estado==='solucionado') {
+    if(btnAñadir) btnAñadir.style.display='none';
+    if(btnSol) btnSol.style.display='none';
+    if(!lockMsg) {
+      lockMsg = document.createElement('div');
+      lockMsg.id = 'mgmtSolucionadoMsg';
+      lockMsg.style.cssText='background:var(--green-l);color:var(--green);border-radius:var(--r2);padding:10px 12px;font-size:11px;font-weight:700;line-height:1.5;margin-top:6px';
+      lockMsg.innerHTML='✅ Ticket solucionado<br><span style="font-weight:400">Solo el administrador puede reabrir este ticket</span>';
+      mgmtSection.appendChild(lockMsg);
+    }
+    lockMsg.style.display='';
+    document.querySelectorAll('.priority-btn').forEach(b=>{ b.disabled=true; b.style.opacity='0.4'; b.style.cursor='not-allowed'; });
+  } else {
+    if(btnAñadir) btnAñadir.style.display='';
+    if(btnSol) btnSol.style.display='';
+    if(lockMsg) lockMsg.style.display='none';
+    document.querySelectorAll('.priority-btn').forEach(b=>{ b.disabled=false; b.style.opacity=''; b.style.cursor=''; });
+  }
 
   // Timeline
   await loadTicketTimeline(id);
@@ -681,6 +709,12 @@ async function saveGestion() {
       document.getElementById('mgmtEstadoBadge').className='badge solucionado';
       document.getElementById('mgmtEstadoBadge').textContent='Solucionado';
       showToast('Ticket solucionado ✓','success');
+      // Bloquear UI inmediatamente
+      const _ms = document.querySelector('#mgmtRight .mgmt-section');
+      if(_ms) { const b1=_ms.querySelector('.btn-primary'),b2=_ms.querySelector('.btn-success'); if(b1)b1.style.display='none'; if(b2)b2.style.display='none'; let lm=document.getElementById('mgmtSolucionadoMsg'); if(!lm){lm=document.createElement('div');lm.id='mgmtSolucionadoMsg';lm.style.cssText='background:var(--green-l);color:var(--green);border-radius:var(--r2);padding:10px 12px;font-size:11px;font-weight:700;line-height:1.5;margin-top:6px';lm.innerHTML='✅ Ticket solucionado<br><span style="font-weight:400">Solo el administrador puede reabrir este ticket</span>';_ms.appendChild(lm);}lm.style.display=''; }
+      document.querySelectorAll('.priority-btn').forEach(b=>{ b.disabled=true; b.style.opacity='0.4'; b.style.cursor='not-allowed'; });
+      // Bloquear ev-actions
+      const _ea=document.querySelector('.ev-actions'); if(_ea){_ea.innerHTML='<span style="display:inline-flex;align-items:center;gap:5px;background:var(--green-l);color:var(--green);font-size:11px;font-weight:700;padding:5px 12px;border-radius:var(--r2)">🔒 Ticket cerrado · solo lectura</span>';}
     } else {
       if(email?.estado==='pendiente') {
         await sb(`correos?id=eq.${id}`,'PATCH',{estado:'gestion'});
