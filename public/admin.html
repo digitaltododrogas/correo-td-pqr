@@ -802,6 +802,9 @@ async function selectEmail(id) {
       ${agent?`<span class="meta-chip">Agente: ${esc(agent.nombre)}</span>`:''}
     </div>
     <div class="ev-actions">
+      ${email.estado==='solucionado' ? `
+        <span style="display:inline-flex;align-items:center;gap:5px;background:var(--green-l);color:var(--green);font-size:11px;font-weight:700;padding:5px 12px;border-radius:var(--r2)">🔒 Ticket cerrado · solo lectura</span>
+      ` : `
       <button class="btn btn-ghost" onclick="toggleReply()">
         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 00-4-4H4"/></svg>
         Responder
@@ -810,6 +813,7 @@ async function selectEmail(id) {
         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Gestión
       </button>
+      `}
     </div>
     <div id="replyBoxArea"></div>
     <div class="ev-body" id="evBody">
@@ -828,6 +832,30 @@ async function selectEmail(id) {
   document.querySelectorAll('.priority-btn').forEach(b=>{
     b.classList.toggle('active-prio', b.dataset.p===email.prioridad);
   });
+
+  // Bloquear panel si está solucionado (admin puede reabrir pero no añadir gestión/marcar sol)
+  const _mgmtBtnRow = document.querySelector('#mgmtPanel .mgmt-btn-row');
+  const _btnAdd = _mgmtBtnRow ? _mgmtBtnRow.querySelector('.btn-primary') : null;
+  const _btnSol = _mgmtBtnRow ? _mgmtBtnRow.querySelector('.btn-success') : null;
+  let _lockMsg = document.getElementById('adminMgmtSolucionadoMsg');
+  if(email.estado==='solucionado') {
+    if(_btnAdd) _btnAdd.style.display='none';
+    if(_btnSol) _btnSol.style.display='none';
+    if(!_lockMsg) {
+      _lockMsg = document.createElement('div');
+      _lockMsg.id = 'adminMgmtSolucionadoMsg';
+      _lockMsg.style.cssText='background:var(--green-l);color:var(--green);border-radius:var(--r2);padding:10px 12px;font-size:11px;font-weight:700;line-height:1.5;margin-top:6px';
+      _lockMsg.innerHTML='✅ Ticket solucionado<br><span style="font-weight:400">Usa "Reabrir ticket" para continuar la gestión</span>';
+      if(_mgmtBtnRow) _mgmtBtnRow.appendChild(_lockMsg);
+    }
+    _lockMsg.style.display='';
+    document.querySelectorAll('.priority-btn').forEach(b=>{ b.disabled=true; b.style.opacity='0.4'; b.style.cursor='not-allowed'; });
+  } else {
+    if(_btnAdd) _btnAdd.style.display='';
+    if(_btnSol) _btnSol.style.display='';
+    if(_lockMsg) _lockMsg.style.display='none';
+    document.querySelectorAll('.priority-btn').forEach(b=>{ b.disabled=false; b.style.opacity=''; b.style.cursor=''; });
+  }
 
   // Load timeline
   await loadTicketTimeline(id, email.message_id);
