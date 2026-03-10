@@ -35,7 +35,7 @@
   --agent-color:#2563eb;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:'Poppins',sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+body{background:var(--bg);color:var(--ink);font-family:'Poppins',sans-serif;min-height:100vh;display:flex;flex-direction:column;overflow:hidden}
 
 /* ── TOPBAR ── */
 .topbar{background:var(--ink);color:#fff;height:52px;display:flex;align-items:center;padding:0 20px;gap:14px;position:sticky;top:0;z-index:200;flex-shrink:0}
@@ -56,7 +56,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Poppins',sans-serif;heig
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* ── LAYOUT ── */
-.app-body{display:flex;flex:1;min-height:0;overflow:hidden}
+.app-body{display:flex;flex:1;height:calc(100vh - 52px);overflow:hidden;min-height:0}
 
 /* ── FOLDERS ── */
 .folders-panel{width:180px;min-width:180px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:14px 8px;gap:2px;overflow-y:auto;min-height:0}
@@ -75,7 +75,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Poppins',sans-serif;heig
 .list-search input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r2);padding:7px 12px 7px 30px;font-size:12px;font-family:'Poppins',sans-serif;color:var(--ink);outline:none;transition:all .15s}
 .list-search input:focus{border-color:var(--blue);background:#fff}
 .list-search svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--ink3)}
-.email-list-items{flex:1;overflow-y:auto;min-height:0}
+.email-list-items{flex:1;overflow-y:scroll;min-height:0}
 .email-list-items::-webkit-scrollbar{width:8px}
 .email-list-items::-webkit-scrollbar-track{background:var(--bg2)}
 .email-list-items::-webkit-scrollbar-thumb{background:#b0b8cc;border-radius:4px;border:2px solid var(--bg2)}
@@ -274,14 +274,21 @@ body{background:var(--bg);color:var(--ink);font-family:'Poppins',sans-serif;heig
       <div class="mgmt-section">
         <div class="mgmt-label">Estado del ticket</div>
         <span id="mgmtEstadoBadge" class="badge pendiente" style="font-size:11px;padding:3px 10px;margin-bottom:10px;display:inline-flex"></span>
-        <button class="btn btn-primary mgmt-btn-full" onclick="openGestionModal()">
-          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Añadir gestión
-        </button>
-        <button class="btn btn-success mgmt-btn-full" onclick="marcarSolucionado()">
-          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-          Marcar solucionado
-        </button>
+        <div id="btnAcciones">
+          <button class="btn btn-primary mgmt-btn-full" onclick="openGestionModal()">
+            <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Añadir gestión
+          </button>
+          <button class="btn btn-success mgmt-btn-full" onclick="marcarSolucionado()">
+            <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Marcar solucionado
+          </button>
+        </div>
+        <div id="ticketCerrado" style="display:none;background:var(--green-l);border:1px solid #bbf7d0;border-radius:var(--r2);padding:10px 12px;margin-top:4px;text-align:center">
+          <div style="font-size:18px;margin-bottom:4px">✅</div>
+          <div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:2px">Ticket solucionado</div>
+          <div style="font-size:10px;color:var(--green);opacity:.8">Solo el administrador puede reabrir este ticket</div>
+        </div>
       </div>
       <div class="mgmt-section">
         <div class="mgmt-label">Prioridad</div>
@@ -508,6 +515,11 @@ async function selectEmail(id) {
       <span class="meta-chip">${formatDate(new Date(email.fecha),true)}</span>
     </div>
     <div class="ev-actions">
+      ${email.estado === 'solucionado' ? `
+      <span style="font-size:11px;color:var(--green);font-weight:600;display:flex;align-items:center;gap:5px">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+        Ticket cerrado · solo lectura
+      </span>` : `
       <button class="btn btn-ghost" onclick="toggleReply()">
         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 00-4-4H4"/></svg>
         Responder
@@ -515,7 +527,7 @@ async function selectEmail(id) {
       <button class="btn btn-primary" onclick="openGestionModal()">
         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Añadir gestión
-      </button>
+      </button>`}
     </div>
     <div id="replyBoxArea"></div>
     <div class="ev-body">
@@ -529,6 +541,16 @@ async function selectEmail(id) {
   document.getElementById('mgmtEstadoBadge').className='badge '+email.estado;
   document.getElementById('mgmtEstadoBadge').textContent=estadoLabel(email.estado);
   document.querySelectorAll('.priority-btn').forEach(b=>b.classList.toggle('active-prio', b.dataset.p===email.prioridad));
+
+  // Bloquear panel si está solucionado
+  const isSolucionado = email.estado === 'solucionado';
+  document.getElementById('btnAcciones').style.display = isSolucionado ? 'none' : 'block';
+  document.getElementById('ticketCerrado').style.display = isSolucionado ? 'block' : 'none';
+  document.querySelectorAll('.priority-btn').forEach(b => {
+    b.disabled = isSolucionado;
+    b.style.opacity = isSolucionado ? '0.4' : '1';
+    b.style.cursor = isSolucionado ? 'not-allowed' : 'pointer';
+  });
 
   // Timeline
   await loadTicketTimeline(id);
