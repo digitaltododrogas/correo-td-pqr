@@ -630,7 +630,7 @@ async function loadAttachments(correoId) {
   if(!el) return;
   try {
     const adjs=await sb(`adjuntos?correo_id=eq.${correoId}`)||[];
-    el.innerHTML=adjs.length?adjs.map(a=>`<div class="adj-pill" onclick="window.open('${esc(a.url||a.content_url||'#')}')">${getFileIcon(a.nombre||a.name)} ${esc(a.nombre||a.name||'Archivo')}</div>`).join(''):'<span style="font-size:11px;color:var(--ink3)">Sin adjuntos</span>';
+    el.innerHTML=adjs.length?adjs.map(a=>`<div class="adj-pill" onclick="window.open('${esc(a.storage_url||a.url||a.content_url||'#')}')">${getFileIcon(a.nombre||a.name)} ${esc(a.nombre||a.name||'Archivo')}</div>`).join(''):'<span style="font-size:11px;color:var(--ink3)">Sin adjuntos</span>';
   } catch { el.innerHTML=''; }
 }
 
