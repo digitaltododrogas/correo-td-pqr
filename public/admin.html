@@ -1483,7 +1483,7 @@ async function loadAttachments(correoId, messageId) {
     const adjs = await sb(`adjuntos?correo_id=eq.${correoId}`)||[];
     if(!adjs.length) { el.innerHTML='<span style="font-size:11px;color:var(--ink3)">Sin adjuntos registrados</span>'; return; }
     el.innerHTML = adjs.map(a=>`
-      <div class="adj-pill" onclick="window.open('${esc(a.url||a.content_url||'#')}')">
+      <div class="adj-pill" onclick="window.open('${esc(a.storage_url||a.url||a.content_url||'#')}')">
         ${getFileIcon(a.nombre||a.name)} ${esc(a.nombre||a.name||'Archivo')}
       </div>`).join('');
   } catch {
