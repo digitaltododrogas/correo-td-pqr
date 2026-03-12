@@ -502,7 +502,7 @@ body{background:var(--ink);display:flex;min-height:100vh;}
         <span style="font-size:9px;color:rgba(99,179,237,.9);font-family:'JetBrains Mono',monospace;font-weight:600;">304 341 2431</span>
       </a>
 
-      <a href="/cdn-cgi/l/email-protection#3d4d4c4f4e5b597d49525952594f525a5c4e135e5250135e52" style="text-decoration:none;flex:1;min-width:100px;max-width:140px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border-radius:14px;border:1px solid rgba(37,99,235,.35);background:linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03));transition:all .25s;" onmouseover="this.style.borderColor='rgba(37,99,235,.7)';this.style.background='linear-gradient(135deg,rgba(37,99,235,.2),rgba(37,99,235,.08))';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(37,99,235,.35)';this.style.background='linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03))';this.style.transform='translateY(0)'">
+      <a href="/cdn-cgi/l/email-protection#aadadbd8d9ccceeadec5cec5ced8c5cdcbd984c9c5c784c9c5" style="text-decoration:none;flex:1;min-width:100px;max-width:140px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border-radius:14px;border:1px solid rgba(37,99,235,.35);background:linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03));transition:all .25s;" onmouseover="this.style.borderColor='rgba(37,99,235,.7)';this.style.background='linear-gradient(135deg,rgba(37,99,235,.2),rgba(37,99,235,.08))';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(37,99,235,.35)';this.style.background='linear-gradient(135deg,rgba(37,99,235,.1),rgba(37,99,235,.03))';this.style.transform='translateY(0)'">
         <span style="font-size:22px;line-height:1;">✉️</span>
         <span style="font-size:10px;font-weight:800;color:#fff;letter-spacing:.8px;text-transform:uppercase;">Correo</span>
         <span style="font-size:9px;color:rgba(99,179,237,.9);font-family:'JetBrains Mono',monospace;font-weight:600;">pqrsfd@tododrogas</span>
@@ -567,13 +567,8 @@ body{background:var(--ink);display:flex;min-height:100vh;}
         </div>
         <div style="font-size:11px;color:rgba(96,165,250,.9);text-align:center;">Escanea el QR con tu celular o toca el botón</div>
       </div>
-      <div class="qr-frame" style="padding:14px;margin:0;">
-        <div class="scan-line"></div>
-        <div class="qr-inner">
-          <div id="qr-encuesta" style="line-height:1;"></div>
-        </div>
-      </div>
-      <div class="qr-url" id="qr-encuesta-url">Cargando…</div><div class="qr-url">Encuesta de satisfacción · Escanea con tu cámara</div>
+      <div class="qr-frame" style="padding:14px;margin:0;"><div class="scan-line"></div><div class="qr-inner"><div id="qr-encuesta" style="line-height:1;min-width:130px;min-height:130px;display:flex;align-items:center;justify-content:center;"></div></div></div>
+      <div class="qr-url" id="qr-encuesta-url">Encuesta de satisfacción · Escanea con tu cámara</div>
     </div>
 
     <!-- DIVISOR -->
@@ -593,13 +588,8 @@ body{background:var(--ink);display:flex;min-height:100vh;}
         </div>
         <div style="font-size:11px;color:rgba(96,165,250,.9);text-align:center;">Escanea el QR con tu celular o toca el botón</div>
       </div>
-      <div class="qr-frame" style="padding:14px;margin:0;">
-        <div class="scan-line"></div>
-        <div class="qr-inner">
-          <div id="qr-radicar" style="line-height:1;"></div>
-        </div>
-      </div>
-      <div class="qr-url" id="qr-radicar-url">Cargando…</div><div class="qr-url">tododrogas.com/pqr · Escanea con tu cámara</div>
+      <div class="qr-frame" style="padding:14px;margin:0;"><div class="scan-line"></div><div class="qr-inner"><div id="qr-radicar" style="line-height:1;min-width:130px;min-height:130px;display:flex;align-items:center;justify-content:center;"></div></div></div>
+      <div class="qr-url" id="qr-radicar-url">tododrogas.com/pqr · Escanea con tu cámara</div>
       <button class="btn-radicar" onclick="goToForm()" style="margin-top:4px;">
         <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
         Radicar mi solicitud aquí
@@ -681,132 +671,61 @@ body{background:var(--ink);display:flex;min-height:100vh;}
 </div>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js">
-
-// ── INIT ──
-document.addEventListener('DOMContentLoaded', loadConfig);
+document.addEventListener('DOMContentLoaded', ()=>{ startCarousel(); applyQRs(); });
 </script><script>
-// ══════════════════════════════════════════════════════
-// CONFIG — carga desde Supabase (si hay creds) o localStorage
-// Flujo: Supabase config_sistema → fallback localStorage pqr_config → defaults
-// El QR NO es estático: se genera con la URL guardada en config.
-// Solo cambia si se edita en el panel y se guarda de nuevo.
-// ══════════════════════════════════════════════════════
+// ══════════════════════════════
+// CARRUSEL — carga desde config o defaults
+// ══════════════════════════════
+let FRASES = [
+  { text:'Tu voz importa', hl:true },
+  { text:'¿Tienes una queja o sugerencia? Estamos para escucharte', hl:false },
+  { text:'Confidencial · Tu información está protegida', hl:false },
+  { text:'Respuesta garantizada en máximo 15 días hábiles', hl:false },
+  { text:'Elige el canal que más te convenga: correo, chat, audio o escritura', hl:false },
+];
 
-const DEFAULTS = {
-  frases: [
-    { text:'Tu voz importa', hl:true },
-    { text:'¿Tienes una queja o sugerencia? Estamos para escucharte', hl:false },
-    { text:'Confidencial · Tu información está protegida', hl:false },
-    { text:'Respuesta garantizada en máximo 15 días hábiles', hl:false },
-    { text:'Elige el canal que más te convenga: correo, chat, audio o escritura', hl:false },
-  ],
-  qrUrl: 'https://td-pruebas.online/pqr_form.html',
-  encuestaUrl: '',
-};
+// Carga config desde localStorage (guardada por el panel en el mismo dominio)
+let CFG = {};
+let FORM_URL = 'pqr_form.html'; // default
+try {
+  const saved = localStorage.getItem('pqr_config');
+  if(saved){
+    CFG = JSON.parse(saved);
+    if(CFG.frases && CFG.frases.length)
+      FRASES = CFG.frases.map((f,i) => ({text: f.text, hl: i===0}));
+    if(CFG.qrUrl) FORM_URL = CFG.qrUrl;
+  }
+} catch(e){}
 
-let FRASES = DEFAULTS.frases;
-let FORM_URL = DEFAULTS.qrUrl;
-let ENCUESTA_URL = DEFAULTS.encuestaUrl;
+// Genera QR en el contenedor dado con la URL dada
+function makeQR(elId, url, size){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  el.innerHTML = '';
+  if(!url){ el.innerHTML='<span style="color:#6b748a;font-size:10px;text-align:center;display:block;padding:16px 4px;">Sin URL</span>'; return; }
+  try{
+    new QRCode(el,{text:url,width:size||130,height:size||130,colorDark:'#0a0e1a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});
+  }catch(e){ el.innerHTML='<span style="color:#f87171;font-size:10px;">Error QR</span>'; }
+}
+
+// Aplica QRs una vez el DOM esté listo
+function applyQRs(){
+  // QR Radicar
+  makeQR('qr-radicar', FORM_URL, 130);
+  const radLbl = document.getElementById('qr-radicar-url');
+  if(radLbl){
+    try{ radLbl.textContent = new URL(FORM_URL).hostname + new URL(FORM_URL).pathname; }
+    catch(e){ radLbl.textContent = FORM_URL; }
+  }
+  // QR Encuesta
+  const encUrl = CFG.canales && CFG.canales.encuesta ? CFG.canales.encuesta : '';
+  makeQR('qr-encuesta', encUrl, 130);
+  const encLbl = document.getElementById('qr-encuesta-url');
+  if(encLbl) encLbl.textContent = encUrl ? 'Encuesta · Escanea con tu cámara' : 'Encuesta · configura la URL en el panel';
+}
 
 let cIdx = 0;
 let cTimer = null;
-
-// ── Genera un QR en el elemento dado con la URL dada ──
-function makeQR(elId, url, size) {
-  const el = document.getElementById(elId);
-  if (!el) return;
-  el.innerHTML = '';
-  if (!url) {
-    el.innerHTML = '<span style="color:#6b748a;font-size:10px;text-align:center;display:block;padding:10px;">Sin URL<br>configurada</span>';
-    return;
-  }
-  try {
-    new QRCode(el, {
-      text: url,
-      width: size || 130,
-      height: size || 130,
-      colorDark: '#0a0e1a',
-      colorLight: '#ffffff',
-      correctLevel: QRCode.CorrectLevel.H
-    });
-  } catch(e) {
-    el.innerHTML = '<span style="color:#f87171;font-size:10px;">Error QR</span>';
-  }
-}
-
-// ── Aplica la config al DOM ──
-function applyConfig(cfg) {
-  // Frases carrusel
-  if (cfg.frases && cfg.frases.length) {
-    FRASES = cfg.frases.map((f, i) => ({ text: f.text, hl: i === 0 }));
-  }
-  // URL formulario (QR radicar)
-  if (cfg.qrUrl) FORM_URL = cfg.qrUrl;
-  // URL encuesta
-  if (cfg.canales && cfg.canales.encuesta) ENCUESTA_URL = cfg.canales.encuesta;
-
-  // Genera QR radicar
-  makeQR('qr-radicar', FORM_URL, 130);
-  const radUrl = document.getElementById('qr-radicar-url');
-  if (radUrl) {
-    try { radUrl.textContent = new URL(FORM_URL).hostname + new URL(FORM_URL).pathname; }
-    catch(e) { radUrl.textContent = FORM_URL; }
-  }
-
-  // Genera QR encuesta (solo si tiene URL)
-  makeQR('qr-encuesta', ENCUESTA_URL, 130);
-  const encUrl = document.getElementById('qr-encuesta-url');
-  if (encUrl) encUrl.textContent = ENCUESTA_URL || 'Encuesta · pendiente de configurar';
-}
-
-// ── Carga config: primero Supabase, luego localStorage, luego defaults ──
-// ══════════════════════════════════════════════════════════════════
-// SUPABASE CONFIG — editar SOLO si cambias de VPS o proyecto Supabase
-// La anon key es pública (solo lectura). La service key NUNCA va aquí.
-// ══════════════════════════════════════════════════════════════════
-const SB_URL  = 'SUPABASE_URL_PLACEHOLDER';   // ej: https://xxxx.supabase.co
-const SB_ANON = 'SUPABASE_ANON_KEY_PLACEHOLDER'; // anon/public key del proyecto
-
-async function loadConfig() {
-  // 1. Supabase — usa anon key embebida o la guardada por el panel en mismo dominio
-  const sbCfg = (() => { try { return JSON.parse(localStorage.getItem('td_sb_cfg')||'{}'); } catch(e){ return {}; } })();
-  const _sbUrl  = (SB_URL  && !SB_URL.includes('PLACEHOLDER'))  ? SB_URL  : (sbCfg.url  || '');
-  const _sbAnon = (SB_ANON && !SB_ANON.includes('PLACEHOLDER')) ? SB_ANON : (sbCfg.anon || sbCfg.key || '');
-
-  if (_sbUrl && _sbAnon) {
-    try {
-      const r = await fetch(
-        `${_sbUrl}/rest/v1/config_sistema?id=eq.main&select=data&limit=1`,
-        { headers: { apikey: _sbAnon, Authorization: 'Bearer ' + _sbAnon } }
-      );
-      if (r.ok) {
-        const rows = await r.json();
-        if (rows && rows[0] && rows[0].data) {
-          const cfg = rows[0].data;
-          // Cachear localmente para carga instantánea en próxima apertura
-          try { localStorage.setItem('pqr_config', JSON.stringify(cfg)); } catch(e){}
-          applyConfig(cfg);
-          startCarousel();
-          return;
-        }
-      }
-    } catch(e) { console.warn('Supabase no disponible, usando caché:', e.message); }
-  }
-
-  // 2. Caché local (última config cargada exitosamente de Supabase)
-  try {
-    const saved = localStorage.getItem('pqr_config');
-    if (saved) {
-      applyConfig(JSON.parse(saved));
-      startCarousel();
-      return;
-    }
-  } catch(e) {}
-
-  // 3. Valores por defecto (primera carga sin config aún)
-  applyConfig(DEFAULTS);
-  startCarousel();
-}
 
 function renderCarousel(){
   const textEl = document.getElementById('carouselText');
