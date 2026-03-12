@@ -498,7 +498,8 @@ html,body{height:100%;font-family:'Poppins',sans-serif;overflow:hidden;backgroun
   .msg-textarea{min-height:140px;}
 
   /* QR block compacto */
-  .qr-frame-sm{padding:8px;}
+  
+  
 }
 
 /* Pantallas grandes (≥1400px): aprovechar espacio */
@@ -806,20 +807,15 @@ html,body{height:100%;font-family:'Poppins',sans-serif;overflow:hidden;backgroun
 // ══════════════════════════════════════════
 // CONFIG — lee localStorage('pqr_config') guardado por el panel
 // ══════════════════════════════════════════
-// Lee config de localStorage — variables disponibles para todo el script
-let _CFG = {};
-try{ const _s=localStorage.getItem('pqr_config'); if(_s) _CFG=JSON.parse(_s); }catch(e){}
-if(_CFG.canales && _CFG.canales.whatsapp){
-  const num=_CFG.canales.whatsapp.replace(/\D/g,'');
-  window._WA_URL='https://wa.me/57'+num;
-}
-if(_CFG.canales && _CFG.canales.web) window._N8N_BASE=_CFG.canales.web;
-// QR solo en bienvenida — no en form
-
-  const encoded = encodeURIComponent(qrUrl);
-  el.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data='+encoded+'&bgcolor=ffffff&color=0a0e1a&qzone=1" width="120" height="120" style="display:block;border-radius:4px;" onerror="this.style.display='none'">';
-  if(lbl){ try{ lbl.textContent=new URL(qrUrl).hostname+new URL(qrUrl).pathname; }catch(e){ lbl.textContent=qrUrl; } }
-}
+(function(){
+  try{
+    const cfg = JSON.parse(localStorage.getItem('pqr_config')||'{}');
+    if(cfg.canales && cfg.canales.whatsapp)
+      window._WA_URL = 'https://wa.me/57' + cfg.canales.whatsapp.replace(/\D/g,'');
+    if(cfg.canales && cfg.canales.web)
+      window._N8N_BASE = cfg.canales.web;
+  }catch(e){}
+})();
 
 const N8N_BASE       = window._N8N_BASE || 'https://TU_DOMINIO.com/webhook';
 const WEBHOOK_PQR    = N8N_BASE + '/radicar-pqr';
@@ -922,7 +918,6 @@ function launchSlide4(medio){
   currentSlide=3;
   updateCarousel(3);
   updateProgress(3);
-
 
   // Inicializar según medio
   if(medio==='lapiz') setTimeout(initCanvas,120);
@@ -1387,8 +1382,6 @@ setTimeout(()=>{document.body.style.opacity='1';},50);
 // Init responsive slides on load
 window.addEventListener('load', ()=>updateCarousel(0));
 window.addEventListener('resize', ()=>updateCarousel(currentSlide));
-
 </script>
-
 </body>
 </html>
