@@ -171,6 +171,67 @@ html,body{height:100%;font-family:'Space Grotesk',sans-serif;background:var(--bg
 .canal-preview-card .cp-icon{font-size:22px;}
 .canal-preview-card .cp-name{font-size:10px;font-weight:800;color:#fff;letter-spacing:.6px;text-transform:uppercase;}
 .canal-preview-card .cp-val{font-size:9px;color:rgba(99,179,237,.9);font-family:'JetBrains Mono',monospace;}
+
+/* BADGE extra */
+.badge-red{background:rgba(248,113,113,.15);color:var(--red);}
+.badge-yellow{background:rgba(251,191,36,.15);color:var(--yellow);}
+
+/* SEDES */
+.sedes-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.sede-stat{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-s);padding:14px 16px;}
+.sede-stat .sv{font-size:24px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+.sede-stat .sl{font-size:11px;color:var(--ink3);margin-top:2px;font-weight:500;}
+.sede-stat.blue .sv{color:var(--blue);}
+.sede-stat.green .sv{color:var(--green);}
+.sede-stat.yellow .sv{color:var(--yellow);}
+.sedes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;margin-bottom:20px;}
+.sede-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:16px;transition:border-color .2s;}
+.sede-card:hover{border-color:var(--border2);}
+.sede-card.activa{border-color:rgba(52,211,153,.25);}
+.sede-card.inactiva{opacity:.6;}
+.sc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;}
+.sc-name{font-size:14px;font-weight:700;color:var(--ink);}
+.sc-id{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--ink3);margin-top:2px;}
+.sc-actions{display:flex;gap:5px;flex-shrink:0;}
+.sc-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;font-size:12px;color:var(--ink2);}
+.sc-row:last-of-type{margin-bottom:0;}
+.sc-row .ico{width:16px;text-align:center;font-size:13px;flex-shrink:0;}
+.sc-coords{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--blue);cursor:pointer;text-decoration:underline dotted;}
+.sc-divider{height:1px;background:var(--border);margin:10px 0;}
+.sc-footer{display:flex;align-items:center;justify-content:space-between;}
+.btn-icon{width:30px;height:30px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-s);cursor:pointer;border:1px solid var(--border);background:var(--surface);font-size:14px;transition:all .15s;color:var(--ink2);}
+.btn-icon:hover{color:var(--ink);border-color:var(--border2);}
+.btn-icon.del:hover{background:rgba(248,113,113,.15);color:var(--red);border-color:rgba(248,113,113,.3);}
+
+/* MODAL SEDES */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
+.modal-overlay.open{opacity:1;pointer-events:auto;}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:16px;width:min(580px,96vw);max-height:92vh;overflow-y:auto;padding:28px;transform:scale(.92) translateY(24px);transition:transform .32s cubic-bezier(.34,1.4,.64,1);}
+.modal::-webkit-scrollbar{width:4px}
+.modal::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+.modal-overlay.open .modal{transform:scale(1) translateY(0);}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;}
+.modal-head h3{font-size:16px;font-weight:700;}
+.modal-close{background:var(--surface);border:1px solid var(--border);color:var(--ink2);border-radius:var(--radius-s);width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:all .15s;}
+.modal-close:hover{color:var(--ink);border-color:var(--border2);}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.fg-full{grid-column:1/-1;}
+.fg-sep{grid-column:1/-1;height:1px;background:var(--border);margin:4px 0;}
+.fg-label{font-size:12px;font-weight:500;color:var(--ink2);display:block;margin-bottom:5px;}
+.fg-hint{font-size:11px;color:var(--ink3);margin-top:4px;line-height:1.4;}
+.fg-inp{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-s);padding:9px 13px;color:var(--ink);font-size:13px;font-family:'Space Grotesk',sans-serif;outline:none;transition:border-color .18s;}
+.fg-inp:focus{border-color:var(--blue);}
+.fg-inp::placeholder{color:var(--ink3);}
+.fg-inp.mono{font-family:'JetBrains Mono',monospace;font-size:12px;}
+.map-preview-btn{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-s);padding:10px 14px;color:var(--ink2);font-size:12px;font-family:'Space Grotesk',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;transition:border-color .15s;margin-top:4px;}
+.map-preview-btn:hover{border-color:var(--blue);color:var(--ink);}
+.toggle-row{display:flex;align-items:center;gap:10px;padding:8px 0;}
+.tog{width:38px;height:22px;background:var(--surface2);border-radius:99px;cursor:pointer;position:relative;transition:background .2s;border:1px solid var(--border);flex-shrink:0;}
+.tog.on{background:var(--green-d);border-color:var(--green-d);}
+.tog::after{content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;top:3px;left:3px;transition:transform .2s;}
+.tog.on::after{transform:translateX(16px);}
+.tog-lbl{font-size:13px;font-weight:500;color:var(--ink2);}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;padding-top:18px;border-top:1px solid var(--border);}
 </style>
 </head>
 <body>
@@ -198,6 +259,9 @@ html,body{height:100%;font-family:'Space Grotesk',sans-serif;background:var(--bg
       </div>
       <div class="nav-item" onclick="goTo('qr',this)">
         <span class="icon">◼</span> Código QR
+      </div>
+      <div class="nav-item" onclick="goTo('sedes',this)">
+        <span class="icon">📍</span> Sedes
       </div>
       <div class="nav-item" onclick="goTo('supabase',this)">
         <span class="icon">🗄</span> Conexión BD
@@ -420,6 +484,41 @@ html,body{height:100%;font-family:'Space Grotesk',sans-serif;background:var(--bg
         </div>
       </div>
 
+      <!-- SEDES -->
+      <div class="page" id="page-sedes">
+        <div class="section-head" style="display:flex;align-items:flex-start;justify-content:space-between;">
+          <div>
+            <h2>Gestión de Sedes</h2>
+            <p>La encuesta detecta la sede más cercana al usuario por GPS. Agrega, edita o desactiva sedes aquí.</p>
+          </div>
+          <div style="display:flex;gap:8px;flex-shrink:0;margin-top:4px;">
+            <button class="btn btn-ghost btn-sm" onclick="syncSedes()">↻ Sincronizar</button>
+            <button class="btn btn-primary btn-sm" onclick="openSedeModal()">+ Nueva sede</button>
+          </div>
+        </div>
+        <div class="sedes-stats">
+          <div class="sede-stat blue"><div class="sv" id="st-total">—</div><div class="sl">Total sedes</div></div>
+          <div class="sede-stat green"><div class="sv" id="st-activas">—</div><div class="sl">Activas</div></div>
+          <div class="sede-stat yellow"><div class="sv" id="st-inactivas">—</div><div class="sl">Inactivas</div></div>
+          <div class="sede-stat"><div class="sv" id="st-radio">—</div><div class="sl">Radio prom. (m)</div></div>
+        </div>
+        <div class="sedes-grid" id="sedes-grid">
+          <div style="grid-column:1/-1;text-align:center;padding:40px;background:var(--bg3);border:1px dashed var(--border);border-radius:var(--radius);color:var(--ink3);font-size:13px;">
+            Conecta Supabase en "Conexión BD" y haz clic en Sincronizar.
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:0;">
+          <div class="card-head"><h3>💡 Cómo obtener coordenadas</h3></div>
+          <p style="font-size:13px;color:var(--ink2);line-height:1.9;">
+            1. Abre <strong style="color:var(--ink)">Google Maps</strong> en el navegador.<br>
+            2. Busca la dirección exacta del local.<br>
+            3. Haz <strong style="color:var(--ink)">clic derecho</strong> sobre el punto exacto en el mapa.<br>
+            4. El primer número = <strong style="color:var(--green)">Latitud</strong> · El segundo = <strong style="color:var(--blue)">Longitud</strong>.<br>
+            5. El <strong style="color:var(--ink)">radio</strong> define cuántos metros alrededor de la sede se consideran esa sede.
+          </p>
+        </div>
+      </div>
+
       <!-- SUPABASE -->
       <div class="page" id="page-supabase">
         <div class="section-head">
@@ -430,7 +529,7 @@ html,body{height:100%;font-family:'Space Grotesk',sans-serif;background:var(--bg
           <div class="card-head"><h3>Credenciales de Supabase</h3><span class="badge badge-orange">Sensible</span></div>
           <div class="sb-config">
             <div><label>URL del proyecto</label><input type="text" id="sb-url" placeholder="https://xxxxxxxxxxx.supabase.co"></div>
-            <div><label>Anon Key</label><input type="password" id="sb-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."></div>
+            <div><label>Service Key (escritura desde el panel)</label><input type="password" id="sb-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."></div>
           </div>
           <div class="sb-status idle" id="sb-status"><span>⬡</span> Sin probar — ingresa las credenciales y prueba</div>
           <div style="margin-top:12px;display:flex;gap:10px;">
@@ -450,6 +549,76 @@ html,body{height:100%;font-family:'Space Grotesk',sans-serif;background:var(--bg
 </div>
 
 <div id="toast"><span class="ti">✓</span><span id="toast-msg">Cambios guardados</span></div>
+
+<!-- MODAL SEDE -->
+<div class="modal-overlay" id="sede-modal-overlay" onclick="onModalOverlay(event)">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="sede-modal-title">Nueva sede</h3>
+      <button class="modal-close" onclick="closeSedeModal()">✕</button>
+    </div>
+    <div class="fg2">
+      <div>
+        <label class="fg-label">ID de sede <span style="color:var(--red)">*</span></label>
+        <input class="fg-inp mono" id="m-id" placeholder="norte" maxlength="30" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'')">
+        <span class="fg-hint">Solo minúsculas y guión bajo. Ej: norte, sur, centro</span>
+      </div>
+      <div>
+        <label class="fg-label">Nombre visible <span style="color:var(--red)">*</span></label>
+        <input class="fg-inp" id="m-nombre" placeholder="Sede Norte" maxlength="60">
+      </div>
+      <div class="fg-full">
+        <label class="fg-label">Dirección completa <span style="color:var(--red)">*</span></label>
+        <input class="fg-inp" id="m-direccion" placeholder="Carrera 5 #42-10, Ibagué" maxlength="120">
+      </div>
+      <div>
+        <label class="fg-label">Ciudad</label>
+        <input class="fg-inp" id="m-ciudad" placeholder="Ibagué" value="Ibagué" maxlength="60">
+      </div>
+      <div>
+        <label class="fg-label">Teléfono de sede</label>
+        <input class="fg-inp" id="m-telefono" type="tel" placeholder="300 123 4567" maxlength="20">
+      </div>
+      <div class="fg-full">
+        <label class="fg-label">Encargado / responsable</label>
+        <input class="fg-inp" id="m-encargado" placeholder="Nombre del responsable" maxlength="80">
+      </div>
+      <div class="fg-sep"></div>
+      <div>
+        <label class="fg-label">Latitud <span style="color:var(--red)">*</span></label>
+        <input class="fg-inp mono" id="m-lat" type="number" step="0.000001" placeholder="4.438900" oninput="updateMapBtn()">
+      </div>
+      <div>
+        <label class="fg-label">Longitud <span style="color:var(--red)">*</span></label>
+        <input class="fg-inp mono" id="m-lng" type="number" step="0.000001" placeholder="-75.232200" oninput="updateMapBtn()">
+      </div>
+      <div class="fg-full">
+        <button class="map-preview-btn" id="m-map-btn" onclick="openModalMaps()">
+          <span>🗺️</span>
+          <span id="m-map-txt" style="flex:1;">Ingresa lat/lng para verificar en Google Maps</span>
+          <span style="font-size:11px;color:var(--blue);">Abrir →</span>
+        </button>
+        <span class="fg-hint">💡 Google Maps → clic derecho sobre el local → 1er número = Lat · 2do = Lng</span>
+      </div>
+      <div>
+        <label class="fg-label">Radio de asignación (metros)</label>
+        <input class="fg-inp mono" id="m-radio" type="number" min="50" max="5000" value="300">
+        <span class="fg-hint">Metros alrededor de la sede. Si el usuario cae dentro, se asigna esta sede.</span>
+      </div>
+      <div>
+        <label class="fg-label">Estado</label>
+        <div class="toggle-row" style="margin-top:8px;">
+          <div class="tog on" id="m-tog" onclick="toggleSedeActiva()"></div>
+          <span class="tog-lbl" id="m-tog-lbl">Sede activa</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeSedeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveSede()">💾 Guardar sede</button>
+    </div>
+  </div>
+</div>
 
 <script>
 const STATE = {
@@ -481,16 +650,18 @@ const STATE = {
 };
 
 let qrInstance=null, previewInterval=null, previewIdx=0, dragSrc=null;
+let SEDES=[], sedeEditId=null;
 
 function goTo(page,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
   el.classList.add('active');
-  const T={frases:'Frases del Carrusel',logo:'Logo & Colores',faq:'Preguntas Frecuentes',canales:'Canales de Contacto',qr:'Código QR',supabase:'Conexión BD'};
+  const T={frases:'Frases del Carrusel',logo:'Logo & Colores',faq:'Preguntas Frecuentes',canales:'Canales de Contacto',qr:'Código QR',sedes:'Gestión de Sedes',supabase:'Conexión BD'};
   document.getElementById('topbar-title').textContent=T[page]||page;
   if(page==='qr') setTimeout(generateQR,100);
   if(page==='frases') startPreview(); else stopPreview();
+  if(page==='sedes') syncSedes();
 }
 
 // FRASES
@@ -610,12 +781,22 @@ async function testSupabase(){
   if(!url||!key){showToast('Ingresa URL y Key','err');return;}
   el.className='sb-status idle'; el.innerHTML='<span>↻</span> Probando…';
   try{
-    const r=await fetch(`${url}/rest/v1/agentes?limit=1`,{headers:{apikey:key,Authorization:'Bearer '+key}});
-    if(r.ok||r.status===200){el.className='sb-status ok';el.innerHTML='<span>✓</span> Conexión exitosa';STATE.sbUrl=url;STATE.sbKey=key;}
-    else throw new Error('Status '+r.status);
+    const r=await fetch(`${url}/rest/v1/sedes?limit=1`,{headers:{apikey:key,Authorization:'Bearer '+key}});
+    if(r.ok||r.status===200){
+      el.className='sb-status ok';el.innerHTML='<span>✓</span> Conexión exitosa';
+      STATE.sbUrl=url;STATE.sbKey=key;
+      localStorage.setItem('td_sb_cfg',JSON.stringify({url,key}));
+      showToast('Conectado ✓');
+      syncSedes();
+    } else throw new Error('Status '+r.status);
   }catch(e){el.className='sb-status err';el.innerHTML='<span>✕</span> Error: '+e.message;}
 }
-function saveSupabase(){STATE.sbUrl=document.getElementById('sb-url').value.trim();STATE.sbKey=document.getElementById('sb-key').value.trim();showToast('Credenciales guardadas');}
+function saveSupabase(){
+  STATE.sbUrl=document.getElementById('sb-url').value.trim();
+  STATE.sbKey=document.getElementById('sb-key').value.trim();
+  localStorage.setItem('td_sb_cfg',JSON.stringify({url:STATE.sbUrl,key:STATE.sbKey}));
+  showToast('Credenciales guardadas');
+}
 
 // GUARDAR
 async function saveAll(){
@@ -666,10 +847,152 @@ try{
 
 // Tablas
 (function(){
-  const tables=[['pqrs','Radicados','OK'],['correos','Correos entrantes','OK'],['historial','Historial','OK'],['historial_eventos','Línea de tiempo','OK'],['agentes','Agentes','OK'],['adjuntos','Adjuntos','OK'],['chat_mensajes','Chatbot','OK'],['respuestas','Respuestas','OK'],['config_sistema','Config panel','FALTANTE']];
+  const tables=[['pqrs','Radicados','OK'],['correos','Correos entrantes','OK'],['historial','Historial','OK'],['historial_eventos','Línea de tiempo','OK'],['agentes','Agentes','OK'],['adjuntos','Adjuntos','OK'],['chat_mensajes','Chatbot','OK'],['respuestas','Respuestas','OK'],['config_sistema','Config panel','OK'],['sedes','Sedes por GPS','OK'],['encuestas_satisfaccion','Encuestas satisfacción','OK']];
   const el=document.getElementById('tables-list');
-  if(el)el.innerHTML=tables.map(([t,d,s])=>`<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-s);"><span style="font-family:JetBrains Mono,monospace;font-size:12px;color:var(--blue);min-width:160px;">${t}</span><span style="font-size:12px;color:var(--ink2);flex:1;">${d}</span><span class="badge ${s==='OK'?'badge-green':'badge-orange'}">${s}</span></div>`).join('');
+  if(el)el.innerHTML=tables.map(([t,d,s])=>`<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-s);"><span style="font-family:JetBrains Mono,monospace;font-size:12px;color:var(--blue);min-width:200px;">${t}</span><span style="font-size:12px;color:var(--ink2);flex:1;">${d}</span><span class="badge ${s==='OK'?'badge-green':'badge-orange'}">${s}</span></div>`).join('');
 })();
+
+// ── SEDES ──────────────────────────────────────────
+function sbH(extra={}){return{apikey:STATE.sbKey,Authorization:'Bearer '+STATE.sbKey,'Content-Type':'application/json',...extra};}
+
+async function syncSedes(){
+  if(!STATE.sbUrl||!STATE.sbKey){
+    try{SEDES=JSON.parse(localStorage.getItem('td_sedes')||'[]');renderSedes();}catch(_){}
+    return;
+  }
+  try{
+    const r=await fetch(`${STATE.sbUrl}/rest/v1/sedes?select=*&order=created_at.asc`,{headers:sbH()});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    SEDES=await r.json();
+    localStorage.setItem('td_sedes',JSON.stringify(SEDES));
+    renderSedes();
+    showToast('Sedes sincronizadas ('+SEDES.length+')');
+  }catch(e){
+    showToast('Error cargando sedes: '+e.message,'err');
+    try{SEDES=JSON.parse(localStorage.getItem('td_sedes')||'[]');renderSedes();}catch(_){}
+  }
+}
+
+function renderSedes(){
+  const activas=SEDES.filter(s=>s.activa).length;
+  const radios=SEDES.map(s=>s.radio_m||300);
+  document.getElementById('st-total').textContent    = SEDES.length;
+  document.getElementById('st-activas').textContent  = activas;
+  document.getElementById('st-inactivas').textContent= SEDES.length-activas;
+  document.getElementById('st-radio').textContent    = radios.length?Math.round(radios.reduce((a,b)=>a+b,0)/radios.length):'—';
+  const grid=document.getElementById('sedes-grid');
+  if(!SEDES.length){
+    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:40px;background:var(--bg3);border:1px dashed var(--border);border-radius:var(--radius);color:var(--ink3);font-size:13px;">Sin sedes. Crea la primera con "+ Nueva sede".</div>`;
+    return;
+  }
+  grid.innerHTML=SEDES.map(s=>`
+    <div class="sede-card ${s.activa?'activa':'inactiva'}">
+      <div class="sc-top">
+        <div><div class="sc-name">${escHtml(s.nombre)}</div><div class="sc-id">${escHtml(s.id)}</div></div>
+        <div class="sc-actions">
+          <span class="badge ${s.activa?'badge-green':'badge-red'}" style="margin-right:4px;">${s.activa?'Activa':'Inactiva'}</span>
+          <button class="btn-icon" onclick="openSedeModal('${escHtml(s.id)}')" title="Editar">✏️</button>
+          <button class="btn-icon del" onclick="deleteSede('${escHtml(s.id)}')" title="Eliminar">🗑</button>
+        </div>
+      </div>
+      <div class="sc-row"><span class="ico">📍</span><span>${escHtml(s.direccion)}${s.ciudad?', '+escHtml(s.ciudad):''}</span></div>
+      <div class="sc-row"><span class="ico">🌐</span><span class="sc-coords" onclick="window.open('https://www.google.com/maps?q=${s.lat},${s.lng}&z=17','_blank')">${(s.lat||0).toFixed(6)}, ${(s.lng||0).toFixed(6)}</span></div>
+      ${s.telefono?`<div class="sc-row"><span class="ico">📞</span><span>${escHtml(s.telefono)}</span></div>`:''}
+      ${s.encargado?`<div class="sc-row"><span class="ico">👤</span><span>${escHtml(s.encargado)}</span></div>`:''}
+      <div class="sc-divider"></div>
+      <div class="sc-footer">
+        <span style="font-size:11px;color:var(--ink3);">📡 Radio: <strong style="color:var(--ink)">${s.radio_m||300} m</strong></span>
+        <button class="btn btn-ghost btn-sm" style="font-size:11px;padding:3px 10px;" onclick="navigator.clipboard.writeText('${(s.lat||0).toFixed(6)}, ${(s.lng||0).toFixed(6)}').then(()=>showToast('Coords copiadas'))">📋 Coords</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openSedeModal(id=null){
+  sedeEditId=id;
+  document.getElementById('sede-modal-title').textContent=id?'Editar sede':'Nueva sede';
+  if(id){
+    const s=SEDES.find(x=>x.id===id); if(!s) return;
+    document.getElementById('m-id').value=s.id;
+    document.getElementById('m-id').disabled=true;
+    document.getElementById('m-nombre').value=s.nombre||'';
+    document.getElementById('m-direccion').value=s.direccion||'';
+    document.getElementById('m-ciudad').value=s.ciudad||'Ibagué';
+    document.getElementById('m-telefono').value=s.telefono||'';
+    document.getElementById('m-encargado').value=s.encargado||'';
+    document.getElementById('m-lat').value=s.lat||'';
+    document.getElementById('m-lng').value=s.lng||'';
+    document.getElementById('m-radio').value=s.radio_m||300;
+    setTog(s.activa!==false);
+    updateMapBtn();
+  } else {
+    ['m-id','m-nombre','m-direccion','m-telefono','m-encargado','m-lat','m-lng'].forEach(f=>document.getElementById(f).value='');
+    document.getElementById('m-id').disabled=false;
+    document.getElementById('m-ciudad').value='Ibagué';
+    document.getElementById('m-radio').value=300;
+    document.getElementById('m-map-txt').textContent='Ingresa lat/lng para verificar en Google Maps';
+    setTog(true);
+  }
+  document.getElementById('sede-modal-overlay').classList.add('open');
+}
+function closeSedeModal(){document.getElementById('sede-modal-overlay').classList.remove('open');sedeEditId=null;}
+function onModalOverlay(e){if(e.target===document.getElementById('sede-modal-overlay'))closeSedeModal();}
+function setTog(on){
+  document.getElementById('m-tog').className='tog'+(on?' on':'');
+  document.getElementById('m-tog-lbl').textContent=on?'Sede activa':'Sede inactiva';
+}
+function toggleSedeActiva(){setTog(!document.getElementById('m-tog').classList.contains('on'));}
+function updateMapBtn(){
+  const lat=parseFloat(document.getElementById('m-lat').value);
+  const lng=parseFloat(document.getElementById('m-lng').value);
+  if(!isNaN(lat)&&!isNaN(lng))
+    document.getElementById('m-map-txt').textContent=`${lat.toFixed(6)}, ${lng.toFixed(6)} — clic para verificar`;
+}
+function openModalMaps(){
+  const lat=parseFloat(document.getElementById('m-lat').value);
+  const lng=parseFloat(document.getElementById('m-lng').value);
+  window.open((!isNaN(lat)&&!isNaN(lng))?`https://www.google.com/maps?q=${lat},${lng}&z=17`:'https://www.google.com/maps','_blank');
+}
+async function saveSede(){
+  const id=document.getElementById('m-id').value.trim();
+  const nombre=document.getElementById('m-nombre').value.trim();
+  const direccion=document.getElementById('m-direccion').value.trim();
+  const lat=parseFloat(document.getElementById('m-lat').value);
+  const lng=parseFloat(document.getElementById('m-lng').value);
+  if(!id||!nombre||!direccion||isNaN(lat)||isNaN(lng)){showToast('Completa los campos obligatorios (*)','err');return;}
+  const sede={id,nombre,direccion,ciudad:document.getElementById('m-ciudad').value.trim()||'Ibagué',telefono:document.getElementById('m-telefono').value.trim()||null,encargado:document.getElementById('m-encargado').value.trim()||null,lat,lng,radio_m:parseInt(document.getElementById('m-radio').value)||300,activa:document.getElementById('m-tog').classList.contains('on')};
+  if(STATE.sbUrl&&STATE.sbKey){
+    try{
+      const r=await fetch(`${STATE.sbUrl}/rest/v1/sedes`,{method:'POST',headers:{...sbH(),Prefer:'resolution=merge-duplicates,return=representation'},body:JSON.stringify(sede)});
+      if(!r.ok){const t=await r.text();throw new Error(t);}
+      showToast(sedeEditId?'Sede actualizada ✓':'Sede creada ✓');
+    }catch(e){showToast('Error Supabase: '+e.message,'err');}
+  } else {showToast('Sin Supabase — guardado local','err');}
+  const idx=SEDES.findIndex(s=>s.id===id);
+  if(idx>=0) SEDES[idx]={...SEDES[idx],...sede}; else SEDES.push(sede);
+  localStorage.setItem('td_sedes',JSON.stringify(SEDES));
+  renderSedes(); closeSedeModal();
+}
+async function deleteSede(id){
+  const s=SEDES.find(x=>x.id===id); if(!s) return;
+  if(!confirm(`¿Eliminar "${s.nombre}"?\n\nEsta acción no se puede deshacer.`)) return;
+  if(STATE.sbUrl&&STATE.sbKey){
+    try{
+      const r=await fetch(`${STATE.sbUrl}/rest/v1/sedes?id=eq.${id}`,{method:'DELETE',headers:sbH()});
+      if(!r.ok) throw new Error('HTTP '+r.status);
+    }catch(e){showToast('Error al eliminar: '+e.message,'err');return;}
+  }
+  SEDES=SEDES.filter(x=>x.id!==id);
+  localStorage.setItem('td_sedes',JSON.stringify(SEDES));
+  renderSedes(); showToast('Sede eliminada');
+}
+
+// Restaurar credenciales Supabase
+try{
+  const sc=JSON.parse(localStorage.getItem('td_sb_cfg')||'{}');
+  if(sc.url){document.getElementById('sb-url').value=sc.url;STATE.sbUrl=sc.url;}
+  if(sc.key){document.getElementById('sb-key').value=sc.key;STATE.sbKey=sc.key;}
+}catch(_){}
 
 document.getElementById('new-frase-input').addEventListener('keydown',e=>{if(e.key==='Enter')addFrase();});
 </script>
