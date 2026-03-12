@@ -17,6 +17,7 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;font-family:'Poppins',sans-serif;overflow:hidden;background:var(--ink)}
+@media(max-width:900px){html,body{overflow-y:auto;height:auto;}}
 
 /* ── TOPBAR ── */
 .topbar{
@@ -80,8 +81,8 @@ html,body{height:100%;font-family:'Poppins',sans-serif;overflow:hidden;backgroun
   margin-bottom:28px;line-height:1.5;}
 
 /* ── TIPO GRID ── */
-.tipo-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;
-  width:100%;max-width:480px;margin-bottom:24px;}
+.tipo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+  width:100%;max-width:580px;margin-bottom:24px;}
 .tipo-card{background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.08);
   border-radius:16px;padding:20px 16px;cursor:pointer;transition:all .2s;
   display:flex;flex-direction:column;align-items:center;gap:8px;}
@@ -437,8 +438,88 @@ html,body{height:100%;font-family:'Poppins',sans-serif;overflow:hidden;backgroun
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .toast.error{background:rgba(220,38,38,.88);color:#fff;}
 .toast.info{background:rgba(37,99,235,.88);color:#fff;}
+
+/* ════ RESPONSIVE ════ */
+
+/* Tablet (≤900px): split → stacked, contenido más compacto */
+@media(max-width:900px){
+  html,body{overflow:auto;}
+  .slides-wrap{position:relative;top:0;display:block;height:auto;transform:none!important;}
+  .slide,.slide-split{min-width:100%;width:100%;min-height:100vh;height:auto;padding:70px 20px 80px;}
+  .slide-split{flex-direction:column;}
+  .split-left,.split-right{width:100%;border-right:none;border-bottom:1px solid var(--border);
+    overflow:visible;padding:20px 16px 24px;}
+  .tipo-grid{grid-template-columns:repeat(3,1fr);gap:10px;}
+  .canal-grid,.medio-grid{grid-template-columns:repeat(3,1fr);}
+  .field-row{grid-template-columns:1fr;}
+  .btn-next{max-width:100%;}
+  .step-dots{bottom:8px;}
+  .topbar{padding:0 16px;}
+}
+
+/* Móvil (≤600px): diseño columna, tipografía reducida */
+@media(max-width:600px){
+  html,body{overflow:auto;}
+  .slides-wrap{position:relative;top:0;display:block;height:auto;transform:none!important;}
+  .slide,.slide-split{min-width:100%;width:100%;min-height:100vh;height:auto;
+    padding:64px 14px 72px;justify-content:flex-start;padding-top:72px;}
+  .slide-title{font-size:clamp(20px,6vw,28px);}
+  .slide-sub{font-size:12px;margin-bottom:18px;}
+  .eyebrow{font-size:9px;}
+
+  /* 6 tipos → 2 columnas en móvil */
+  .tipo-grid{grid-template-columns:repeat(2,1fr);gap:9px;max-width:100%;}
+  .tipo-card{padding:14px 10px;border-radius:14px;}
+  .tc-emoji{font-size:24px;}
+  .tc-name{font-size:12px;}
+  .tc-desc{font-size:10px;}
+
+  /* Canal y medio → 1 columna en móvil */
+  .canal-grid{grid-template-columns:repeat(2,1fr);gap:9px;}
+  .medio-grid{grid-template-columns:repeat(2,1fr);gap:9px;}
+  .canal-card,.medio-card{padding:16px 8px;}
+
+  /* Split layout → columna */
+  .slide-split{flex-direction:column;}
+  .split-left,.split-right{width:100%;border-right:none;overflow:visible;padding:12px;}
+  .split-right{border-top:1px solid var(--border);}
+
+  /* Campo form */
+  .field-row{grid-template-columns:1fr;}
+  .data-card{padding:14px;}
+  .data-card-title{font-size:11px;}
+  .pqr-input,.pqr-textarea{font-size:14px;} /* evitar zoom en iOS */
+
+  /* Botones */
+  .btn-next{padding:14px;font-size:14px;border-radius:12px;}
+  .btn-submit{padding:13px;font-size:14px;}
+
+  /* Topbar */
+  .topbar{padding:0 12px;height:44px;}
+  .tb-name{font-size:13px;}
+  .progress-bar{top:44px;}
+  .slides-wrap{top:47px;}
+
+  /* Dots */
+  .step-dots{bottom:8px;}
+
+  /* Canvas cuaderno — más alto en móvil */
+  .msg-textarea{min-height:140px;}
+
+  /* QR block compacto */
+  .qr-block{padding:14px;}
+  .qr-frame-sm{padding:8px;}
+}
+
+/* Pantallas grandes (≥1400px): aprovechar espacio */
+@media(min-width:1400px){
+  .tipo-grid{max-width:640px;gap:16px;}
+  .canal-grid,.medio-grid{max-width:600px;}
+  .btn-next{max-width:600px;}
+  .tipo-card{padding:24px 18px;}
+  .tc-emoji{font-size:36px;}
+}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -486,10 +567,20 @@ html,body{height:100%;font-family:'Poppins',sans-serif;overflow:hidden;backgroun
         <div class="tc-name">Reclamo</div>
         <div class="tc-desc">No cumplieron lo prometido</div>
       </div>
+      <div class="tipo-card" onclick="selTipo(this,'Sugerencia')">
+        <div class="tc-emoji">💬</div>
+        <div class="tc-name">Sugerencia</div>
+        <div class="tc-desc">Tengo una idea de mejora</div>
+      </div>
       <div class="tipo-card" onclick="selTipo(this,'Felicitación')">
         <div class="tc-emoji">🌟</div>
         <div class="tc-name">Felicitación</div>
         <div class="tc-desc">Quiero reconocer algo</div>
+      </div>
+      <div class="tipo-card" onclick="selTipo(this,'Denuncia')">
+        <div class="tc-emoji">🚨</div>
+        <div class="tc-name">Denuncia</div>
+        <div class="tc-desc">Reportar una irregularidad</div>
       </div>
     </div>
     <button class="btn-next" id="btn1" onclick="goTo(1)" disabled>
@@ -666,11 +757,44 @@ html,body{height:100%;font-family:'Poppins',sans-serif;overflow:hidden;backgroun
       <!-- QR SIEMPRE VISIBLE -->
       <div class="qr-block">
         <div class="qr-block-title">Escanea o radica aquí</div>
-        <div class="qr-frame-sm" style="background:#fff;padding:8px;">
+        <div class="qr-frame-sm">
           <div class="scan-line"></div>
-          <div id="qr-form-el" style="width:120px;height:120px;display:flex;align-items:center;justify-content:center;"></div>
+          <svg width="120" height="120" viewBox="0 0 168 168" xmlns="http://www.w3.org/2000/svg">
+            <rect width="168" height="168" fill="white"/>
+            <rect x="8" y="8" width="48" height="48" rx="5" fill="#0a0e1a"/>
+            <rect x="14" y="14" width="36" height="36" rx="3" fill="white"/>
+            <rect x="20" y="20" width="24" height="24" rx="2" fill="#0a0e1a"/>
+            <rect x="112" y="8" width="48" height="48" rx="5" fill="#0a0e1a"/>
+            <rect x="118" y="14" width="36" height="36" rx="3" fill="white"/>
+            <rect x="124" y="20" width="24" height="24" rx="2" fill="#0a0e1a"/>
+            <rect x="8" y="112" width="48" height="48" rx="5" fill="#0a0e1a"/>
+            <rect x="14" y="118" width="36" height="36" rx="3" fill="white"/>
+            <rect x="20" y="124" width="24" height="24" rx="2" fill="#0a0e1a"/>
+            <g fill="#0a0e1a">
+              <rect x="66" y="8" width="8" height="8"/><rect x="78" y="8" width="8" height="8"/><rect x="90" y="8" width="8" height="8"/>
+              <rect x="66" y="20" width="8" height="8"/><rect x="90" y="20" width="8" height="8"/>
+              <rect x="66" y="32" width="8" height="8"/><rect x="78" y="32" width="8" height="8"/>
+              <rect x="8" y="66" width="8" height="8"/><rect x="20" y="66" width="8" height="8"/><rect x="44" y="66" width="8" height="8"/>
+              <rect x="8" y="78" width="8" height="8"/><rect x="32" y="78" width="8" height="8"/>
+              <rect x="8" y="90" width="8" height="8"/><rect x="20" y="90" width="8" height="8"/><rect x="44" y="90" width="8" height="8"/>
+              <rect x="66" y="66" width="8" height="8"/><rect x="78" y="66" width="8" height="8"/><rect x="90" y="66" width="8" height="8"/><rect x="102" y="66" width="8" height="8"/>
+              <rect x="78" y="78" width="8" height="8"/><rect x="102" y="78" width="8" height="8"/>
+              <rect x="66" y="90" width="8" height="8"/><rect x="90" y="90" width="8" height="8"/>
+              <rect x="112" y="66" width="8" height="8"/><rect x="136" y="66" width="8" height="8"/>
+              <rect x="124" y="78" width="8" height="8"/><rect x="148" y="78" width="8" height="8"/>
+              <rect x="112" y="90" width="8" height="8"/><rect x="124" y="90" width="8" height="8"/>
+              <rect x="66" y="112" width="8" height="8"/><rect x="90" y="112" width="8" height="8"/>
+              <rect x="66" y="124" width="8" height="8"/><rect x="78" y="124" width="8" height="8"/>
+              <rect x="90" y="136" width="8" height="8"/><rect x="102" y="136" width="8" height="8"/>
+              <rect x="112" y="112" width="8" height="8"/><rect x="136" y="112" width="8" height="8"/>
+              <rect x="124" y="124" width="8" height="8"/><rect x="148" y="124" width="8" height="8"/>
+              <rect x="112" y="136" width="8" height="8"/><rect x="124" y="136" width="8" height="8"/>
+            </g>
+            <rect x="72" y="72" width="24" height="24" rx="5" fill="#2563eb"/>
+            <text x="84" y="87" text-anchor="middle" font-size="9" fill="white" font-weight="800" font-family="Poppins,sans-serif">PQR</text>
+          </svg>
         </div>
-        <div class="qr-url-sm" id="qr-form-url">td-pruebas.online/pqr</div>
+        <div class="qr-url-sm">tododrogas.com/pqr</div>
         <div class="canal-sel-badge">
           <div class="csb-dot"></div>
           <span id="canalBadge">Canal: —</span>
@@ -771,7 +895,17 @@ updateProgress(0);
 
 // CAROUSEL
 function updateCarousel(idx){
-  document.getElementById('slidesWrap').style.transform=`translateX(-${idx*100}vw)`;
+  const isMobile = window.innerWidth <= 900;
+  if(isMobile){
+    document.querySelectorAll('.slide,.slide-split').forEach((s,i)=>{
+      s.style.display = i===idx ? 'flex' : 'none';
+    });
+    window.scrollTo({top:0,behavior:'smooth'});
+    document.getElementById('slidesWrap').style.transform='';
+  } else {
+    document.querySelectorAll('.slide,.slide-split').forEach(s=>s.style.display='');
+    document.getElementById('slidesWrap').style.transform=`translateX(-${idx*100}vw)`;
+  }
 }
 
 // ══════════════════════════════════════════
@@ -1289,56 +1423,10 @@ function showToast(msg,type='info'){
 // Fade in
 document.body.style.opacity='0'; document.body.style.transition='opacity .4s ease';
 setTimeout(()=>{document.body.style.opacity='1';},50);
+
+// Init responsive slides on load
+window.addEventListener('load', ()=>updateCarousel(0));
+window.addEventListener('resize', ()=>updateCarousel(currentSlide));
 </script>
-
-<script>
-// ── QR DINÁMICO — mismo que bienvenida ──────────────────────
-const SB_URL_FORM = 'https://yeiupcumvdvdswfhcoty.supabase.co';
-const SB_KEY_FORM = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InllaXVwY3VtdmR2ZHN3ZmhjdHkiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc0MDAwMDAwMCwiZXhwIjoyMDU1NTYwMDAwfQ.2M5OXYOm03yIJTypGn-C1dQVBl-QnZX1IkBz_pNAmxk';
-const QR_FORM_DEFAULT = 'https://td-pruebas.online/pqr_form.html';
-
-function generarQRForm(url) {
-  const el = document.getElementById('qr-form-el');
-  if (!el) return;
-  el.innerHTML = '';
-  new QRCode(el, {
-    text: url || QR_FORM_DEFAULT,
-    width: 120, height: 120,
-    colorDark: '#0a0e1a',
-    colorLight: '#ffffff',
-    correctLevel: QRCode.CorrectLevel.H
-  });
-  const label = document.getElementById('qr-form-url');
-  if (label) {
-    try {
-      const u = new URL(url || QR_FORM_DEFAULT);
-      label.textContent = u.hostname + u.pathname.replace('/pqr_form.html','') + '/pqr';
-    } catch(e) {}
-  }
-}
-
-async function initQRForm() {
-  try {
-    const r = await fetch(`${SB_URL_FORM}/rest/v1/config_sistema?id=eq.main&select=data`, {
-      headers: { apikey: SB_KEY_FORM, Authorization: 'Bearer ' + SB_KEY_FORM }
-    });
-    if (!r.ok) throw new Error();
-    const rows = await r.json();
-    const qrUrl = rows[0]?.data?.qrUrl || QR_FORM_DEFAULT;
-    generarQRForm(qrUrl);
-  } catch(e) {
-    // Fallback localStorage o URL por defecto
-    try {
-      const cfg = JSON.parse(localStorage.getItem('pqr_config') || '{}');
-      generarQRForm(cfg.qrUrl || QR_FORM_DEFAULT);
-    } catch(e2) {
-      generarQRForm(QR_FORM_DEFAULT);
-    }
-  }
-}
-
-initQRForm();
-</script>
-
 </body>
 </html>
