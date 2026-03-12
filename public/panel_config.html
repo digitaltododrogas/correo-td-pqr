@@ -459,10 +459,10 @@ html,body{height:100%;font-family:'Space Grotesk',sans-serif;background:var(--bg
             </div>
             <div class="qr-meta">
               <h4>QR de radicación PQRSF</h4>
-              <p id="qr-url-label">https://td-pruebas.online/pqr_form.html</p>
+              <p id="qr-url-label">https://td-pruebas.online/pqr_bienvenida.html</p>
             </div>
             <div class="url-input-wrap">
-              <input type="text" id="qr-url-input" value="https://td-pruebas.online/pqr_form.html" placeholder="https://tu-dominio.com/form">
+              <input type="text" id="qr-url-input" value="https://td-pruebas.online/pqr_bienvenida.html" placeholder="https://tu-dominio.com/pqr_bienvenida.html">
               <button class="btn btn-primary" onclick="generateQR()">↺ Actualizar</button>
             </div>
             <div class="qr-actions">
@@ -656,7 +656,7 @@ const STATE = {
     horario:'Lun-Vier 7 a.m-5:30 p.m. · Nova 24/7',
     encuesta:'',
   },
-  qrUrl:'https://td-pruebas.online/pqr_form.html',
+  qrUrl:'https://td-pruebas.online/pqr_bienvenida.html',
   instName:'Tododrogas',
   sbUrl:'', sbKey:'', sbAnon:'', nextId:10,
 };
@@ -764,7 +764,11 @@ function saveCanales(){
 
 // QR
 function generateQR(){
-  const url=document.getElementById('qr-url-input').value.trim()||STATE.qrUrl;
+  let url=document.getElementById('qr-url-input').value.trim();
+  // Si está vacía o es solo dominio sin path, completar con /pqr_bienvenida.html
+  if(!url) url=STATE.qrUrl;
+  try{const p=new URL(url);if(p.pathname==='/'||p.pathname==='')url=url.replace(/\/+$/,'')+'/pqr_bienvenida.html';}catch(e){}
+  document.getElementById('qr-url-input').value=url;
   STATE.qrUrl=url; document.getElementById('qr-url-label').textContent=url;
   document.getElementById('qr-code-el').innerHTML='';
   qrInstance=new QRCode(document.getElementById('qr-code-el'),{text:url,width:220,height:220,colorDark:'#0a0e1a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});
