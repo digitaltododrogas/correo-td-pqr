@@ -1417,8 +1417,8 @@ setTimeout(()=>{document.body.style.opacity='1';},50);
 window.addEventListener('load', ()=>updateCarousel(0));
 window.addEventListener('resize', ()=>updateCarousel(currentSlide));
 
-// ── Inicializar QR del formulario (DOM ya pintado) ──
-initFormQR();
+// ── Inicializar QR del formulario (garantizar paint en móvil) ──
+requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(initFormQR, 100)));
 </script>
 
 </body>
