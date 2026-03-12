@@ -953,6 +953,9 @@ function launchSlide4(medio){
   updateCarousel(3);
   updateProgress(3);
 
+  // QR — generarlo aquí cuando slide4 ya es visible (funciona en móvil y PC)
+  requestAnimationFrame(()=>setTimeout(initFormQR, 80));
+
   // Inicializar según medio
   if(medio==='lapiz') setTimeout(initCanvas,120);
   if(medio==='audio') initWaveform();
@@ -1417,8 +1420,7 @@ setTimeout(()=>{document.body.style.opacity='1';},50);
 window.addEventListener('load', ()=>updateCarousel(0));
 window.addEventListener('resize', ()=>updateCarousel(currentSlide));
 
-// ── Inicializar QR del formulario (garantizar paint en móvil) ──
-requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(initFormQR, 100)));
+// QR se inicializa en launchSlide4 cuando el slide ya es visible
 </script>
 
 </body>
