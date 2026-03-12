@@ -684,7 +684,7 @@ let FRASES = [
 
 // Carga config desde localStorage (guardada por el panel en el mismo dominio)
 let CFG = {};
-let FORM_URL = 'pqr_form.html'; // default
+let FORM_URL = 'pqr_form.html';
 try {
   const saved = localStorage.getItem('pqr_config');
   if(saved){
@@ -694,6 +694,37 @@ try {
     if(CFG.qrUrl) FORM_URL = CFG.qrUrl;
   }
 } catch(e){}
+
+function makeQR(elId, url, size){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  el.innerHTML = '';
+  if(!url){
+    el.innerHTML = '<span style="color:#6b748a;font-size:10px;text-align:center;display:block;padding:20px 4px;">Sin URL<br>configurada</span>';
+    return;
+  }
+  try{
+    new QRCode(el,{text:url,width:size||130,height:size||130,
+      colorDark:'#0a0e1a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});
+  }catch(e){ el.innerHTML='<span style="color:#f87171;font-size:10px;">Error QR</span>'; }
+}
+
+function applyQRs(){
+  // QR Radicar
+  makeQR('qr-radicar', FORM_URL, 130);
+  const radLbl = document.getElementById('qr-radicar-url');
+  if(radLbl){
+    try{ radLbl.textContent = new URL(FORM_URL).hostname + new URL(FORM_URL).pathname; }
+    catch(e){ radLbl.textContent = FORM_URL; }
+  }
+  // QR Encuesta
+  const encUrl = CFG.canales && CFG.canales.encuesta ? CFG.canales.encuesta : '';
+  makeQR('qr-encuesta', encUrl, 130);
+  const encLbl = document.getElementById('qr-encuesta-url');
+  if(encLbl) encLbl.textContent = encUrl
+    ? 'Encuesta de satisfacción · Escanea con tu cámara'
+    : 'Encuesta · configura la URL en el panel';
+}
 
 // Genera QR en el contenedor dado con la URL dada
 function makeQR(elId, url, size){
@@ -778,9 +809,10 @@ function startCarousel(){
 })();
 
 function goToForm(){
+  const dest = FORM_URL || 'pqr_form.html';
   document.body.style.transition='opacity .35s ease';
   document.body.style.opacity='0';
-  setTimeout(()=>window.location.href=FORM_URL,350);
+  setTimeout(()=>{ window.location.href = dest; },350);
 }
 
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -997,7 +1029,7 @@ async function processVoice(chunks){
   }catch(e){hideTyping();addBot('Recibí tu mensaje. Escríbeme y te ayudo.');}
   const vc=document.getElementById('vc');
   vc.textContent='🎤';
-  document.getElementById('vlabel').textContent='Toca el micófono para hablar';
+  document.getElementById('vlabel').textContent='Toca el micrófono para hablar';
 }
 
 // ── RELOJ ──
@@ -1016,7 +1048,7 @@ document.body.style.opacity='0';
 document.body.style.transition='opacity .4s ease';
 setTimeout(()=>{ document.body.style.opacity='1'; },50);
 
-// ── INIT ──
+// ── INIT — script al final del body, DOM ya existe ──
 startCarousel();
 applyQRs();
 </script>
