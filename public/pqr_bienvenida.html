@@ -691,7 +691,16 @@ try {
     CFG = JSON.parse(saved);
     if(CFG.frases && CFG.frases.length)
       FRASES = CFG.frases.map((f,i) => ({text: f.text, hl: i===0}));
-    if(CFG.qrUrl) FORM_URL = CFG.qrUrl;
+    if(CFG.qrUrl){
+      let u = CFG.qrUrl.trim();
+      // Si la URL es solo el dominio sin ruta de archivo, agregar /pqr_form.html
+      try{
+        const parsed = new URL(u);
+        if(parsed.pathname === '/' || parsed.pathname === '')
+          u = u.replace(/\/+$/, '') + '/pqr_form.html';
+      }catch(e){}
+      FORM_URL = u;
+    }
   }
 } catch(e){}
 
@@ -809,10 +818,11 @@ function startCarousel(){
 })();
 
 function goToForm(){
-  const dest = FORM_URL || 'pqr_form.html';
+  // El botón siempre va al formulario directamente
+  // El QR (cfg.qrUrl) es para imprimir/escanear desde fuera — apunta a bienvenida
   document.body.style.transition='opacity .35s ease';
   document.body.style.opacity='0';
-  setTimeout(()=>{ window.location.href = dest; },350);
+  setTimeout(()=>{ window.location.href='pqr_form.html'; },350);
 }
 
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
