@@ -701,7 +701,7 @@ try {
   if(saved) applyConfig(JSON.parse(saved));
 } catch(e){}
 
-// Polling a Supabase: revisa la config cada 30 segundos y actualiza el QR si cambió
+// Polling a Supabase: revisa la config cada 30 s y actualiza QRs si algo cambió
 async function pollSupabaseConfig(){
   try {
     const sbRaw = localStorage.getItem('td_sb_cfg');
@@ -715,13 +715,16 @@ async function pollSupabaseConfig(){
     const rows = await r.json();
     if(!rows || !rows.length || !rows[0].data) return;
     const remoteCfg = rows[0].data;
-    const newQrUrl = remoteCfg.qrUrl || '';
-    if(newQrUrl && newQrUrl !== _lastQrUrl){
-      _lastQrUrl = newQrUrl;
-      FORM_URL = newQrUrl;
-      applyQRs(); // regenera el QR con la nueva URL
+    const newQrUrl  = remoteCfg.qrUrl || '';
+    const newEncUrl = remoteCfg.canales && remoteCfg.canales.encuesta ? remoteCfg.canales.encuesta : '';
+    const oldEncUrl = CFG.canales && CFG.canales.encuesta ? CFG.canales.encuesta : '';
+    const qrChanged  = newQrUrl  && newQrUrl  !== _lastQrUrl;
+    const encChanged = newEncUrl !== oldEncUrl;
+    if(qrChanged || encChanged){
+      CFG = remoteCfg;
+      if(newQrUrl){ _lastQrUrl = newQrUrl; FORM_URL = newQrUrl; }
+      applyQRs(); // regenera AMBOS QRs
     }
-    // También actualizar localStorage para consistencia
     localStorage.setItem('pqr_config', JSON.stringify(remoteCfg));
   } catch(e){}
 }
