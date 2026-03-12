@@ -529,13 +529,25 @@ html,body{height:100%;font-family:'Space Grotesk',sans-serif;background:var(--bg
           <div class="card-head"><h3>Credenciales de Supabase</h3><span class="badge badge-orange">Sensible</span></div>
           <div class="sb-config">
             <div><label>URL del proyecto</label><input type="text" id="sb-url" placeholder="https://xxxxxxxxxxx.supabase.co"></div>
-            <div><label>Service Key (escritura desde el panel)</label><input type="password" id="sb-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."></div>
+            <div><label>Anon / Public Key <span style="color:var(--green);font-size:11px;">(lectura pública — va en la pantalla de bienvenida)</span></label><input type="text" id="sb-anon" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." style="font-size:11px;"></div>
+            <div><label>Service Key <span style="color:var(--orange);font-size:11px;">(escritura — solo en este panel)</span></label><input type="password" id="sb-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."></div>
           </div>
           <div class="sb-status idle" id="sb-status"><span>⬡</span> Sin probar — ingresa las credenciales y prueba</div>
           <div style="margin-top:12px;display:flex;gap:10px;">
             <button class="btn btn-primary" onclick="testSupabase()">🔌 Probar conexión</button>
             <button class="btn btn-ghost" onclick="saveSupabase()">💾 Guardar</button>
           </div>
+        </div>
+        <div class="card" style="border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.04);">
+          <div class="card-head"><h3>🔗 Vincular pantalla de bienvenida</h3><span class="badge" style="background:rgba(52,211,153,.15);color:var(--green);border:1px solid rgba(52,211,153,.3);">Importante</span></div>
+          <p style="font-size:13px;color:var(--ink2);line-height:1.7;margin-bottom:12px;">
+            La pantalla de bienvenida (<code style="background:var(--bg3);padding:1px 6px;border-radius:4px;font-size:12px;">pqr_bienvenida.html</code>) lee la config desde Supabase usando la <strong>Anon Key</strong>.<br>
+            Pega la URL y la Anon Key arriba, guarda, y luego copia los valores en el HTML de bienvenida:
+          </p>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink2);line-height:1.8;" id="bienvenida-snippet">
+            Ingresa URL y Anon Key y haz clic en "Guardar" para ver el código.
+          </div>
+          <button class="btn btn-success btn-sm" style="margin-top:10px;" onclick="copyBienvenidaSnippet()">📋 Copiar para pegar en bienvenida.html</button>
         </div>
         <div class="card">
           <div class="card-head"><h3>Tablas del sistema</h3></div>
@@ -646,7 +658,7 @@ const STATE = {
   },
   qrUrl:'https://td-pruebas.online/pqr_form.html',
   instName:'Tododrogas',
-  sbUrl:'', sbKey:'', nextId:10,
+  sbUrl:'', sbKey:'', sbAnon:'', nextId:10,
 };
 
 let qrInstance=null, previewInterval=null, previewIdx=0, dragSrc=null;
@@ -785,7 +797,8 @@ async function testSupabase(){
     if(r.ok||r.status===200){
       el.className='sb-status ok';el.innerHTML='<span>✓</span> Conexión exitosa';
       STATE.sbUrl=url;STATE.sbKey=key;
-      localStorage.setItem('td_sb_cfg',JSON.stringify({url,key}));
+      STATE.sbAnon=document.getElementById('sb-anon').value.trim();
+      localStorage.setItem('td_sb_cfg',JSON.stringify({url,key,anon:STATE.sbAnon}));
       showToast('Conectado ✓');
       syncSedes();
     } else throw new Error('Status '+r.status);
@@ -794,7 +807,9 @@ async function testSupabase(){
 function saveSupabase(){
   STATE.sbUrl=document.getElementById('sb-url').value.trim();
   STATE.sbKey=document.getElementById('sb-key').value.trim();
-  localStorage.setItem('td_sb_cfg',JSON.stringify({url:STATE.sbUrl,key:STATE.sbKey}));
+  STATE.sbAnon=document.getElementById('sb-anon').value.trim();
+  localStorage.setItem('td_sb_cfg',JSON.stringify({url:STATE.sbUrl,key:STATE.sbKey,anon:STATE.sbAnon}));
+  updateBienvenidaSnippet();
   showToast('Credenciales guardadas');
 }
 
@@ -822,6 +837,24 @@ function exportConfig(){
 // HELPERS
 function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 let toastT;
+function updateBienvenidaSnippet(){
+  const url = STATE.sbUrl || document.getElementById('sb-url').value.trim();
+  const anon = STATE.sbAnon || document.getElementById('sb-anon').value.trim();
+  const el = document.getElementById('bienvenida-snippet');
+  if(!el) return;
+  if(!url || !anon){
+    el.textContent = 'Ingresa URL y Anon Key y haz clic en "Guardar" para ver el código.';
+    return;
+  }
+  el.innerHTML = `<span style="color:var(--ink3);">// En pqr_bienvenida.html busca estas dos líneas y reemplaza:</span>\nconst SB_URL  = '<span style="color:var(--green);">${escHtml(url)}</span>';\nconst SB_ANON = '<span style="color:var(--green);">${escHtml(anon)}</span>';`;
+}
+function copyBienvenidaSnippet(){
+  const url = STATE.sbUrl || document.getElementById('sb-url').value.trim();
+  const anon = STATE.sbAnon || document.getElementById('sb-anon').value.trim();
+  if(!url||!anon){showToast('Ingresa URL y Anon Key primero','err');return;}
+  const txt = `const SB_URL  = '${url}';\nconst SB_ANON = '${anon}';`;
+  navigator.clipboard.writeText(txt).then(()=>showToast('Copiado — pégalo en pqr_bienvenida.html'));
+}
 function showToast(msg,type='success'){
   const el=document.getElementById('toast');
   document.getElementById('toast-msg').textContent=msg;
@@ -991,7 +1024,9 @@ async function deleteSede(id){
 try{
   const sc=JSON.parse(localStorage.getItem('td_sb_cfg')||'{}');
   if(sc.url){document.getElementById('sb-url').value=sc.url;STATE.sbUrl=sc.url;}
+  if(sc.anon){document.getElementById('sb-anon').value=sc.anon;STATE.sbAnon=sc.anon;}
   if(sc.key){document.getElementById('sb-key').value=sc.key;STATE.sbKey=sc.key;}
+  updateBienvenidaSnippet();
 }catch(_){}
 
 document.getElementById('new-frase-input').addEventListener('keydown',e=>{if(e.key==='Enter')addFrase();});
