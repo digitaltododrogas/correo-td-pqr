@@ -529,7 +529,7 @@ body{background:var(--ink);display:flex;min-height:100vh;}
 //  Sedes sin coordenadas GPS: se usan en el autocomplete manual
 //  Para geolocalización, agrega lat/lng desde el panel_config
 // ════════════════════════════════════════════════════════
-const SEDES_LISTA = [
+let SEDES_LISTA = [
   { id: 'sf-medellin',          nombre: 'Sede Servicio Farmacéutico Medellín',           ciudad: 'Medellín',             direccion: 'CR 48 49 57' },
   { id: 'sf-bic',               nombre: 'Sede Servicio Farmacéutico BIC',                ciudad: 'Medellín',             direccion: 'CL 50 48 03 ED B P 6' },
   { id: 'sf-caucasia',          nombre: 'Sede Servicio Farmacéutico Caucasia',           ciudad: 'Caucasia',             direccion: 'CR 20 03 76 LC 122 123' },
@@ -556,11 +556,26 @@ const SEDES_LISTA = [
 ];
 
 // ════════════════════════════════════════════════════════
-//  SUPABASE CONFIG
+//  SUPABASE CONFIG — lee de td_sb_cfg (guardado por panel_config)
 // ════════════════════════════════════════════════════════
-const SUPABASE_URL    = 'https://TU_PROYECTO.supabase.co';
-const SUPABASE_KEY    = 'TU_ANON_KEY';
 const TABLE_ENCUESTAS = 'encuestas_satisfaccion';
+let SUPABASE_URL = '';
+let SUPABASE_KEY = '';
+try {
+  const _sb = JSON.parse(localStorage.getItem('td_sb_cfg') || '{}');
+  SUPABASE_URL = _sb.url  || '';
+  SUPABASE_KEY = _sb.anon || _sb.key || '';
+} catch(e) {}
+
+// Lee sedes desde panel_config (td_sedes_encuesta) — si no hay, usa la lista local
+try {
+  const _sedesGuardadas = JSON.parse(localStorage.getItem('td_sedes_encuesta') || 'null');
+  if (_sedesGuardadas && _sedesGuardadas.length) {
+    SEDES_LISTA = _sedesGuardadas
+      .filter(s => s.activa !== false)
+      .map(s => ({ id: s.id, nombre: s.nombre, ciudad: s.ciudad, direccion: s.direccion || '' }));
+  }
+} catch(e) {}
 
 // ════════════════════════════════════════════════════════
 //  ESTADO GLOBAL
@@ -589,6 +604,10 @@ let   geoFailed = false;
 //  INIT
 // ════════════════════════════════════════════════════════
 (async function init(){
+  // Verifica que las credenciales Supabase estén configuradas
+  if(!SUPABASE_URL || !SUPABASE_KEY){
+    console.warn('[Encuesta] Supabase no configurado — configura las credenciales en panel_config.');
+  }
   buildStars();
   iniciarParticulas();
   iniciarGeolocalizacion();
@@ -941,6 +960,9 @@ async function submitSurvey(){
   };
 
   let saved=false;
+  if(!SUPABASE_URL || !SUPABASE_KEY){
+    console.warn('Supabase no configurado — guardando offline');
+  } else {
   try{
     const r=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_ENCUESTAS}`,{
       method:'POST',
@@ -955,6 +977,7 @@ async function submitSurvey(){
     saved = r.ok || r.status===201;
     if(!saved) console.error('Supabase error:', r.status, await r.text());
   }catch(e){ console.warn('Sin conexión Supabase:', e.message); }
+  }
 
   if(!saved){
     try{
