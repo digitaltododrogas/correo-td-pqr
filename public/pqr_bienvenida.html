@@ -670,9 +670,7 @@ body{background:var(--ink);display:flex;min-height:100vh;}
   </div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js">
-document.addEventListener('DOMContentLoaded', ()=>{ startCarousel(); applyQRs(); });
-</script><script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ══════════════════════════════
 // CARRUSEL — carga desde config o defaults
 // ══════════════════════════════
@@ -998,4 +996,29 @@ async function processVoice(chunks){
     addBot(reply,true);speak(reply);
   }catch(e){hideTyping();addBot('Recibí tu mensaje. Escríbeme y te ayudo.');}
   const vc=document.getElementById('vc');
-  vc.textContent=' 
+  vc.textContent='🎤';
+  document.getElementById('vlabel').textContent='Toca el micófono para hablar';
+}
+
+// ── RELOJ ──
+function updateClock(){
+  const now=new Date();
+  const h=String(now.getHours()).padStart(2,'0');
+  const m=String(now.getMinutes()).padStart(2,'0');
+  const el=document.getElementById('clockDisplay');
+  if(el) el.textContent=h+':'+m;
+}
+setInterval(updateClock,1000);
+updateClock();
+
+// ── FADE IN ──
+document.body.style.opacity='0';
+document.body.style.transition='opacity .4s ease';
+setTimeout(()=>{ document.body.style.opacity='1'; },50);
+
+// ── INIT ──
+startCarousel();
+applyQRs();
+</script>
+</body>
+</html>
