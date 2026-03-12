@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Radicar PQR · Tododrogas</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -206,23 +205,14 @@ html,body{height:100%;font-family:'Poppins',sans-serif;overflow:hidden;backgroun
 .email-note b{font-weight:700;}
 
 /* ── QR panel compacto ── */
-.qr-block{
-  background:var(--bg);border:1px solid var(--border);
-  border-radius:16px;padding:18px;
-  display:flex;flex-direction:column;align-items:center;gap:10px;
-  margin-bottom:14px;
-}
-.qr-block-title{font-size:10px;font-weight:700;letter-spacing:.8px;
-  text-transform:uppercase;color:var(--ink3);text-align:center;}
-.qr-frame-sm{
-  background:var(--bg2);border:1.5px solid var(--border);
-  border-radius:12px;padding:12px;position:relative;overflow:hidden;
-}
+
+
+
 .scan-line{position:absolute;left:8px;right:8px;height:2px;
   background:linear-gradient(90deg,transparent,var(--blue),transparent);
   top:8px;animation:scanMove 2.5s ease-in-out infinite;opacity:.7;}
 @keyframes scanMove{0%,100%{top:8px;opacity:.7}50%{top:calc(100% - 10px);opacity:.9}}
-.qr-url-sm{font-size:10px;font-family:'DM Mono',monospace;color:var(--blue);text-align:center;}
+
 .canal-sel-badge{
   display:flex;align-items:center;gap:6px;
   background:var(--surface);border:1px solid var(--border);
@@ -508,7 +498,6 @@ html,body{height:100%;font-family:'Poppins',sans-serif;overflow:hidden;backgroun
   .msg-textarea{min-height:140px;}
 
   /* QR block compacto */
-  .qr-block{padding:14px;}
   .qr-frame-sm{padding:8px;}
 }
 
@@ -756,16 +745,6 @@ html,body{height:100%;font-family:'Poppins',sans-serif;overflow:hidden;backgroun
     <div class="split-right">
 
       <!-- QR SIEMPRE VISIBLE -->
-      <div class="qr-block">
-        <div class="qr-block-title">Escanea o radica aquí</div>
-        <div class="qr-frame-sm"><div class="scan-line"></div><div id="form-qr" style="line-height:1;width:120px;height:120px;display:flex;align-items:center;justify-content:center;"></div></div>
-        <div class="qr-url-sm" id="form-qr-url">tododrogas.com/pqr</div>
-        <div class="canal-sel-badge">
-          <div class="csb-dot"></div>
-          <span id="canalBadge">Canal: —</span>
-        </div>
-      </div>
-
       <!-- DATOS OBLIGATORIOS -->
       <div class="data-card">
         <div class="data-card-title"><span>👤</span> Tus datos de contacto</div>
@@ -835,19 +814,10 @@ if(_CFG.canales && _CFG.canales.whatsapp){
   window._WA_URL='https://wa.me/57'+num;
 }
 if(_CFG.canales && _CFG.canales.web) window._N8N_BASE=_CFG.canales.web;
+// QR solo en bienvenida — no en form
 
-// QR usando <img> con API — funciona en todos los dispositivos sin librería
-function initFormQR(){
-  const qrUrl = _CFG.qrUrl || '';
-  const el = document.getElementById('form-qr');
-  if(!el) return;
-  if(!qrUrl){
-    el.innerHTML='<span style="font-size:10px;color:#999;text-align:center;display:block;padding:10px;">Sin URL<br>configurada</span>';
-    return;
-  }
   const encoded = encodeURIComponent(qrUrl);
   el.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data='+encoded+'&bgcolor=ffffff&color=0a0e1a&qzone=1" width="120" height="120" style="display:block;border-radius:4px;" onerror="this.style.display='none'">';
-  const lbl = document.getElementById('form-qr-url');
   if(lbl){ try{ lbl.textContent=new URL(qrUrl).hostname+new URL(qrUrl).pathname; }catch(e){ lbl.textContent=qrUrl; } }
 }
 
@@ -953,8 +923,6 @@ function launchSlide4(medio){
   updateCarousel(3);
   updateProgress(3);
 
-  // QR — slide4 ya visible, generar
-  initFormQR();
 
   // Inicializar según medio
   if(medio==='lapiz') setTimeout(initCanvas,120);
@@ -1420,7 +1388,6 @@ setTimeout(()=>{document.body.style.opacity='1';},50);
 window.addEventListener('load', ()=>updateCarousel(0));
 window.addEventListener('resize', ()=>updateCarousel(currentSlide));
 
-// QR se inicializa en launchSlide4 cuando el slide ya es visible
 </script>
 
 </body>
