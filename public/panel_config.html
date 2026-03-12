@@ -260,6 +260,9 @@ html,body{height:100%;font-family:'Space Grotesk',sans-serif;background:var(--bg
       <div class="nav-item" onclick="goTo('qr',this)">
         <span class="icon">◼</span> Código QR
       </div>
+      <div class="nav-item" onclick="goTo('sedes-encuesta',this)">
+        <span class="icon">🏥</span> Sedes (Encuesta)
+      </div>
       <div class="nav-item" onclick="goTo('sedes',this)">
         <span class="icon">📍</span> Sedes
       </div>
@@ -459,10 +462,10 @@ html,body{height:100%;font-family:'Space Grotesk',sans-serif;background:var(--bg
             </div>
             <div class="qr-meta">
               <h4>QR de radicación PQRSF</h4>
-              <p id="qr-url-label">https://td-pruebas.online/pqr_bienvenida.html</p>
+              <p id="qr-url-label">https://td-pruebas.online/pqr_form.html</p>
             </div>
             <div class="url-input-wrap">
-              <input type="text" id="qr-url-input" value="https://td-pruebas.online/pqr_bienvenida.html" placeholder="https://tu-dominio.com/form">
+              <input type="text" id="qr-url-input" value="https://td-pruebas.online/pqr_form.html" placeholder="https://tu-dominio.com/form">
               <button class="btn btn-primary" onclick="generateQR()">↺ Actualizar</button>
             </div>
             <div class="qr-actions">
@@ -484,12 +487,56 @@ html,body{height:100%;font-family:'Space Grotesk',sans-serif;background:var(--bg
         </div>
       </div>
 
-      <!-- SEDES -->
+      <!-- SEDES ENCUESTA (lista para autocomplete — sin GPS) -->
+      <div class="page" id="page-sedes-encuesta">
+        <div class="section-head" style="display:flex;align-items:flex-start;justify-content:space-between;">
+          <div>
+            <h2>Sedes — Lista de Encuesta</h2>
+            <p>Estas sedes aparecen en el autocomplete cuando el GPS falla. No requieren coordenadas. Extraídas del RUT de Tododrogas CIA S.A.S.</p>
+          </div>
+          <div style="display:flex;gap:8px;flex-shrink:0;margin-top:4px;">
+            <button class="btn btn-ghost btn-sm" onclick="syncSedesEncuesta()">↻ Sincronizar</button>
+            <button class="btn btn-primary btn-sm" onclick="openSedeEncuestaModal()">+ Nueva sede</button>
+          </div>
+        </div>
+        <div class="sedes-stats">
+          <div class="sede-stat blue"><div class="sv" id="se-total">—</div><div class="sl">Total sedes</div></div>
+          <div class="sede-stat green"><div class="sv" id="se-activas">—</div><div class="sl">Activas</div></div>
+          <div class="sede-stat yellow"><div class="sv" id="se-inactivas">—</div><div class="sl">Inactivas</div></div>
+          <div class="sede-stat"><div class="sv" id="se-ciudades">—</div><div class="sl">Ciudades</div></div>
+        </div>
+
+        <!-- Filtro por ciudad -->
+        <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center;">
+          <input class="inp" id="se-filter" placeholder="🔍 Filtrar por nombre o ciudad…" oninput="renderSedesEncuesta()" style="flex:1;margin-top:0;">
+          <select class="inp" id="se-ciudad-filter" onchange="renderSedesEncuesta()" style="width:180px;margin-top:0;">
+            <option value="">Todas las ciudades</option>
+          </select>
+        </div>
+
+        <div class="sedes-grid" id="sedes-encuesta-grid">
+          <div style="grid-column:1/-1;text-align:center;padding:40px;background:var(--bg3);border:1px dashed var(--border);border-radius:var(--radius);color:var(--ink3);font-size:13px;">
+            Cargando sedes…
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:0;">
+          <div class="card-head"><h3>💡 ¿Cómo funciona?</h3></div>
+          <p style="font-size:13px;color:var(--ink2);line-height:1.9;">
+            1. Cuando el usuario abre la encuesta, el sistema intenta <strong style="color:var(--ink)">detectar su ubicación por GPS</strong>.<br>
+            2. Si el GPS funciona, la sede se asigna automáticamente (configurada en <strong style="color:var(--blue)">Sedes GPS</strong>).<br>
+            3. Si el GPS falla o el usuario lo deniega, aparece un <strong style="color:var(--green)">campo de búsqueda con autocomplete</strong>.<br>
+            4. El usuario escribe el nombre y el sistema sugiere de esta lista. <strong style="color:var(--ink)">No puede escribir libremente</strong> — solo puede elegir de las opciones.
+          </p>
+        </div>
+      </div>
+
+      <!-- SEDES GPS -->
       <div class="page" id="page-sedes">
         <div class="section-head" style="display:flex;align-items:flex-start;justify-content:space-between;">
           <div>
             <h2>Gestión de Sedes</h2>
-            <p>La encuesta detecta la sede más cercana al usuario por GPS. Agrega, edita o desactiva sedes aquí.</p>
+            <p>Sedes con coordenadas GPS para detección automática. Si el GPS falla, el usuario elige de la lista de Sedes (Encuesta).</p>
           </div>
           <div style="display:flex;gap:8px;flex-shrink:0;margin-top:4px;">
             <button class="btn btn-ghost btn-sm" onclick="syncSedes()">↻ Sincronizar</button>
@@ -561,6 +608,42 @@ html,body{height:100%;font-family:'Space Grotesk',sans-serif;background:var(--bg
 </div>
 
 <div id="toast"><span class="ti">✓</span><span id="toast-msg">Cambios guardados</span></div>
+
+<!-- MODAL SEDE ENCUESTA -->
+<div class="modal-overlay" id="sede-enc-modal-overlay" onclick="if(event.target===this)closeSedeEncuestaModal()">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-head">
+      <h3 id="sede-enc-modal-title">Nueva sede (Encuesta)</h3>
+      <button class="modal-close" onclick="closeSedeEncuestaModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg"><label class="fg-label">ID de sede <span style="color:var(--red)">*</span></label>
+        <input class="inp" id="me-id" placeholder="ej: drogueria-15-envigado" style="font-family:'JetBrains Mono',monospace;font-size:12px;">
+        <span class="fg-hint">Identificador único, sin espacios ni tildes.</span>
+      </div>
+      <div class="fg"><label class="fg-label">Nombre de la sede <span style="color:var(--red)">*</span></label>
+        <input class="inp" id="me-nombre" placeholder="Ej: Droguería Todo Drogas 15">
+      </div>
+      <div class="fg"><label class="fg-label">Ciudad / Municipio <span style="color:var(--red)">*</span></label>
+        <input class="inp" id="me-ciudad" placeholder="Ej: Medellín">
+      </div>
+      <div class="fg"><label class="fg-label">Dirección</label>
+        <input class="inp" id="me-dir" placeholder="Ej: CR 50 45 12 LC 101">
+      </div>
+      <div class="fg" style="display:flex;align-items:center;gap:10px;">
+        <div class="tog" id="me-tog" onclick="toggleSedeEncActiva()"></div>
+        <span id="me-tog-lbl" style="font-size:13px;color:var(--ink2);">Sede activa</span>
+      </div>
+      <div style="background:var(--blue-glow);border:1px solid rgba(79,142,247,.2);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--ink2);line-height:1.6;">
+        💡 Esta sede <strong style="color:var(--ink)">no necesita coordenadas GPS</strong>. Aparecerá en el autocomplete de la encuesta solo cuando el GPS falle.
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeSedeEncuestaModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveSedeEncuesta()">💾 Guardar sede</button>
+    </div>
+  </div>
+</div>
 
 <!-- MODAL SEDE -->
 <div class="modal-overlay" id="sede-modal-overlay" onclick="onModalOverlay(event)">
@@ -656,7 +739,7 @@ const STATE = {
     horario:'Lun-Vier 7 a.m-5:30 p.m. · Nova 24/7',
     encuesta:'',
   },
-  qrUrl:'https://td-pruebas.online/pqr_bienvenida.html',
+  qrUrl:'https://td-pruebas.online/pqr_form.html',
   instName:'Tododrogas',
   sbUrl:'', sbKey:'', sbAnon:'', nextId:10,
 };
@@ -669,11 +752,12 @@ function goTo(page,el){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
   el.classList.add('active');
-  const T={frases:'Frases del Carrusel',logo:'Logo & Colores',faq:'Preguntas Frecuentes',canales:'Canales de Contacto',qr:'Código QR',sedes:'Gestión de Sedes',supabase:'Conexión BD'};
+  const T={frases:'Frases del Carrusel',logo:'Logo & Colores',faq:'Preguntas Frecuentes',canales:'Canales de Contacto',qr:'Código QR','sedes-encuesta':'Sedes (Encuesta)',sedes:'Sedes GPS',supabase:'Conexión BD'};
   document.getElementById('topbar-title').textContent=T[page]||page;
   if(page==='qr') setTimeout(generateQR,100);
   if(page==='frases') startPreview(); else stopPreview();
   if(page==='sedes') syncSedes();
+  if(page==='sedes-encuesta') syncSedesEncuesta();
 }
 
 // FRASES
@@ -764,9 +848,7 @@ function saveCanales(){
 
 // QR
 function generateQR(){
-  let url=document.getElementById('qr-url-input').value.trim()||STATE.qrUrl;
-  try{const p=new URL(url);if(p.pathname==='/'||p.pathname==='')url=url.replace(/\/+$/,'')+'/pqr_bienvenida.html';}catch(e){}
-  document.getElementById('qr-url-input').value=url;
+  const url=document.getElementById('qr-url-input').value.trim()||STATE.qrUrl;
   STATE.qrUrl=url; document.getElementById('qr-url-label').textContent=url;
   document.getElementById('qr-code-el').innerHTML='';
   qrInstance=new QRCode(document.getElementById('qr-code-el'),{text:url,width:220,height:220,colorDark:'#0a0e1a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});
@@ -803,6 +885,7 @@ async function testSupabase(){
       localStorage.setItem('td_sb_cfg',JSON.stringify({url,key,anon:STATE.sbAnon}));
       showToast('Conectado ✓');
       syncSedes();
+    syncSedesEncuesta();
     } else throw new Error('Status '+r.status);
   }catch(e){el.className='sb-status err';el.innerHTML='<span>✕</span> Error: '+e.message;}
 }
@@ -887,6 +970,174 @@ try{
   const el=document.getElementById('tables-list');
   if(el)el.innerHTML=tables.map(([t,d,s])=>`<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-s);"><span style="font-family:JetBrains Mono,monospace;font-size:12px;color:var(--blue);min-width:200px;">${t}</span><span style="font-size:12px;color:var(--ink2);flex:1;">${d}</span><span class="badge ${s==='OK'?'badge-green':'badge-orange'}">${s}</span></div>`).join('');
 })();
+
+// ── SEDES ENCUESTA (lista autocomplete, sin GPS) ──────────────────
+const SEDES_ENCUESTA_DEFAULT = [
+  { id:'sf-medellin',           nombre:'Sede Servicio Farmacéutico Medellín',              ciudad:'Medellín',             direccion:'CR 48 49 57',                       activa:true },
+  { id:'sf-bic',                nombre:'Sede Servicio Farmacéutico BIC',                   ciudad:'Medellín',             direccion:'CL 50 48 03 ED B P 6',              activa:true },
+  { id:'sf-caucasia',           nombre:'Sede Servicio Farmacéutico Caucasia',              ciudad:'Caucasia',             direccion:'CR 20 03 76 LC 122 123',            activa:true },
+  { id:'sf-bagre',              nombre:'Sede Servicio Farmacéutico El Bagre',              ciudad:'El Bagre',             direccion:'CL 50 N 47 A 31',                   activa:true },
+  { id:'sf-ciudad-bolivar',     nombre:'Sede Servicio Farmacéutico Ciudad Bolívar',        ciudad:'Ciudad Bolívar',       direccion:'CL 49 CR 50 57 LC 104',             activa:true },
+  { id:'sf-yarumal',            nombre:'Sede Servicio Farmacéutico Yarumal',               ciudad:'Yarumal',              direccion:'CR 21 CL 17 17 LC 102 CC CUBOX',    activa:true },
+  { id:'sf-puerto-berrio',      nombre:'Sede Servicio Farmacéutico Puerto Berrío',         ciudad:'Puerto Berrío',        direccion:'CR 4 N 48 13',                      activa:true },
+  { id:'sf-santa-barbara',      nombre:'Sede Servicio Farmacéutico Santa Bárbara',         ciudad:'Santa Bárbara',        direccion:'CR 50 48 17',                       activa:true },
+  { id:'sf-yolombo',            nombre:'Sede Servicio Farmacéutico Yolombó',               ciudad:'Yolombó',              direccion:'CR 24 CL 18 04 LC 2',               activa:true },
+  { id:'sf-zaragoza',           nombre:'Sede Servicio Farmacéutico Zaragoza',              ciudad:'Zaragoza',             direccion:'CL 35 N 36 17',                     activa:true },
+  { id:'sf-santafe-antioquia',  nombre:'Sede Servicio Farmacéutico Santafé de Antioquia',  ciudad:'Santafé de Antioquia', direccion:'CL 10 7 49 P 1',                    activa:true },
+  { id:'sf-tamesis',            nombre:'Sede Servicio Farmacéutico Támesis',               ciudad:'Támesis',              direccion:'CR 10 9 47 P 1 LC 1',               activa:true },
+  { id:'sf-segovia',            nombre:'Sede Servicio Farmacéutico Segovia',               ciudad:'Segovia',              direccion:'CL 52 48 69 BRR EL BOLSILLO',       activa:true },
+  { id:'sf-turbo',              nombre:'Sede Servicio Farmacéutico Turbo',                 ciudad:'Turbo',                direccion:'CL 110 N 20 37',                    activa:true },
+  { id:'sf-amaga',              nombre:'Sede Servicio Farmacéutico Amagá',                 ciudad:'Amagá',                direccion:'CL 52 51 63',                       activa:true },
+  { id:'sf-apartado',           nombre:'Sede Servicio Farmacéutico Apartadó',              ciudad:'Apartadó',             direccion:'CR 102 92 16 18',                   activa:true },
+  { id:'sf-andes',              nombre:'Sede Servicio Farmacéutico Andes',                 ciudad:'Andes',                direccion:'CR 50 49 68 LC 102',                activa:true },
+  { id:'sf-carepa',             nombre:'Sede Servicio Farmacéutico Carepa',                ciudad:'Carepa',               direccion:'CL 81 74 12 14 A P 101',            activa:true },
+  { id:'sf-chigorodo',          nombre:'Sede Servicio Farmacéutico Chigorodó',             ciudad:'Chigorodó',            direccion:'CL 95 97 04 A 202',                 activa:true },
+  { id:'sf-abejorral',          nombre:'Sede Servicio Farmacéutico Abejorral',             ciudad:'Abejorral',            direccion:'CR 50 48 71',                       activa:true },
+  { id:'sf-sopetran',           nombre:'Sede Servicio Farmacéutico Sopetrán',              ciudad:'Sopetrán',             direccion:'CR 10 11 65',                       activa:true },
+  { id:'sf-rionegro',           nombre:'Sede Servicio Farmacéutico Rionegro',              ciudad:'Rionegro',             direccion:'CL 52 45 N 70',                     activa:true },
+  { id:'sf-la-ceja',            nombre:'Sede Servicio Farmacéutico La Ceja',               ciudad:'La Ceja',              direccion:'CR 24 N 19 40',                     activa:true },
+];
+
+let SEDES_ENCUESTA = [...SEDES_ENCUESTA_DEFAULT];
+let sedeEncuestaEditId = null;
+
+async function syncSedesEncuesta(){
+  if(STATE.sbUrl && STATE.sbKey){
+    try{
+      const r = await fetch(`${STATE.sbUrl}/rest/v1/sedes_encuesta?select=*&order=ciudad.asc,nombre.asc`, {headers:sbH()});
+      if(r.ok){
+        const data = await r.json();
+        if(data.length){ SEDES_ENCUESTA = data; localStorage.setItem('td_sedes_encuesta', JSON.stringify(SEDES_ENCUESTA)); }
+      }
+    }catch(e){ showToast('Error cargando sedes encuesta: '+e.message,'err'); }
+  } else {
+    try{ const d=JSON.parse(localStorage.getItem('td_sedes_encuesta')||'null'); if(d&&d.length) SEDES_ENCUESTA=d; }catch(_){}
+  }
+  renderSedesEncuesta();
+}
+
+function renderSedesEncuesta(){
+  const q    = (document.getElementById('se-filter')?.value||'').toLowerCase();
+  const ciu  = document.getElementById('se-ciudad-filter')?.value||'';
+  const grid = document.getElementById('sedes-encuesta-grid');
+  if(!grid) return;
+
+  // Actualizar stats
+  const activas = SEDES_ENCUESTA.filter(s=>s.activa).length;
+  const ciudades = [...new Set(SEDES_ENCUESTA.map(s=>s.ciudad))].length;
+  document.getElementById('se-total').textContent    = SEDES_ENCUESTA.length;
+  document.getElementById('se-activas').textContent  = activas;
+  document.getElementById('se-inactivas').textContent= SEDES_ENCUESTA.length-activas;
+  document.getElementById('se-ciudades').textContent = ciudades;
+
+  // Llenar select de ciudades
+  const sel = document.getElementById('se-ciudad-filter');
+  if(sel && sel.options.length <= 1){
+    [...new Set(SEDES_ENCUESTA.map(s=>s.ciudad))].sort().forEach(c=>{
+      const o = document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o);
+    });
+  }
+
+  // Filtrar
+  const filtered = SEDES_ENCUESTA.filter(s=>{
+    const matchQ = !q || s.nombre.toLowerCase().includes(q) || s.ciudad.toLowerCase().includes(q);
+    const matchC = !ciu || s.ciudad===ciu;
+    return matchQ && matchC;
+  });
+
+  if(!filtered.length){
+    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:40px;background:var(--bg3);border:1px dashed var(--border);border-radius:var(--radius);color:var(--ink3);font-size:13px;">Sin resultados para ese filtro.</div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(s=>`
+    <div class="sede-card ${s.activa?'activa':'inactiva'}">
+      <div class="sc-top">
+        <div>
+          <div class="sc-name">${escHtml(s.nombre)}</div>
+          <div class="sc-id">${escHtml(s.id)}</div>
+        </div>
+        <div class="sc-actions">
+          <span class="badge ${s.activa?'badge-green':'badge-red'}" style="margin-right:4px;">${s.activa?'Activa':'Inactiva'}</span>
+          <button class="btn-icon" onclick="openSedeEncuestaModal('${escHtml(s.id)}')" title="Editar">✏️</button>
+          <button class="btn-icon del" onclick="deleteSedeEncuesta('${escHtml(s.id)}')" title="Eliminar">🗑</button>
+        </div>
+      </div>
+      <div class="sc-row"><span class="ico">🏙</span><span>${escHtml(s.ciudad)}</span></div>
+      <div class="sc-row"><span class="ico">📍</span><span>${escHtml(s.direccion||'—')}</span></div>
+      <div class="sc-divider"></div>
+      <div class="sc-footer">
+        <span style="font-size:11px;color:var(--ink3);">Sin GPS · solo autocomplete</span>
+        <button class="btn btn-ghost btn-sm" style="font-size:11px;padding:3px 10px;" onclick="toggleSedeEncuestaActiva('${escHtml(s.id)}')">
+          ${s.activa?'Desactivar':'Activar'}
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openSedeEncuestaModal(id=null){
+  sedeEncuestaEditId = id;
+  if(id){
+    const s = SEDES_ENCUESTA.find(x=>x.id===id); if(!s) return;
+    document.getElementById('me-id').value      = s.id;
+    document.getElementById('me-id').disabled   = true;
+    document.getElementById('me-nombre').value  = s.nombre||'';
+    document.getElementById('me-ciudad').value  = s.ciudad||'';
+    document.getElementById('me-dir').value     = s.direccion||'';
+    setTogE(s.activa!==false);
+  } else {
+    ['me-id','me-nombre','me-ciudad','me-dir'].forEach(f=>document.getElementById(f).value='');
+    document.getElementById('me-id').disabled=false;
+    setTogE(true);
+  }
+  document.getElementById('sede-enc-modal-overlay').classList.add('open');
+}
+function closeSedeEncuestaModal(){ document.getElementById('sede-enc-modal-overlay').classList.remove('open'); sedeEncuestaEditId=null; }
+function setTogE(on){ document.getElementById('me-tog').className='tog'+(on?' on':''); document.getElementById('me-tog-lbl').textContent=on?'Sede activa':'Sede inactiva'; }
+function toggleSedeEncActiva(){ setTogE(!document.getElementById('me-tog').classList.contains('on')); }
+
+async function saveSedeEncuesta(){
+  const id      = document.getElementById('me-id').value.trim();
+  const nombre  = document.getElementById('me-nombre').value.trim();
+  const ciudad  = document.getElementById('me-ciudad').value.trim();
+  const dir     = document.getElementById('me-dir').value.trim();
+  if(!id||!nombre||!ciudad){ showToast('ID, nombre y ciudad son obligatorios','err'); return; }
+  const sede = { id, nombre, ciudad, direccion:dir, activa: document.getElementById('me-tog').classList.contains('on') };
+  if(STATE.sbUrl && STATE.sbKey){
+    try{
+      const r=await fetch(`${STATE.sbUrl}/rest/v1/sedes_encuesta`,{method:'POST',headers:{...sbH(),Prefer:'resolution=merge-duplicates,return=representation'},body:JSON.stringify(sede)});
+      if(!r.ok) throw new Error(await r.text());
+      showToast(sedeEncuestaEditId?'Sede actualizada ✓':'Sede creada ✓');
+    }catch(e){ showToast('Error: '+e.message,'err'); }
+  }
+  const idx = SEDES_ENCUESTA.findIndex(s=>s.id===id);
+  if(idx>=0) SEDES_ENCUESTA[idx]={...SEDES_ENCUESTA[idx],...sede}; else SEDES_ENCUESTA.push(sede);
+  localStorage.setItem('td_sedes_encuesta', JSON.stringify(SEDES_ENCUESTA));
+  renderSedesEncuesta(); closeSedeEncuestaModal();
+}
+
+async function deleteSedeEncuesta(id){
+  const s = SEDES_ENCUESTA.find(x=>x.id===id); if(!s) return;
+  if(!confirm(`¿Eliminar "${s.nombre}"?`)) return;
+  if(STATE.sbUrl&&STATE.sbKey){
+    try{ await fetch(`${STATE.sbUrl}/rest/v1/sedes_encuesta?id=eq.${id}`,{method:'DELETE',headers:sbH()}); }
+    catch(e){ showToast('Error: '+e.message,'err'); return; }
+  }
+  SEDES_ENCUESTA = SEDES_ENCUESTA.filter(x=>x.id!==id);
+  localStorage.setItem('td_sedes_encuesta', JSON.stringify(SEDES_ENCUESTA));
+  renderSedesEncuesta(); showToast('Sede eliminada');
+}
+
+function toggleSedeEncuestaActiva(id){
+  const s = SEDES_ENCUESTA.find(x=>x.id===id); if(!s) return;
+  s.activa = !s.activa;
+  if(STATE.sbUrl&&STATE.sbKey){
+    fetch(`${STATE.sbUrl}/rest/v1/sedes_encuesta?id=eq.${id}`,{method:'PATCH',headers:{...sbH(),Prefer:'return=minimal'},body:JSON.stringify({activa:s.activa})});
+  }
+  localStorage.setItem('td_sedes_encuesta', JSON.stringify(SEDES_ENCUESTA));
+  renderSedesEncuesta();
+}
 
 // ── SEDES ──────────────────────────────────────────
 function sbH(extra={}){return{apikey:STATE.sbKey,Authorization:'Bearer '+STATE.sbKey,'Content-Type':'application/json',...extra};}
