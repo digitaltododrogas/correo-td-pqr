@@ -697,7 +697,7 @@ try {
       try{
         const parsed = new URL(u);
         if(parsed.pathname === '/' || parsed.pathname === '')
-          u = u.replace(/\/+$/, '') + '/pqr_form.html';
+          u = u.replace(/\/+$/, '') + '/pqr_bienvenida.html';
       }catch(e){}
       FORM_URL = u;
     }
@@ -735,32 +735,6 @@ function applyQRs(){
     : 'Encuesta · configura la URL en el panel';
 }
 
-// Genera QR en el contenedor dado con la URL dada
-function makeQR(elId, url, size){
-  const el = document.getElementById(elId);
-  if(!el) return;
-  el.innerHTML = '';
-  if(!url){ el.innerHTML='<span style="color:#6b748a;font-size:10px;text-align:center;display:block;padding:16px 4px;">Sin URL</span>'; return; }
-  try{
-    new QRCode(el,{text:url,width:size||130,height:size||130,colorDark:'#0a0e1a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});
-  }catch(e){ el.innerHTML='<span style="color:#f87171;font-size:10px;">Error QR</span>'; }
-}
-
-// Aplica QRs una vez el DOM esté listo
-function applyQRs(){
-  // QR Radicar
-  makeQR('qr-radicar', FORM_URL, 130);
-  const radLbl = document.getElementById('qr-radicar-url');
-  if(radLbl){
-    try{ radLbl.textContent = new URL(FORM_URL).hostname + new URL(FORM_URL).pathname; }
-    catch(e){ radLbl.textContent = FORM_URL; }
-  }
-  // QR Encuesta
-  const encUrl = CFG.canales && CFG.canales.encuesta ? CFG.canales.encuesta : '';
-  makeQR('qr-encuesta', encUrl, 130);
-  const encLbl = document.getElementById('qr-encuesta-url');
-  if(encLbl) encLbl.textContent = encUrl ? 'Encuesta · Escanea con tu cámara' : 'Encuesta · configura la URL en el panel';
-}
 
 let cIdx = 0;
 let cTimer = null;
