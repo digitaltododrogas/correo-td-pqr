@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Radicar PQR · Tododrogas</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -757,44 +758,8 @@ html,body{height:100%;font-family:'Poppins',sans-serif;overflow:hidden;backgroun
       <!-- QR SIEMPRE VISIBLE -->
       <div class="qr-block">
         <div class="qr-block-title">Escanea o radica aquí</div>
-        <div class="qr-frame-sm">
-          <div class="scan-line"></div>
-          <svg width="120" height="120" viewBox="0 0 168 168" xmlns="http://www.w3.org/2000/svg">
-            <rect width="168" height="168" fill="white"/>
-            <rect x="8" y="8" width="48" height="48" rx="5" fill="#0a0e1a"/>
-            <rect x="14" y="14" width="36" height="36" rx="3" fill="white"/>
-            <rect x="20" y="20" width="24" height="24" rx="2" fill="#0a0e1a"/>
-            <rect x="112" y="8" width="48" height="48" rx="5" fill="#0a0e1a"/>
-            <rect x="118" y="14" width="36" height="36" rx="3" fill="white"/>
-            <rect x="124" y="20" width="24" height="24" rx="2" fill="#0a0e1a"/>
-            <rect x="8" y="112" width="48" height="48" rx="5" fill="#0a0e1a"/>
-            <rect x="14" y="118" width="36" height="36" rx="3" fill="white"/>
-            <rect x="20" y="124" width="24" height="24" rx="2" fill="#0a0e1a"/>
-            <g fill="#0a0e1a">
-              <rect x="66" y="8" width="8" height="8"/><rect x="78" y="8" width="8" height="8"/><rect x="90" y="8" width="8" height="8"/>
-              <rect x="66" y="20" width="8" height="8"/><rect x="90" y="20" width="8" height="8"/>
-              <rect x="66" y="32" width="8" height="8"/><rect x="78" y="32" width="8" height="8"/>
-              <rect x="8" y="66" width="8" height="8"/><rect x="20" y="66" width="8" height="8"/><rect x="44" y="66" width="8" height="8"/>
-              <rect x="8" y="78" width="8" height="8"/><rect x="32" y="78" width="8" height="8"/>
-              <rect x="8" y="90" width="8" height="8"/><rect x="20" y="90" width="8" height="8"/><rect x="44" y="90" width="8" height="8"/>
-              <rect x="66" y="66" width="8" height="8"/><rect x="78" y="66" width="8" height="8"/><rect x="90" y="66" width="8" height="8"/><rect x="102" y="66" width="8" height="8"/>
-              <rect x="78" y="78" width="8" height="8"/><rect x="102" y="78" width="8" height="8"/>
-              <rect x="66" y="90" width="8" height="8"/><rect x="90" y="90" width="8" height="8"/>
-              <rect x="112" y="66" width="8" height="8"/><rect x="136" y="66" width="8" height="8"/>
-              <rect x="124" y="78" width="8" height="8"/><rect x="148" y="78" width="8" height="8"/>
-              <rect x="112" y="90" width="8" height="8"/><rect x="124" y="90" width="8" height="8"/>
-              <rect x="66" y="112" width="8" height="8"/><rect x="90" y="112" width="8" height="8"/>
-              <rect x="66" y="124" width="8" height="8"/><rect x="78" y="124" width="8" height="8"/>
-              <rect x="90" y="136" width="8" height="8"/><rect x="102" y="136" width="8" height="8"/>
-              <rect x="112" y="112" width="8" height="8"/><rect x="136" y="112" width="8" height="8"/>
-              <rect x="124" y="124" width="8" height="8"/><rect x="148" y="124" width="8" height="8"/>
-              <rect x="112" y="136" width="8" height="8"/><rect x="124" y="136" width="8" height="8"/>
-            </g>
-            <rect x="72" y="72" width="24" height="24" rx="5" fill="#2563eb"/>
-            <text x="84" y="87" text-anchor="middle" font-size="9" fill="white" font-weight="800" font-family="Poppins,sans-serif">PQR</text>
-          </svg>
-        </div>
-        <div class="qr-url-sm">tododrogas.com/pqr</div>
+        <div class="qr-frame-sm"><div class="scan-line"></div><div id="form-qr" style="line-height:1;width:120px;height:120px;display:flex;align-items:center;justify-content:center;"></div></div>
+        <div class="qr-url-sm" id="form-qr-url">tododrogas.com/pqr</div>
         <div class="canal-sel-badge">
           <div class="csb-dot"></div>
           <span id="canalBadge">Canal: —</span>
@@ -860,13 +825,45 @@ html,body{height:100%;font-family:'Poppins',sans-serif;overflow:hidden;backgroun
 
 <script>
 // ══════════════════════════════════════════
-// CONFIG
+// CONFIG — lee desde localStorage('pqr_config') guardado por el panel
 // ══════════════════════════════════════════
-const N8N_BASE       = 'https://TU_DOMINIO.com/webhook';
+(function(){
+  try{
+    const saved = localStorage.getItem('pqr_config');
+    if(!saved) return;
+    const cfg = JSON.parse(saved);
+
+    // QR del formulario
+    const qrUrl = cfg.qrUrl || '';
+    if(qrUrl){
+      const el = document.getElementById('form-qr');
+      if(el){
+        el.innerHTML='';
+        new QRCode(el,{text:qrUrl,width:120,height:120,colorDark:'#0a0e1a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});
+      }
+      const lbl = document.getElementById('form-qr-url');
+      try{ if(lbl) lbl.textContent = new URL(qrUrl).hostname + new URL(qrUrl).pathname; }
+      catch(e){ if(lbl) lbl.textContent = qrUrl; }
+    }
+
+    // WhatsApp desde canales
+    if(cfg.canales && cfg.canales.whatsapp){
+      const num = cfg.canales.whatsapp.replace(/\D/g,'');
+      window._WA_URL = 'https://wa.me/57' + num;
+    }
+
+    // Webhooks n8n desde canales.web
+    if(cfg.canales && cfg.canales.web){
+      window._N8N_BASE = cfg.canales.web;
+    }
+  }catch(e){}
+})();
+
+const N8N_BASE       = window._N8N_BASE || 'https://TU_DOMINIO.com/webhook';
 const WEBHOOK_PQR    = N8N_BASE + '/radicar-pqr';
 const WEBHOOK_AUDIO  = N8N_BASE + '/transcribir-audio';
 const WEBHOOK_CANVAS = N8N_BASE + '/procesar-canvas';
-const WA_URL         = 'https://wa.me/57XXXXXXXXXX';
+const WA_URL         = window._WA_URL   || 'https://wa.me/57XXXXXXXXXX';
 
 // ══════════════════════════════════════════
 // ESTADO
