@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>PQR · Tododrogas</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -16,7 +17,6 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;font-family:'Sora',sans-serif;overflow:hidden}
-@media(max-width:768px){html,body{overflow:visible;height:auto;}}
 body{background:var(--ink);display:flex;min-height:100vh;}
 
 /* ════ LAYOUT ════ */
@@ -423,106 +423,6 @@ body{background:var(--ink);display:flex;min-height:100vh;}
   border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
   flex-shrink:0;transition:all .15s;box-shadow:0 4px 14px rgba(37,99,235,.35);}
 .send-btn:hover{transform:scale(1.06);}
-
-/* ════ RESPONSIVE ════ */
-
-/* Tablet (768px – 1100px): reduce right panel width, compact layout */
-@media(max-width:1100px){
-  .right{width:360px;min-width:320px;padding:20px 18px 18px;}
-  .rp-title{font-size:26px;}
-  .agent-right{width:180px;}
-  .carousel-text{font-size:clamp(22px,3.5vw,38px);}
-  .stats-bar{display:none;}
-}
-
-/* Tablet portrait / small tablet (≤768px): stack layout */
-@media(max-width:768px){
-  html,body{overflow-y:auto;height:auto;}
-  body{flex-direction:column;}
-  .layout{flex-direction:column;height:auto;min-height:100vh;}
-
-  /* Panel izquierdo → full width, altura auto */
-  .left{flex:none;width:100%;min-height:60vh;}
-
-  /* Panel derecho → full width abajo */
-  .right{width:100%;min-width:0;padding:24px 20px 32px;
-    box-shadow:none;border-top:1px solid rgba(255,255,255,.08);}
-
-  .rp-title{font-size:28px;}
-  .rp-sub{font-size:13px;}
-  .qr-duo{grid-template-columns:1fr 1fr;}
-
-  /* Carrusel */
-  .carousel-text{font-size:clamp(22px,5.5vw,36px);}
-  .agent-row{flex-direction:column;align-items:stretch;}
-  .agent-divider{width:100%;height:1px;}
-  .agent-right{width:100%;flex-direction:row;gap:8px;padding:12px 16px;}
-  .btn-chat,.btn-audio{flex:1;}
-  .stats-bar{display:none;}
-  .l-top{padding:16px 18px 0;}
-  .carousel-section{padding:16px 18px 12px;}
-}
-
-/* Móvil (≤480px): diseño completamente vertical, optimizado para pulgar */
-@media(max-width:480px){
-  html,body{overflow-y:auto;height:auto;}
-  body{flex-direction:column;}
-  .layout{flex-direction:column;height:auto;min-height:100vh;}
-
-  /* Izquierdo — zona visual compacta */
-  .left{flex:none;width:100%;min-height:55vh;}
-  .l-top{padding:14px 14px 0;}
-  .brand-pill{padding:5px 12px;}
-  .brand-name{font-size:10px;}
-  .live-txt{font-size:9px;}
-  .carousel-section{padding:12px 14px 10px;flex:1;}
-  .carousel-eyebrow{font-size:9px;margin-bottom:12px;}
-  .carousel-text{font-size:clamp(20px,6vw,30px);letter-spacing:-.5px;}
-  .carousel-sub{font-size:12px;}
-  .carousel-dots{margin-bottom:16px;}
-
-  /* Agent row compacto */
-  .agent-row{flex-direction:column;}
-  .agent-left{padding:12px 14px;gap:10px;}
-  .agent-avatar{width:42px;height:42px;font-size:20px;}
-  .agent-name{font-size:13px;}
-  .agent-desc{font-size:10px;}
-  .agent-caps{gap:4px;}
-  .acap{font-size:9px;padding:2px 7px;}
-  .agent-divider{width:100%;height:1px;}
-  .agent-right{width:100%;flex-direction:row;gap:7px;padding:10px 14px;flex-shrink:0;}
-  .btn-chat{flex:1;font-size:12px;padding:10px 12px;}
-  .btn-audio{flex:1;font-size:10px;padding:7px 10px;}
-  .stats-bar{display:none;}
-
-  /* Derecho — acción principal */
-  .right{width:100%;min-width:0;padding:20px 16px 36px;
-    box-shadow:none;border-top:1px solid rgba(255,255,255,.06);}
-  .rp-eyebrow{font-size:9px;}
-  .rp-title{font-size:24px;letter-spacing:-.3px;}
-  .rp-sub{font-size:12px;margin-bottom:14px;}
-  .horario-badge{font-size:10px;padding:4px 12px;margin-bottom:14px;}
-
-  /* QR más compacto */
-  .qr-frame{padding:12px;margin-bottom:10px;}
-  .qr-url{font-size:10px;margin-bottom:10px;}
-  .qr-duo{gap:8px;}
-
-  /* Canales */
-  .canales-grid{gap:7px;}
-  .canal-btn{padding:9px 5px;}
-  .canal-icon{font-size:18px;}
-  .canal-label{font-size:9px;}
-
-  /* Botón radicar — grande para fácil toque */
-  .btn-radicar{padding:16px;font-size:15px;border-radius:14px;}
-  .footer-note{font-size:10px;}
-
-  /* Chat modal full screen en móvil */
-  .chat-modal{width:100%;height:100%;border-radius:0;border:none;}
-  .overlay{align-items:flex-end;}
-  .overlay.open .chat-modal{transform:none;}
-}
 </style>
 </head>
 <body>
@@ -668,37 +568,12 @@ body{background:var(--ink);display:flex;min-height:100vh;}
         <div style="font-size:11px;color:rgba(96,165,250,.9);text-align:center;">Escanea el QR con tu celular o toca el botón</div>
       </div>
       <div class="qr-frame" style="padding:14px;margin:0;">
+        <div class="scan-line"></div>
         <div class="qr-inner">
-          <svg width="130" height="130" viewBox="0 0 168 168" xmlns="http://www.w3.org/2000/svg">
-            <rect width="168" height="168" fill="white"/>
-            <rect x="8" y="8" width="48" height="48" rx="5" fill="#080d1a"/><rect x="14" y="14" width="36" height="36" rx="3" fill="white"/><rect x="20" y="20" width="24" height="24" rx="2" fill="#080d1a"/>
-            <rect x="112" y="8" width="48" height="48" rx="5" fill="#080d1a"/><rect x="118" y="14" width="36" height="36" rx="3" fill="white"/><rect x="124" y="20" width="24" height="24" rx="2" fill="#080d1a"/>
-            <rect x="8" y="112" width="48" height="48" rx="5" fill="#080d1a"/><rect x="14" y="118" width="36" height="36" rx="3" fill="white"/><rect x="20" y="124" width="24" height="24" rx="2" fill="#080d1a"/>
-            <g fill="#080d1a">
-              <rect x="78" y="8" width="8" height="8"/><rect x="66" y="20" width="8" height="8"/><rect x="90" y="20" width="8" height="8"/>
-              <rect x="78" y="32" width="8" height="8"/><rect x="66" y="32" width="8" height="8"/>
-              <rect x="20" y="66" width="8" height="8"/><rect x="32" y="66" width="8" height="8"/><rect x="44" y="66" width="8" height="8"/>
-              <rect x="8" y="78" width="8" height="8"/><rect x="44" y="78" width="8" height="8"/>
-              <rect x="20" y="90" width="8" height="8"/><rect x="32" y="90" width="8" height="8"/>
-              <rect x="66" y="66" width="8" height="8"/><rect x="90" y="66" width="8" height="8"/><rect x="102" y="66" width="8" height="8"/>
-              <rect x="66" y="78" width="8" height="8"/><rect x="78" y="78" width="8" height="8"/>
-              <rect x="90" y="90" width="8" height="8"/><rect x="102" y="90" width="8" height="8"/>
-              <rect x="112" y="78" width="8" height="8"/><rect x="136" y="66" width="8" height="8"/>
-              <rect x="124" y="66" width="8" height="8"/><rect x="152" y="78" width="8" height="8"/>
-              <rect x="112" y="90" width="8" height="8"/><rect x="136" y="90" width="8" height="8"/>
-              <rect x="78" y="112" width="8" height="8"/><rect x="102" y="112" width="8" height="8"/>
-              <rect x="66" y="124" width="8" height="8"/><rect x="90" y="124" width="8" height="8"/>
-              <rect x="78" y="136" width="8" height="8"/><rect x="102" y="136" width="8" height="8"/>
-              <rect x="112" y="112" width="8" height="8"/><rect x="148" y="112" width="8" height="8"/>
-              <rect x="124" y="124" width="8" height="8"/><rect x="136" y="136" width="8" height="8"/>
-              <rect x="112" y="148" width="8" height="8"/><rect x="148" y="148" width="8" height="8"/>
-            </g>
-            <rect x="72" y="72" width="24" height="24" rx="5" fill="#f59e0b"/>
-            <text x="84" y="87" text-anchor="middle" font-size="13" fill="white" font-weight="800" font-family="Sora,sans-serif">★</text>
-          </svg>
+          <div id="qr-encuesta" style="line-height:1;"></div>
         </div>
       </div>
-      <div class="qr-url">Encuesta de satisfacción · Escanea con tu cámara</div>
+      <div class="qr-url" id="qr-encuesta-url">Cargando…</div><div class="qr-url">Encuesta de satisfacción · Escanea con tu cámara</div>
     </div>
 
     <!-- DIVISOR -->
@@ -721,38 +596,10 @@ body{background:var(--ink);display:flex;min-height:100vh;}
       <div class="qr-frame" style="padding:14px;margin:0;">
         <div class="scan-line"></div>
         <div class="qr-inner">
-          <svg width="130" height="130" viewBox="0 0 168 168" xmlns="http://www.w3.org/2000/svg">
-            <rect width="168" height="168" fill="white"/>
-            <rect x="8" y="8" width="48" height="48" rx="5" fill="#080d1a"/><rect x="14" y="14" width="36" height="36" rx="3" fill="white"/><rect x="20" y="20" width="24" height="24" rx="2" fill="#080d1a"/>
-            <rect x="112" y="8" width="48" height="48" rx="5" fill="#080d1a"/><rect x="118" y="14" width="36" height="36" rx="3" fill="white"/><rect x="124" y="20" width="24" height="24" rx="2" fill="#080d1a"/>
-            <rect x="8" y="112" width="48" height="48" rx="5" fill="#080d1a"/><rect x="14" y="118" width="36" height="36" rx="3" fill="white"/><rect x="20" y="124" width="24" height="24" rx="2" fill="#080d1a"/>
-            <g fill="#080d1a">
-              <rect x="66" y="8" width="8" height="8"/><rect x="78" y="8" width="8" height="8"/><rect x="90" y="8" width="8" height="8"/>
-              <rect x="66" y="20" width="8" height="8"/><rect x="90" y="20" width="8" height="8"/>
-              <rect x="66" y="32" width="8" height="8"/><rect x="78" y="32" width="8" height="8"/>
-              <rect x="8" y="66" width="8" height="8"/><rect x="20" y="66" width="8" height="8"/><rect x="44" y="66" width="8" height="8"/>
-              <rect x="8" y="78" width="8" height="8"/><rect x="32" y="78" width="8" height="8"/>
-              <rect x="8" y="90" width="8" height="8"/><rect x="20" y="90" width="8" height="8"/><rect x="44" y="90" width="8" height="8"/>
-              <rect x="66" y="66" width="8" height="8"/><rect x="78" y="66" width="8" height="8"/><rect x="90" y="66" width="8" height="8"/><rect x="102" y="66" width="8" height="8"/>
-              <rect x="78" y="78" width="8" height="8"/><rect x="102" y="78" width="8" height="8"/>
-              <rect x="66" y="90" width="8" height="8"/><rect x="90" y="90" width="8" height="8"/>
-              <rect x="112" y="66" width="8" height="8"/><rect x="136" y="66" width="8" height="8"/><rect x="152" y="66" width="8" height="8"/>
-              <rect x="124" y="78" width="8" height="8"/><rect x="148" y="78" width="8" height="8"/>
-              <rect x="112" y="90" width="8" height="8"/><rect x="124" y="90" width="8" height="8"/><rect x="152" y="90" width="8" height="8"/>
-              <rect x="66" y="112" width="8" height="8"/><rect x="90" y="112" width="8" height="8"/><rect x="102" y="112" width="8" height="8"/>
-              <rect x="66" y="124" width="8" height="8"/><rect x="78" y="124" width="8" height="8"/>
-              <rect x="90" y="136" width="8" height="8"/><rect x="102" y="136" width="8" height="8"/>
-              <rect x="112" y="112" width="8" height="8"/><rect x="136" y="112" width="8" height="8"/>
-              <rect x="124" y="124" width="8" height="8"/><rect x="148" y="124" width="8" height="8"/>
-              <rect x="112" y="136" width="8" height="8"/><rect x="124" y="136" width="8" height="8"/>
-              <rect x="112" y="148" width="8" height="8"/><rect x="136" y="148" width="8" height="8"/>
-            </g>
-            <rect x="72" y="72" width="24" height="24" rx="5" fill="#2563eb"/>
-            <text x="84" y="87" text-anchor="middle" font-size="9" fill="white" font-weight="800" font-family="Sora,sans-serif">PQR</text>
-          </svg>
+          <div id="qr-radicar" style="line-height:1;"></div>
         </div>
       </div>
-      <div class="qr-url">tododrogas.com/pqr · Escanea con tu cámara</div>
+      <div class="qr-url" id="qr-radicar-url">Cargando…</div><div class="qr-url">tododrogas.com/pqr · Escanea con tu cámara</div>
       <button class="btn-radicar" onclick="goToForm()" style="margin-top:4px;">
         <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
         Radicar mi solicitud aquí
@@ -833,31 +680,122 @@ body{background:var(--ink);display:flex;min-height:100vh;}
   </div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-// ══════════════════════════════
-// CARRUSEL — carga desde config o defaults
-// ══════════════════════════════
-let FRASES = [
-  { text:'Tu voz importa', hl:true },
-  { text:'¿Tienes una queja o sugerencia? Estamos para escucharte', hl:false },
-  { text:'Confidencial · Tu información está protegida', hl:false },
-  { text:'Respuesta garantizada en máximo 15 días hábiles', hl:false },
-  { text:'Elige el canal que más te convenga: correo, chat, audio o escritura', hl:false },
-];
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js">
 
-// Intentar cargar desde Supabase / localStorage
-try {
-  const saved = localStorage.getItem('pqr_config');
-  if(saved){
-    const cfg = JSON.parse(saved);
-    if(cfg.frases && cfg.frases.length){
-      FRASES = cfg.frases.map((f,i) => ({text: f.text, hl: i===0}));
-    }
-  }
-} catch(e){}
+// ── INIT ──
+document.addEventListener('DOMContentLoaded', loadConfig);
+</script><script>
+// ══════════════════════════════════════════════════════
+// CONFIG — carga desde Supabase (si hay creds) o localStorage
+// Flujo: Supabase config_sistema → fallback localStorage pqr_config → defaults
+// El QR NO es estático: se genera con la URL guardada en config.
+// Solo cambia si se edita en el panel y se guarda de nuevo.
+// ══════════════════════════════════════════════════════
+
+const DEFAULTS = {
+  frases: [
+    { text:'Tu voz importa', hl:true },
+    { text:'¿Tienes una queja o sugerencia? Estamos para escucharte', hl:false },
+    { text:'Confidencial · Tu información está protegida', hl:false },
+    { text:'Respuesta garantizada en máximo 15 días hábiles', hl:false },
+    { text:'Elige el canal que más te convenga: correo, chat, audio o escritura', hl:false },
+  ],
+  qrUrl: 'https://td-pruebas.online/pqr_form.html',
+  encuestaUrl: '',
+};
+
+let FRASES = DEFAULTS.frases;
+let FORM_URL = DEFAULTS.qrUrl;
+let ENCUESTA_URL = DEFAULTS.encuestaUrl;
 
 let cIdx = 0;
 let cTimer = null;
+
+// ── Genera un QR en el elemento dado con la URL dada ──
+function makeQR(elId, url, size) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  el.innerHTML = '';
+  if (!url) {
+    el.innerHTML = '<span style="color:#6b748a;font-size:10px;text-align:center;display:block;padding:10px;">Sin URL<br>configurada</span>';
+    return;
+  }
+  try {
+    new QRCode(el, {
+      text: url,
+      width: size || 130,
+      height: size || 130,
+      colorDark: '#0a0e1a',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+  } catch(e) {
+    el.innerHTML = '<span style="color:#f87171;font-size:10px;">Error QR</span>';
+  }
+}
+
+// ── Aplica la config al DOM ──
+function applyConfig(cfg) {
+  // Frases carrusel
+  if (cfg.frases && cfg.frases.length) {
+    FRASES = cfg.frases.map((f, i) => ({ text: f.text, hl: i === 0 }));
+  }
+  // URL formulario (QR radicar)
+  if (cfg.qrUrl) FORM_URL = cfg.qrUrl;
+  // URL encuesta
+  if (cfg.canales && cfg.canales.encuesta) ENCUESTA_URL = cfg.canales.encuesta;
+
+  // Genera QR radicar
+  makeQR('qr-radicar', FORM_URL, 130);
+  const radUrl = document.getElementById('qr-radicar-url');
+  if (radUrl) {
+    try { radUrl.textContent = new URL(FORM_URL).hostname + new URL(FORM_URL).pathname; }
+    catch(e) { radUrl.textContent = FORM_URL; }
+  }
+
+  // Genera QR encuesta (solo si tiene URL)
+  makeQR('qr-encuesta', ENCUESTA_URL, 130);
+  const encUrl = document.getElementById('qr-encuesta-url');
+  if (encUrl) encUrl.textContent = ENCUESTA_URL || 'Encuesta · pendiente de configurar';
+}
+
+// ── Carga config: primero Supabase, luego localStorage, luego defaults ──
+async function loadConfig() {
+  // 1. Intentar desde Supabase (usa las mismas creds que el panel)
+  try {
+    const sb = JSON.parse(localStorage.getItem('td_sb_cfg') || '{}');
+    if (sb.url && sb.key) {
+      const r = await fetch(
+        `${sb.url}/rest/v1/config_sistema?id=eq.main&select=data&limit=1`,
+        { headers: { apikey: sb.key, Authorization: 'Bearer ' + sb.key } }
+      );
+      if (r.ok) {
+        const rows = await r.json();
+        if (rows && rows[0] && rows[0].data) {
+          applyConfig(rows[0].data);
+          // Guardar en localStorage como cache
+          localStorage.setItem('pqr_config', JSON.stringify(rows[0].data));
+          startCarousel();
+          return;
+        }
+      }
+    }
+  } catch(e) {}
+
+  // 2. Fallback: localStorage (guardado por el panel o cache anterior)
+  try {
+    const saved = localStorage.getItem('pqr_config');
+    if (saved) {
+      applyConfig(JSON.parse(saved));
+      startCarousel();
+      return;
+    }
+  } catch(e) {}
+
+  // 3. Defaults: sin config guardada aún
+  applyConfig(DEFAULTS);
+  startCarousel();
+}
 
 function renderCarousel(){
   const textEl = document.getElementById('carouselText');
@@ -914,7 +852,7 @@ function startCarousel(){
 function goToForm(){
   document.body.style.transition='opacity .35s ease';
   document.body.style.opacity='0';
-  setTimeout(()=>window.location.href='pqr_form_v4.html',350);
+  setTimeout(()=>window.location.href=FORM_URL,350);
 }
 
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
