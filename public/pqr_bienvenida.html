@@ -760,29 +760,40 @@ function applyConfig(cfg) {
 }
 
 // ── Carga config: primero Supabase, luego localStorage, luego defaults ──
+// ══════════════════════════════════════════════════════════════════
+// SUPABASE CONFIG — editar SOLO si cambias de VPS o proyecto Supabase
+// La anon key es pública (solo lectura). La service key NUNCA va aquí.
+// ══════════════════════════════════════════════════════════════════
+const SB_URL  = 'SUPABASE_URL_PLACEHOLDER';   // ej: https://xxxx.supabase.co
+const SB_ANON = 'SUPABASE_ANON_KEY_PLACEHOLDER'; // anon/public key del proyecto
+
 async function loadConfig() {
-  // 1. Intentar desde Supabase (usa las mismas creds que el panel)
-  try {
-    const sb = JSON.parse(localStorage.getItem('td_sb_cfg') || '{}');
-    if (sb.url && sb.key) {
+  // 1. Supabase — usa anon key embebida o la guardada por el panel en mismo dominio
+  const sbCfg = (() => { try { return JSON.parse(localStorage.getItem('td_sb_cfg')||'{}'); } catch(e){ return {}; } })();
+  const _sbUrl  = (SB_URL  && !SB_URL.includes('PLACEHOLDER'))  ? SB_URL  : (sbCfg.url  || '');
+  const _sbAnon = (SB_ANON && !SB_ANON.includes('PLACEHOLDER')) ? SB_ANON : (sbCfg.anon || sbCfg.key || '');
+
+  if (_sbUrl && _sbAnon) {
+    try {
       const r = await fetch(
-        `${sb.url}/rest/v1/config_sistema?id=eq.main&select=data&limit=1`,
-        { headers: { apikey: sb.key, Authorization: 'Bearer ' + sb.key } }
+        `${_sbUrl}/rest/v1/config_sistema?id=eq.main&select=data&limit=1`,
+        { headers: { apikey: _sbAnon, Authorization: 'Bearer ' + _sbAnon } }
       );
       if (r.ok) {
         const rows = await r.json();
         if (rows && rows[0] && rows[0].data) {
-          applyConfig(rows[0].data);
-          // Guardar en localStorage como cache
-          localStorage.setItem('pqr_config', JSON.stringify(rows[0].data));
+          const cfg = rows[0].data;
+          // Cachear localmente para carga instantánea en próxima apertura
+          try { localStorage.setItem('pqr_config', JSON.stringify(cfg)); } catch(e){}
+          applyConfig(cfg);
           startCarousel();
           return;
         }
       }
-    }
-  } catch(e) {}
+    } catch(e) { console.warn('Supabase no disponible, usando caché:', e.message); }
+  }
 
-  // 2. Fallback: localStorage (guardado por el panel o cache anterior)
+  // 2. Caché local (última config cargada exitosamente de Supabase)
   try {
     const saved = localStorage.getItem('pqr_config');
     if (saved) {
@@ -792,7 +803,7 @@ async function loadConfig() {
     }
   } catch(e) {}
 
-  // 3. Defaults: sin config guardada aún
+  // 3. Valores por defecto (primera carga sin config aún)
   applyConfig(DEFAULTS);
   startCarousel();
 }
