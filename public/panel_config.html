@@ -462,7 +462,7 @@ html,body{height:100%;font-family:'Space Grotesk',sans-serif;background:var(--bg
               <p id="qr-url-label">https://td-pruebas.online/pqr_bienvenida.html</p>
             </div>
             <div class="url-input-wrap">
-              <input type="text" id="qr-url-input" value="https://td-pruebas.online/pqr_bienvenida.html" placeholder="https://tu-dominio.com/pqr_bienvenida.html">
+              <input type="text" id="qr-url-input" value="https://td-pruebas.online/pqr_bienvenida.html" placeholder="https://tu-dominio.com/form">
               <button class="btn btn-primary" onclick="generateQR()">↺ Actualizar</button>
             </div>
             <div class="qr-actions">
@@ -764,9 +764,7 @@ function saveCanales(){
 
 // QR
 function generateQR(){
-  let url=document.getElementById('qr-url-input').value.trim();
-  // Si está vacía o es solo dominio sin path, completar con /pqr_bienvenida.html
-  if(!url) url=STATE.qrUrl;
+  let url=document.getElementById('qr-url-input').value.trim()||STATE.qrUrl;
   try{const p=new URL(url);if(p.pathname==='/'||p.pathname==='')url=url.replace(/\/+$/,'')+'/pqr_bienvenida.html';}catch(e){}
   document.getElementById('qr-url-input').value=url;
   STATE.qrUrl=url; document.getElementById('qr-url-label').textContent=url;
