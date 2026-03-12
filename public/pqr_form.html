@@ -836,19 +836,19 @@ if(_CFG.canales && _CFG.canales.whatsapp){
 }
 if(_CFG.canales && _CFG.canales.web) window._N8N_BASE=_CFG.canales.web;
 
-// El QR se genera al final cuando el DOM ya está pintado
+// QR usando <img> con API — funciona en todos los dispositivos sin librería
 function initFormQR(){
   const qrUrl = _CFG.qrUrl || '';
   const el = document.getElementById('form-qr');
   if(!el) return;
-  el.innerHTML = '';
-  if(!qrUrl){ return; }
-  try{
-    new QRCode(el,{text:qrUrl,width:120,height:120,
-      colorDark:'#0a0e1a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});
-    const lbl=document.getElementById('form-qr-url');
-    if(lbl){ try{ lbl.textContent=new URL(qrUrl).hostname+new URL(qrUrl).pathname; }catch(e){ lbl.textContent=qrUrl; } }
-  }catch(e){}
+  if(!qrUrl){
+    el.innerHTML='<span style="font-size:10px;color:#999;text-align:center;display:block;padding:10px;">Sin URL<br>configurada</span>';
+    return;
+  }
+  const encoded = encodeURIComponent(qrUrl);
+  el.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data='+encoded+'&bgcolor=ffffff&color=0a0e1a&qzone=1" width="120" height="120" style="display:block;border-radius:4px;" onerror="this.style.display='none'">';
+  const lbl = document.getElementById('form-qr-url');
+  if(lbl){ try{ lbl.textContent=new URL(qrUrl).hostname+new URL(qrUrl).pathname; }catch(e){ lbl.textContent=qrUrl; } }
 }
 
 const N8N_BASE       = window._N8N_BASE || 'https://TU_DOMINIO.com/webhook';
@@ -953,8 +953,8 @@ function launchSlide4(medio){
   updateCarousel(3);
   updateProgress(3);
 
-  // QR — generarlo aquí cuando slide4 ya es visible (funciona en móvil y PC)
-  requestAnimationFrame(()=>setTimeout(initFormQR, 80));
+  // QR — slide4 ya visible, generar
+  initFormQR();
 
   // Inicializar según medio
   if(medio==='lapiz') setTimeout(initCanvas,120);
