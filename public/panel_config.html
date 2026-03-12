@@ -902,14 +902,18 @@ function saveSupabase(){
 async function saveAll(){
   saveCanales();
   const cfg=buildConfig();
+  // Siempre guardar en localStorage
+  try{ localStorage.setItem('pqr_config',JSON.stringify(cfg)); }catch(e){}
+  // Si hay Supabase, sincronizar también allá
   if(STATE.sbUrl&&STATE.sbKey){
     try{
       const r=await fetch(`${STATE.sbUrl}/rest/v1/config_sistema`,{method:'POST',headers:{apikey:STATE.sbKey,Authorization:'Bearer '+STATE.sbKey,'Content-Type':'application/json',Prefer:'resolution=merge-duplicates'},body:JSON.stringify({id:'main',data:cfg,updated_at:new Date().toISOString()})});
-      if(r.ok||r.status===201){showToast('Guardado en Supabase ✓ — La tablet se actualizará');return;}
-    }catch(e){}
+      if(r.ok||r.status===201){showToast('Guardado en Supabase ✓ — La pantalla se actualizará en 30s');return;}
+      else showToast('Supabase error '+r.status+' — guardado local','err');
+    }catch(e){showToast('Sin conexión Supabase — guardado local','err');}
+  } else {
+    showToast('Guardado localmente');
   }
-  try{localStorage.setItem('pqr_config',JSON.stringify(cfg));showToast('Guardado localmente');}
-  catch(e){showToast('Error: '+e.message,'err');}
 }
 function buildConfig(){
   return{frases:STATE.frases,colors:STATE.colors,logo:STATE.logo,faq:STATE.faq,canales:STATE.canales,qrUrl:STATE.qrUrl,instName:document.getElementById('inst-name')?.value||STATE.instName,updatedAt:new Date().toISOString()};
@@ -973,31 +977,71 @@ try{
 
 // ── SEDES ENCUESTA (lista autocomplete, sin GPS) ──────────────────
 const SEDES_ENCUESTA_DEFAULT = [
-  { id:'sf-medellin',           nombre:'Sede Servicio Farmacéutico Medellín',              ciudad:'Medellín',             direccion:'CR 48 49 57',                       activa:true },
-  { id:'sf-bic',                nombre:'Sede Servicio Farmacéutico BIC',                   ciudad:'Medellín',             direccion:'CL 50 48 03 ED B P 6',              activa:true },
-  { id:'sf-caucasia',           nombre:'Sede Servicio Farmacéutico Caucasia',              ciudad:'Caucasia',             direccion:'CR 20 03 76 LC 122 123',            activa:true },
-  { id:'sf-bagre',              nombre:'Sede Servicio Farmacéutico El Bagre',              ciudad:'El Bagre',             direccion:'CL 50 N 47 A 31',                   activa:true },
-  { id:'sf-ciudad-bolivar',     nombre:'Sede Servicio Farmacéutico Ciudad Bolívar',        ciudad:'Ciudad Bolívar',       direccion:'CL 49 CR 50 57 LC 104',             activa:true },
-  { id:'sf-yarumal',            nombre:'Sede Servicio Farmacéutico Yarumal',               ciudad:'Yarumal',              direccion:'CR 21 CL 17 17 LC 102 CC CUBOX',    activa:true },
-  { id:'sf-puerto-berrio',      nombre:'Sede Servicio Farmacéutico Puerto Berrío',         ciudad:'Puerto Berrío',        direccion:'CR 4 N 48 13',                      activa:true },
-  { id:'sf-santa-barbara',      nombre:'Sede Servicio Farmacéutico Santa Bárbara',         ciudad:'Santa Bárbara',        direccion:'CR 50 48 17',                       activa:true },
-  { id:'sf-yolombo',            nombre:'Sede Servicio Farmacéutico Yolombó',               ciudad:'Yolombó',              direccion:'CR 24 CL 18 04 LC 2',               activa:true },
-  { id:'sf-zaragoza',           nombre:'Sede Servicio Farmacéutico Zaragoza',              ciudad:'Zaragoza',             direccion:'CL 35 N 36 17',                     activa:true },
-  { id:'sf-santafe-antioquia',  nombre:'Sede Servicio Farmacéutico Santafé de Antioquia',  ciudad:'Santafé de Antioquia', direccion:'CL 10 7 49 P 1',                    activa:true },
-  { id:'sf-tamesis',            nombre:'Sede Servicio Farmacéutico Támesis',               ciudad:'Támesis',              direccion:'CR 10 9 47 P 1 LC 1',               activa:true },
-  { id:'sf-segovia',            nombre:'Sede Servicio Farmacéutico Segovia',               ciudad:'Segovia',              direccion:'CL 52 48 69 BRR EL BOLSILLO',       activa:true },
-  { id:'sf-turbo',              nombre:'Sede Servicio Farmacéutico Turbo',                 ciudad:'Turbo',                direccion:'CL 110 N 20 37',                    activa:true },
-  { id:'sf-amaga',              nombre:'Sede Servicio Farmacéutico Amagá',                 ciudad:'Amagá',                direccion:'CL 52 51 63',                       activa:true },
-  { id:'sf-apartado',           nombre:'Sede Servicio Farmacéutico Apartadó',              ciudad:'Apartadó',             direccion:'CR 102 92 16 18',                   activa:true },
-  { id:'sf-andes',              nombre:'Sede Servicio Farmacéutico Andes',                 ciudad:'Andes',                direccion:'CR 50 49 68 LC 102',                activa:true },
-  { id:'sf-carepa',             nombre:'Sede Servicio Farmacéutico Carepa',                ciudad:'Carepa',               direccion:'CL 81 74 12 14 A P 101',            activa:true },
-  { id:'sf-chigorodo',          nombre:'Sede Servicio Farmacéutico Chigorodó',             ciudad:'Chigorodó',            direccion:'CL 95 97 04 A 202',                 activa:true },
-  { id:'sf-abejorral',          nombre:'Sede Servicio Farmacéutico Abejorral',             ciudad:'Abejorral',            direccion:'CR 50 48 71',                       activa:true },
-  { id:'sf-sopetran',           nombre:'Sede Servicio Farmacéutico Sopetrán',              ciudad:'Sopetrán',             direccion:'CR 10 11 65',                       activa:true },
-  { id:'sf-rionegro',           nombre:'Sede Servicio Farmacéutico Rionegro',              ciudad:'Rionegro',             direccion:'CL 52 45 N 70',                     activa:true },
-  { id:'sf-la-ceja',            nombre:'Sede Servicio Farmacéutico La Ceja',               ciudad:'La Ceja',              direccion:'CR 24 N 19 40',                     activa:true },
+  // PROPIOS
+  { id:'sf-abejorral',         nombre:'Tododrogas Abejorral',              ciudad:'Abejorral',            direccion:'Carrera Santander # 48-11',                             activa:true },
+  { id:'sf-amaga',             nombre:'Tododrogas Amagá',                  ciudad:'Amagá',                direccion:'Calle 51 N 51 Bloque 1 Primer Piso',                    activa:true },
+  { id:'sf-andes',             nombre:'Tododrogas Andes',                  ciudad:'Andes',                direccion:'Carrera 50 # 49-68 Local 102 Edificio El Tesoro',       activa:true },
+  { id:'sf-apartado',          nombre:'Tododrogas Apartadó',               ciudad:'Apartadó',             direccion:'Carrera 102 # 92-16/18 Barrio Industriales',            activa:true },
+  { id:'sf-carepa',            nombre:'Tododrogas Carepa',                 ciudad:'Carepa',               direccion:'Calle 81 con Carrera 74-12/14 Barrio Pueblo Nuevo',      activa:true },
+  { id:'sf-caucasia',          nombre:'Tododrogas Caucasia',               ciudad:'Caucasia',             direccion:'Carrera 20 # 3-76 CC Cauca Centro A1 Loc 120-123',      activa:true },
+  { id:'sf-chigorodo',         nombre:'Tododrogas Chigorodó',              ciudad:'Chigorodó',            direccion:'Calle 95 # 97-04 Local 2',                              activa:true },
+  { id:'sf-ciudad-bolivar',    nombre:'Tododrogas Ciudad Bolívar',         ciudad:'Ciudad Bolívar',       direccion:'Calle 49 # 50-57 Local 104',                            activa:true },
+  { id:'sf-bagre',             nombre:'Tododrogas El Bagre',               ciudad:'El Bagre',             direccion:'Calle 50 # 47A-31',                                     activa:true },
+  { id:'sf-medellin1',         nombre:'Tododrogas Medellín',               ciudad:'Medellín',             direccion:'Carrera 49 # 48-57',                                    activa:true },
+  { id:'sf-medellin2',         nombre:'Tododrogas Medellín 2',             ciudad:'Medellín',             direccion:'Calle 48 # 48-03',                                      activa:true },
+  { id:'sf-puerto-berrio',     nombre:'Tododrogas Puerto Berrío',          ciudad:'Puerto Berrío',        direccion:'Calle 48 # 4-56 Barrio El Hoyo',                        activa:true },
+  { id:'sf-santa-barbara',     nombre:'Tododrogas Santa Bárbara',          ciudad:'Santa Bárbara',        direccion:'Carrera 50 # 48-17',                                    activa:true },
+  { id:'sf-santafe',           nombre:'Tododrogas Santa Fe de Antioquia',  ciudad:'Santa Fe de Antioquia',direccion:'Calle 10 # 7-49',                                       activa:true },
+  { id:'sf-segovia',           nombre:'Tododrogas Segovia',                ciudad:'Segovia',              direccion:'Calle 52 N 48-69 Calle El Palo Taratal',                activa:true },
+  { id:'sf-tamesis',           nombre:'Tododrogas Támesis',                ciudad:'Támesis',              direccion:'Carrera 10 # 9-47 Primer Piso Local 1',                 activa:true },
+  { id:'sf-turbo',             nombre:'Tododrogas Turbo',                  ciudad:'Turbo',                direccion:'Calle 101 # 15-14 Barrio Baltazar',                      activa:true },
+  { id:'sf-yarumal',           nombre:'Tododrogas Yarumal',                ciudad:'Yarumal',              direccion:'Carrera 21 # 17-17 Mall Cubox LC 102',                  activa:true },
+  { id:'sf-yolombo',           nombre:'Tododrogas Yolombó',                ciudad:'Yolombó',              direccion:'Carrera 24 Calle 18-04 Local 2 Edif SYS',               activa:true },
+  { id:'sf-zaragoza',          nombre:'Tododrogas Zaragoza',               ciudad:'Zaragoza',             direccion:'Calle Principal San Gregorio 36-20',                    activa:true },
+  { id:'sf-nechi',             nombre:'Tododrogas Nechí',                  ciudad:'Nechí',                direccion:'Cl 25 N.º 31A-16 Barrio San Nicolás',                   activa:true },
+  { id:'sf-rionegro',          nombre:'Tododrogas Rionegro',               ciudad:'Rionegro',             direccion:'Cl 52 #45-70 Local 2006',                               activa:true },
+  { id:'sf-la-ceja',           nombre:'Tododrogas La Ceja',                ciudad:'La Ceja',              direccion:'Carrera 24 19 40',                                      activa:true },
+  { id:'sf-sopetran',          nombre:'Tododrogas Sopetrán',               ciudad:'Sopetrán',             direccion:'Carrera 10 # 11-65',                                    activa:true },
+  // IN HOUSE / ALIADOS
+  { id:'ih-amalfi',            nombre:'Droguería Farmavida (Savia) Amalfi',          ciudad:'Amalfi',               direccion:'Calle 23 # 29-54',                             activa:true },
+  { id:'ih-angostura',         nombre:'Droguería Coopriachon (Savia) Angostura',     ciudad:'Angostura',            direccion:'Carrera 10 # 9-20',                            activa:true },
+  { id:'ih-anori',             nombre:'Droguería San Rafael (Savia) Anorí',          ciudad:'Anorí',                direccion:'Avenida 31 n 30-16',                           activa:true },
+  { id:'ih-frontino',          nombre:'Droguería Frontifarma (Savia) Frontino',      ciudad:'Frontino',             direccion:'Carrera 30 # 38-47',                           activa:true },
+  { id:'ih-mutata',            nombre:'Droguería Familiar Eddy (Savia) Mutatá',      ciudad:'Mutatá',               direccion:'Carrera 10 # 10-41-43',                        activa:true },
+  { id:'ih-necocli',           nombre:'Droguería La Píldora (Savia) Necoclí',        ciudad:'Necoclí',              direccion:'Calle 51 # 48-38 Barrio Centro',               activa:true },
+  { id:'ih-remedios',          nombre:'Farmax La Droguería (Savia) Remedios',        ciudad:'Remedios',             direccion:'Calle 11 # 8-12',                              activa:true },
+  { id:'al-giraldo',           nombre:'ESE Hospital San Isidro (Savia) Giraldo',     ciudad:'Giraldo',              direccion:'Carrera 10 # 11-05',                           activa:true },
+  { id:'al-armenia',           nombre:'ESE San Martín de Porres (Savia) Armenia',    ciudad:'Armenia Antioquia',    direccion:'Calle 11 # 6-69',                              activa:true },
+  { id:'al-briceno',           nombre:'ESE Sagrado Corazón (Savia) Briceño',         ciudad:'Briceño',              direccion:'Calle 11 # 8-31',                              activa:true },
+  { id:'al-dabeiba',           nombre:'Droguería Donde Natalia (Savia) Dabeiba',     ciudad:'Dabeiba',              direccion:'Carrera 10 # 6-47',                            activa:true },
+  { id:'al-hispania',          nombre:'Droguería Biomedic (Savia) Hispania',         ciudad:'Hispania',             direccion:'Calle 50 Toledo # 50-12',                      activa:true },
+  { id:'al-peque',             nombre:"Farmacia D'Andreé (Savia) Peque",             ciudad:'Peque',                direccion:'Carrera Bolívar # 11-19',                      activa:true },
+  { id:'al-pueblorrico',       nombre:'Droguería Familia S.G. (Savia) Pueblorrico',  ciudad:'Pueblorrico',          direccion:'Carrera 30 # 30-56 Local 101',                 activa:true },
+  { id:'al-uramita',           nombre:'Droguería H. Ramírez (Savia) Uramita',        ciudad:'Uramita',              direccion:'Carrera 20 # 20-67',                           activa:true },
+  { id:'al-valdivia',          nombre:'Droguería Macefarma (Savia) Valdivia',        ciudad:'Valdivia',             direccion:'Calle Libertador # 9-92',                      activa:true },
+  { id:'al-yali',              nombre:'Droguería El Regalo de Dios (Savia) Yalí',    ciudad:'Yalí',                 direccion:'Calle 20 # 19-71 Barrio La Plaza',             activa:true },
+  { id:'al-anza',              nombre:'Droguería San Martín 712 (Savia) Anzá',       ciudad:'Anzá',                 direccion:'Carrera 8 # 7-51',                             activa:true },
+  { id:'ih-betulia',           nombre:'Droguería Famidrogas (Savia) Betulia',        ciudad:'Betulia',              direccion:'Calle 21 # 21-42',                             activa:true },
+  { id:'ih-buritica',          nombre:'Droguería San Antonio (Savia) Buriticá',      ciudad:'Buriticá',             direccion:'Calle 6 # 5-12 Parque Principal',              activa:true },
+  { id:'al-caicedo',           nombre:'ESE Hospital G. Gaviria (Savia) Caicedo',     ciudad:'Caicedo',              direccion:'Cra. 5 # 3-23',                                activa:true },
+  { id:'ih-jardin',            nombre:'Droguería Macrodescuentos #9 (Savia) Jardín', ciudad:'Jardín',               direccion:'Calle 9 # 2-59',                               activa:true },
+  { id:'ih-liborina',          nombre:'Droguería San Gabriel (Savia) Liborina',      ciudad:'Liborina',             direccion:'Carrera 9 # 8-4 Parque Principal',             activa:true },
+  { id:'al-olaya',             nombre:'ESE Hospital San Miguel (Savia) Olaya',       ciudad:'Olaya',                direccion:'Carrera 10 # 10-34 Llanadas',                  activa:true },
+  { id:'al-sabanalarga-savia', nombre:'Droguería La Amistad (Savia) Sabanalarga',    ciudad:'Sabanalarga',          direccion:'Calle 17 # 18-06',                             activa:true },
+  { id:'al-san-jeronimo',      nombre:'Droguería Santa Teresita (Savia) San Jerónimo',ciudad:'San Jerónimo',        direccion:'Carrera 11 # 21-73',                           activa:true },
+  { id:'ih-caceres',           nombre:'Droguería Bienestar (Coosalud) Cáceres',      ciudad:'Cáceres',              direccion:'Calle 49 # 51-36 Brr Centro',                  activa:true },
+  { id:'ih-jerico',            nombre:'Droguería San Antonio (Coosalud) Jericó',     ciudad:'Jericó',               direccion:'Carrera 5 # 6-09',                             activa:true },
+  { id:'al-puerto-nare',       nombre:'Hospital Octavio Álvarez (Coosalud) Puerto Nare',ciudad:'Puerto Nare',       direccion:'Carrera 5 # 45-103',                           activa:true },
+  { id:'al-samana',            nombre:'ESE San José (Coosalud) Samaná',             ciudad:'Samaná',               direccion:'Carrera 9 # 4-79',                             activa:true },
+  { id:'al-sabanalarga-cos',   nombre:'ESE Hospital San Pedro (Coosalud) Sabanalarga',ciudad:'Sabanalarga',         direccion:'Carrera 17 # 15-94',                           activa:true },
+  { id:'ih-taraza',            nombre:'Droguería Kirius (Coosalud) Tarazá',          ciudad:'Tarazá',               direccion:'Carrera 28 # 27-26',                           activa:true },
+  { id:'ih-barbosa',           nombre:'Droguería La Solidaria (Coosalud) Barbosa',   ciudad:'Barbosa',              direccion:'Calle 15 No. 17-22',                           activa:true },
+  { id:'ih-girardota',         nombre:'Droguería Familiar E&M (Salud Total) Girardota',ciudad:'Girardota',          direccion:'Carrera 15 No. 5-42',                          activa:true },
+  { id:'ih-rionegro-st',       nombre:'Droguerías Oriente (Salud Total) Rionegro',   ciudad:'Rionegro',             direccion:'Carrera 48 # 51-15 Centro',                    activa:true },
+  { id:'al-concordia',         nombre:'Droguería La Nuestra (Salud Total) Concordia',ciudad:'Concordia',            direccion:'Calle 19 No. 19-30',                           activa:true },
+  { id:'al-copacabana',        nombre:'Droguería Alma Salud 1 (Salud Total) Copacabana',ciudad:'Copacabana',        direccion:'Calle 40 No. 84-18',                           activa:true },
+  { id:'ih-sabaneta',          nombre:'Droguería Innova Farma (Nueva EPS) Sabaneta', ciudad:'Sabaneta',             direccion:'Calle 73 Sur # 46-09 Entre Amigos',            activa:true },
 ];
-
 let SEDES_ENCUESTA = [...SEDES_ENCUESTA_DEFAULT];
 let sedeEncuestaEditId = null;
 
