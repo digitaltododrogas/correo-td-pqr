@@ -825,37 +825,32 @@ html,body{height:100%;font-family:'Poppins',sans-serif;overflow:hidden;backgroun
 
 <script>
 // ══════════════════════════════════════════
-// CONFIG — lee desde localStorage('pqr_config') guardado por el panel
+// CONFIG — lee localStorage('pqr_config') guardado por el panel
 // ══════════════════════════════════════════
 (function(){
   try{
     const saved = localStorage.getItem('pqr_config');
     if(!saved) return;
     const cfg = JSON.parse(saved);
-
-    // QR del formulario
+    // QR
     const qrUrl = cfg.qrUrl || '';
     if(qrUrl){
       const el = document.getElementById('form-qr');
       if(el){
         el.innerHTML='';
-        new QRCode(el,{text:qrUrl,width:120,height:120,colorDark:'#0a0e1a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});
+        new QRCode(el,{text:qrUrl,width:120,height:120,
+          colorDark:'#0a0e1a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});
       }
       const lbl = document.getElementById('form-qr-url');
-      try{ if(lbl) lbl.textContent = new URL(qrUrl).hostname + new URL(qrUrl).pathname; }
-      catch(e){ if(lbl) lbl.textContent = qrUrl; }
+      if(lbl){ try{ lbl.textContent=new URL(qrUrl).hostname+new URL(qrUrl).pathname; }catch(e){ lbl.textContent=qrUrl; } }
     }
-
-    // WhatsApp desde canales
+    // WhatsApp
     if(cfg.canales && cfg.canales.whatsapp){
-      const num = cfg.canales.whatsapp.replace(/\D/g,'');
-      window._WA_URL = 'https://wa.me/57' + num;
+      const num=cfg.canales.whatsapp.replace(/\D/g,'');
+      window._WA_URL='https://wa.me/57'+num;
     }
-
-    // Webhooks n8n desde canales.web
-    if(cfg.canales && cfg.canales.web){
-      window._N8N_BASE = cfg.canales.web;
-    }
+    // N8N webhook base
+    if(cfg.canales && cfg.canales.web) window._N8N_BASE=cfg.canales.web;
   }catch(e){}
 })();
 
