@@ -685,15 +685,46 @@ let FRASES = [
 // Carga config desde localStorage (guardada por el panel en el mismo dominio)
 let CFG = {};
 let FORM_URL = 'pqr_form.html'; // default
+let _lastQrUrl = null; // para detectar cambios
+
+function applyConfig(cfg){
+  if(!cfg) return;
+  CFG = cfg;
+  if(cfg.frases && cfg.frases.length)
+    FRASES = cfg.frases.map((f,i) => ({text: f.text, hl: i===0}));
+  if(cfg.qrUrl) FORM_URL = cfg.qrUrl;
+}
+
+// Carga inicial desde localStorage
 try {
   const saved = localStorage.getItem('pqr_config');
-  if(saved){
-    CFG = JSON.parse(saved);
-    if(CFG.frases && CFG.frases.length)
-      FRASES = CFG.frases.map((f,i) => ({text: f.text, hl: i===0}));
-    if(CFG.qrUrl) FORM_URL = CFG.qrUrl;
-  }
+  if(saved) applyConfig(JSON.parse(saved));
 } catch(e){}
+
+// Polling a Supabase: revisa la config cada 30 segundos y actualiza el QR si cambió
+async function pollSupabaseConfig(){
+  try {
+    const sbRaw = localStorage.getItem('td_sb_cfg');
+    if(!sbRaw) return;
+    const sb = JSON.parse(sbRaw);
+    if(!sb.url || !sb.anon) return;
+    const r = await fetch(`${sb.url}/rest/v1/config_sistema?id=eq.main&select=data`, {
+      headers:{ apikey: sb.anon, Authorization: 'Bearer ' + sb.anon }
+    });
+    if(!r.ok) return;
+    const rows = await r.json();
+    if(!rows || !rows.length || !rows[0].data) return;
+    const remoteCfg = rows[0].data;
+    const newQrUrl = remoteCfg.qrUrl || '';
+    if(newQrUrl && newQrUrl !== _lastQrUrl){
+      _lastQrUrl = newQrUrl;
+      FORM_URL = newQrUrl;
+      applyQRs(); // regenera el QR con la nueva URL
+    }
+    // También actualizar localStorage para consistencia
+    localStorage.setItem('pqr_config', JSON.stringify(remoteCfg));
+  } catch(e){}
+}
 
 // Genera QR en el contenedor dado con la URL dada
 function makeQR(elId, url, size){
@@ -1021,6 +1052,9 @@ setTimeout(()=>{ document.body.style.opacity='1'; },50);
 // ── INIT ──
 startCarousel();
 applyQRs();
+_lastQrUrl = FORM_URL; // fijar URL inicial para detectar cambios
+pollSupabaseConfig();   // primera verificación inmediata
+setInterval(pollSupabaseConfig, 30000); // polling cada 30 segundos
 document.getElementById('btn-radicar-main').addEventListener('click', goToForm);
 document.getElementById('btn-radicar-chat').addEventListener('click', goToForm);
 </script>
