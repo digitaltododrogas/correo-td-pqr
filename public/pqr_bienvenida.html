@@ -590,7 +590,7 @@ body{background:var(--ink);display:flex;min-height:100vh;}
       </div>
       <div class="qr-frame" style="padding:14px;margin:0;"><div class="scan-line"></div><div class="qr-inner"><div id="qr-radicar" style="line-height:1;min-width:130px;min-height:130px;display:flex;align-items:center;justify-content:center;"></div></div></div>
       <div class="qr-url" id="qr-radicar-url">tododrogas.com/pqr · Escanea con tu cámara</div>
-      <button class="btn-radicar" onclick="goToForm()" style="margin-top:4px;">
+      <button class="btn-radicar" id="btn-radicar-main" style="margin-top:4px;">
         <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
         Radicar mi solicitud aquí
       </button>
@@ -655,7 +655,7 @@ body{background:var(--ink);display:flex;min-height:100vh;}
 
     <div class="esc-bar" id="escBar">
       ⚠️ Nova no logró resolver tu consulta del todo. ¿Deseas que un asesor te contacte formalmente?
-      <br><button class="esc-btn" onclick="goToForm()">📋 Radicar mi solicitud</button>
+      <br><button class="esc-btn" id="btn-radicar-chat">📋 Radicar mi solicitud</button>
     </div>
 
     <div class="input-row" id="inputRow">
@@ -1061,6 +1061,8 @@ setTimeout(()=>{ document.body.style.opacity='1'; },50);
 // ── INIT — script al final del body, DOM ya existe ──
 startCarousel();
 applyQRs();
+document.getElementById("btn-radicar-main").addEventListener("click", goToForm);
+document.getElementById("btn-radicar-chat").addEventListener("click", goToForm);
 </script>
 </body>
 </html>
