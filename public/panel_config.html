@@ -875,6 +875,7 @@ try{
     if(cfg.logo){STATE.logo=cfg.logo;document.getElementById('logo-preview').innerHTML=`<img src="${cfg.logo}" alt="Logo">`;}
     if(cfg.colors){STATE.colors=cfg.colors;Object.entries(cfg.colors).forEach(([k,v])=>{const c=document.getElementById('c-'+k);const h=document.getElementById('h-'+k);if(c)c.value=v;if(h)h.value=v;});}
     if(cfg.canales){STATE.canales=cfg.canales;Object.entries(cfg.canales).forEach(([k,v])=>{const key=k.replace(/([A-Z])/g,'-$1').toLowerCase();const el=document.getElementById('ch-'+key);if(el)el.value=v;});}
+    if(cfg.qrUrl){STATE.qrUrl=cfg.qrUrl;const qi=document.getElementById('qr-url-input');if(qi)qi.value=cfg.qrUrl;const ql=document.getElementById('qr-url-label');if(ql)ql.textContent=cfg.qrUrl;}
   }
 }catch(e){}
 
