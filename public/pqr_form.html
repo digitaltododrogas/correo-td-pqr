@@ -576,26 +576,26 @@ html,body{height:100%;font-family:'Poppins',sans-serif;overflow:hidden;backgroun
     <div class="sgrid"></div>
     <div class="eyebrow">Paso 2 de 4</div>
     <h1 class="slide-title">¿Cómo deseas que<br>te contactemos?</h1>
-    <p class="slide-sub">La confirmación de tu radicado llegará a tu correo electrónico</p>
+    <p class="slide-sub">Elige cómo prefieres que el asesor te responda.<br><span style="font-size:11px;opacity:.7;">📩 La confirmación con tu número de radicado llegará siempre a tu correo.</span></p>
     <div class="canal-grid">
       <div class="canal-card" onclick="selCanal(this,'WhatsApp','sel-wa')">
         <div class="cc-iw">💬</div>
         <div class="cc-name">WhatsApp</div>
-        <div class="cc-sub">Ir al chat</div>
+        <div class="cc-sub">Un asesor te escribirá</div>
       </div>
       <div class="canal-card" onclick="selCanal(this,'correo','sel-email')">
         <div class="cc-iw">📧</div>
         <div class="cc-name">Correo</div>
-        <div class="cc-sub">Canal oficial</div>
+        <div class="cc-sub">Te respondemos por correo</div>
       </div>
       <div class="canal-card" onclick="selCanal(this,'llamada','sel-phone')">
         <div class="cc-iw">📞</div>
         <div class="cc-name">Llamada</div>
-        <div class="cc-sub">Te llamamos</div>
+        <div class="cc-sub">Un asesor te llama</div>
       </div>
     </div>
-    <div class="wa-note" id="waNoteMsg">
-      💬 Serás redirigido al WhatsApp de la empresa para continuar con un asesor.
+    <div class="wa-note" id="waNoteMsg" style="background:rgba(37,211,102,.08);border-color:rgba(37,211,102,.25);">
+      💬 <strong style="color:#4ade80;">Perfecto.</strong> Registraremos que prefieres WhatsApp. Un asesor de Tododrogas te escribirá al número que indiques. No hace falta que abras WhatsApp ahora — continúa para completar tu radicado.
     </div>
     <button class="btn-next" id="btn2" onclick="goTo(2)" disabled>
       Continuar
@@ -611,21 +611,23 @@ html,body{height:100%;font-family:'Poppins',sans-serif;overflow:hidden;backgroun
     <p class="slide-sub">Elige el formato que te resulte más cómodo</p>
     <div class="medio-grid">
       <div class="medio-card" onclick="selMedio(this,'texto')">
-        <div class="medio-iw">⌨️</div>
+        <div class="medio-iw">✍️</div>
         <div class="medio-name">Escribir</div>
-        <div class="medio-sub">Redacta tu solicitud</div>
+        <div class="medio-sub">Escribe tu mensaje con el teclado</div>
       </div>
       <div class="medio-card" onclick="selMedio(this,'audio')">
         <div class="medio-iw">🎤</div>
         <div class="medio-name">Audio</div>
-        <div class="medio-sub">Graba un mensaje</div>
+        <div class="medio-sub">Toca el micrófono, habla y tócalo de nuevo para terminar</div>
       </div>
       <div class="medio-card" onclick="selMedio(this,'lapiz')">
         <div class="medio-iw">✏️</div>
         <div class="medio-name">Lápiz inteligente</div>
-        <div class="medio-sub">Escribe a mano</div>
+        <div class="medio-sub">Escribe a mano con el lápiz o tu dedo en la pantalla</div>
       </div>
     </div>
+    <!-- Instrucción dinámica según medio seleccionado -->
+    <div id="medioInstruccion" style="display:none;max-width:520px;width:100%;background:rgba(37,99,235,.1);border:1px solid rgba(37,99,235,.3);border-radius:12px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:rgba(255,255,255,.75);line-height:1.6;text-align:center;"></div>
     <button class="btn-next" id="btn3" onclick="goTo(3)" disabled>
       Continuar
       <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
@@ -640,7 +642,7 @@ html,body{height:100%;font-family:'Poppins',sans-serif;overflow:hidden;backgroun
 
       <!-- TÍTULO DINÁMICO -->
       <div class="left-section-title" id="leftTitle">
-        <span id="leftIcon">⌨️</span>
+        <span id="leftIcon">✍️</span>
         <span id="leftTitleText">Tu mensaje</span>
         <span id="canalBadge" style="margin-left:auto;font-size:10px;font-weight:700;letter-spacing:.4px;background:rgba(37,99,235,.15);color:var(--blue-m);border:1px solid rgba(37,99,235,.25);border-radius:20px;padding:2px 10px;"></span>
       </div>
@@ -648,22 +650,30 @@ html,body{height:100%;font-family:'Poppins',sans-serif;overflow:hidden;backgroun
       <!-- TEXTO -->
       <div id="modo-texto" style="display:flex;flex-direction:column;gap:10px;flex:1;">
         <textarea class="msg-textarea" id="msgText"
-          placeholder="Cuéntanos con detalle qué ocurrió, qué necesitas o qué quieres reportar…"
+          placeholder="Escribe aquí tu solicitud con detalle: ¿qué ocurrió?, ¿cuándo?, ¿en qué sede o producto?, ¿qué esperas de nosotros?"
           style="flex:1;min-height:220px;"></textarea>
       </div>
 
       <!-- AUDIO -->
       <div id="modo-audio" style="display:none;flex-direction:column;align-items:center;gap:0;">
-        <p style="font-size:12px;color:var(--ink3);text-align:center;margin-bottom:14px;">
-          Máximo 2 minutos · La IA transcribirá tu mensaje automáticamente
-        </p>
+        <!-- Instrucción paso a paso para audio -->
+        <div style="background:#fdf2f8;border:1px solid #fbcfe8;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:#9d174d;line-height:1.7;">
+          <div style="font-weight:700;margin-bottom:4px;font-size:13px;">🎤 ¿Cómo grabar tu mensaje?</div>
+          <div>① Toca el <strong>botón del micrófono</strong> para comenzar a grabar</div>
+          <div>② Habla con claridad — cuéntanos qué pasó</div>
+          <div>③ Cuando termines, toca el <strong>botón nuevamente</strong> para parar</div>
+          <div style="margin-top:6px;font-size:11px;color:#be185d;">⏱ Máximo 2 minutos · La IA transcribirá tu voz automáticamente</div>
+        </div>
         <div class="waveform" id="waveform"></div>
         <div style="height:16px;"></div>
         <div class="rec-orb" id="recOrb" onclick="toggleRecord()">
           <div class="rec-rings"></div><div class="rec-rings2"></div>🎤
         </div>
         <div style="height:14px;"></div>
-        <div class="rec-status" id="recStatus">Toca el micrófono para comenzar</div>
+        <div class="rec-status" id="recStatus">
+          👆 <strong>Toca el micrófono</strong> para comenzar a grabar<br>
+          <span style="font-size:11px;color:var(--ink3);">Cuando termines, tócalo nuevamente para detener</span>
+        </div>
         <div style="height:12px;width:100%;"></div>
         <div class="rec-bar" style="width:100%;"><div class="rec-bar-fill" id="recBarFill"></div></div>
         <div style="font-size:11px;color:var(--ink3);align-self:flex-end;margin-top:4px;" id="recLimit">0:00 / 2:00</div>
@@ -672,6 +682,14 @@ html,body{height:100%;font-family:'Poppins',sans-serif;overflow:hidden;backgroun
 
       <!-- LÁPIZ: cuaderno con páginas y renglones -->
       <div id="modo-lapiz" style="display:none;flex-direction:column;gap:0;flex:1;">
+        <!-- Instrucción lápiz -->
+        <div id="lapiz-instruccion" style="background:#f0f7ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 14px;margin-bottom:8px;font-size:12px;color:#1e40af;line-height:1.7;">
+          <div style="font-weight:700;margin-bottom:3px;font-size:13px;">✏️ ¿Cómo usar el lápiz?</div>
+          <div>① Usa el <strong>lápiz de la tablet</strong> o tu dedo para escribir en el cuaderno</div>
+          <div>② Puedes cambiar el grosor y color en la barra de arriba</div>
+          <div>③ Si necesitas más espacio, pasa a la siguiente página con <strong>→</strong></div>
+          <div>④ Cuando termines, toca <strong>✨ Convertir todo</strong> para que la IA lea tu texto</div>
+        </div>
 
         <!-- TOOLBAR -->
         <div class="canvas-toolbar">
@@ -708,7 +726,8 @@ html,body{height:100%;font-family:'Poppins',sans-serif;overflow:hidden;backgroun
           <!-- Hint inicial -->
           <div class="canvas-hint-inner" id="canvasHint">
             <div class="hi">✏️</div>
-            <span>Escribe aquí tu solicitud</span>
+            <span style="font-size:14px;font-weight:600;color:rgba(0,0,0,.35);">Escribe aquí con el lápiz o tu dedo</span>
+            <span style="font-size:11px;color:rgba(0,0,0,.2);">Cuando termines, toca <strong>✨ Convertir todo</strong></span>
           </div>
         </div>
 
@@ -739,7 +758,13 @@ html,body{height:100%;font-family:'Poppins',sans-serif;overflow:hidden;backgroun
 
       <!-- DATOS OBLIGATORIOS -->
       <div class="data-card">
-        <div class="data-card-title"><span>👤</span> Tus datos de contacto</div>
+        <div class="data-card-title">
+          <span>👤</span> Tus datos de contacto
+          <span id="canal-datos-badge" style="margin-left:auto;font-size:10px;font-weight:700;background:rgba(37,99,235,.1);color:var(--blue);border:1px solid rgba(37,99,235,.2);border-radius:20px;padding:2px 9px;display:none;"></span>
+        </div>
+        <p style="font-size:11px;color:var(--ink3);margin-bottom:12px;line-height:1.5;">
+          Por favor llena todos los campos — son necesarios para procesar y hacerle seguimiento a tu solicitud.
+        </p>
         <div class="field-group">
           <div class="field-row">
             <div class="field-wrap">
@@ -752,16 +777,27 @@ html,body{height:100%;font-family:'Poppins',sans-serif;overflow:hidden;backgroun
             </div>
           </div>
           <div class="field-wrap">
-            <label>Correo electrónico <span class="req">*</span></label>
-            <input class="pqr-input hi" type="email" id="fCorreo" placeholder="ejemplo@correo.com">
-            <div class="email-note">
-              <span>📩</span>
-              <span><b>Aquí recibirás tu confirmación</b> con el número de radicado.</span>
+            <label>Celular <span class="req">*</span></label>
+            <input class="pqr-input" type="tel" id="fTelefono" placeholder="300 123 4567">
+            <div id="wa-tel-hint" style="display:none;background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.25);border-radius:8px;padding:8px 11px;margin-top:4px;font-size:11px;color:#4ade80;line-height:1.5;">
+              💬 <strong>Este número debe tener WhatsApp activo</strong> — el asesor te escribirá aquí.
             </div>
           </div>
           <div class="field-wrap">
-            <label>Teléfono <span class="req">*</span></label>
-            <input class="pqr-input" type="tel" id="fTelefono" placeholder="300 123 4567">
+            <label id="correoLabel">Correo electrónico <span id="correoReq" class="req" style="display:none;">*</span> <span id="correoOpc" style="font-size:10px;color:var(--ink3);font-weight:400;">(opcional)</span></label>
+            <input class="pqr-input" type="email" id="fCorreo" placeholder="ejemplo@correo.com">
+            <!-- Nota dinámica según tenga correo o no -->
+            <div class="email-note" id="emailNoteConCorreo">
+              <span>📩</span>
+              <div>
+                <b>Recibirás tu confirmación automática aquí</b> con el número de radicado.<br>
+                <span style="font-size:10px;opacity:.8;">Revisa también tu carpeta de spam si no la encuentras.</span>
+              </div>
+            </div>
+            <div id="emailNoteSinCorreo" style="display:none;background:#fefce8;border:1px solid #fde68a;border-radius:10px;padding:10px 12px;margin-top:2px;font-size:11px;color:#92400e;line-height:1.6;">
+              ⚠️ <b>Sin correo, la confirmación no se enviará automáticamente.</b><br>
+              El asesor te informará tu número de radicado cuando te contacte.
+            </div>
           </div>
         </div>
       </div>
@@ -785,9 +821,13 @@ html,body{height:100%;font-family:'Poppins',sans-serif;overflow:hidden;backgroun
   <div class="success-card">
     <div class="success-glow">✅</div>
     <h2>¡Solicitud radicada!</h2>
-    <p>Tu PQR fue registrada exitosamente.<br>Guarda este número:</p>
+    <p>Tu PQR fue registrada exitosamente.<br>Guarda este número de radicado:</p>
     <div class="ticket-badge" id="successTicket">PQR-00000000</div>
-    <p class="confirm-email">Confirmación enviada a <span id="successCorreo">—</span></p>
+    <p class="confirm-email" id="successConfirmLine" style="margin-bottom:8px;display:none;">📩 Confirmación enviada a <span id="successCorreo">—</span></p>
+    <p id="successSinCorreo" style="display:none;font-size:12px;color:rgba(255,200,50,.75);margin-bottom:8px;padding:8px 12px;background:rgba(255,200,50,.08);border:1px solid rgba(255,200,50,.2);border-radius:8px;line-height:1.5;">
+      📋 No registraste correo — <strong>el asesor te informará tu número de radicado cuando te contacte.</strong>
+    </p>
+    <div id="successCanalMsg" style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:12px;padding:8px 14px;background:rgba(37,99,235,.1);border-radius:8px;border:1px solid rgba(37,99,235,.2);line-height:1.5;"></div>
     <div class="countdown-text" id="countdown">Reiniciando en 10s…</div>
   </div>
 </div>
@@ -860,10 +900,7 @@ function updateCarousel(idx){
 function goTo(next){
   if(next===1 && !S.tipo){ showToast('Selecciona el tipo de solicitud','error'); return; }
   if(next===2 && !S.canal){ showToast('Selecciona cómo deseas ser contactado','error'); return; }
-  if(next===2 && S.canal==='WhatsApp'){
-    window.open(WA_URL+'?text='+encodeURIComponent('Hola, necesito radicar una PQR.'),'_blank');
-    return;
-  }
+  // WhatsApp ya NO redirige — se registra como canal preferido y el agente contacta al usuario
   if(next===3){
     if(!S.medio){ showToast('Selecciona cómo prefieres contarnos','error'); return; }
     launchSlide4(S.medio);
@@ -897,14 +934,28 @@ function launchSlide4(medio){
   modoEl.style.flexDirection = 'column';
 
   // Actualizar título izquierdo
-  const icons = {texto:'⌨️',audio:'🎤',lapiz:'✏️'};
+  const icons = {texto:'✍️',audio:'🎤',lapiz:'✏️'};
   const titles = {texto:'Tu mensaje',audio:'Graba tu mensaje',lapiz:'Lápiz inteligente'};
   document.getElementById('leftIcon').textContent = icons[medio];
   document.getElementById('leftTitleText').textContent = titles[medio];
 
-  // Actualizar badge canal
+  // Actualizar badge canal (arriba del medio)
   const canalesLabel={WhatsApp:'💬 WhatsApp',correo:'📧 Correo',llamada:'📞 Llamada'};
   document.getElementById('canalBadge').textContent = canalesLabel[S.canal]||S.canal;
+  // Badge en sección datos
+  const cdb = document.getElementById('canal-datos-badge');
+  if(cdb){
+    const canalTextos = {
+      WhatsApp: '💬 Te contactaremos por WhatsApp',
+      correo:   '📧 Te responderemos por correo',
+      llamada:  '📞 Un asesor te llamará'
+    };
+    cdb.textContent = canalTextos[S.canal] || S.canal;
+    cdb.style.display = 'inline-flex';
+  }
+  // Mostrar/ocultar hint de WhatsApp en teléfono
+  const waTelHint = document.getElementById('wa-tel-hint');
+  if(waTelHint) waTelHint.style.display = S.canal==='WhatsApp' ? 'block' : 'none';
 
   currentSlide=3;
   updateCarousel(3);
@@ -932,6 +983,11 @@ function selCanal(el,canal,cls){
   el.classList.add(cls); S.canal=canal;
   document.getElementById('btn2').disabled=false;
   document.getElementById('waNoteMsg').classList.toggle('show',canal==='WhatsApp');
+  // Mostrar hint de WhatsApp en campo teléfono
+  const waTelHint = document.getElementById('wa-tel-hint');
+  if(waTelHint) waTelHint.style.display = canal==='WhatsApp' ? 'block' : 'none';
+  // Notificar al listener del correo
+  document.dispatchEvent(new CustomEvent('canalChanged', {detail: canal}));
 }
 
 // ══════════════════════════════════════════
@@ -942,6 +998,17 @@ function selMedio(el,medio){
   const cm={texto:'sel-texto',audio:'sel-audio',lapiz:'sel-lapiz'};
   el.classList.add(cm[medio]); S.medio=medio;
   document.getElementById('btn3').disabled=false;
+  // Instrucción dinámica
+  const instrDiv = document.getElementById('medioInstruccion');
+  if(instrDiv){
+    const instrTextos = {
+      texto: '✍️ En el siguiente paso verás un <strong>cuadro de texto</strong>. Escribe con detalle qué ocurrió, cuándo y qué esperas de nosotros.',
+      audio: '🎤 En el siguiente paso verás un <strong>botón de micrófono</strong>. Tócalo para empezar a hablar y tócalo de nuevo cuando termines. Máximo 2 minutos.',
+      lapiz: '✏️ En el siguiente paso verás un <strong>cuaderno digital</strong>. Escribe con el lápiz de la tablet o con tu dedo. Cuando termines toca "Convertir todo".'
+    };
+    instrDiv.innerHTML = instrTextos[medio] || '';
+    instrDiv.style.display = 'block';
+  }
 }
 
 // ══════════════════════════════════════════
@@ -1268,12 +1335,14 @@ async function submitPQR(){
   const telefono = document.getElementById('fTelefono').value.trim();
   const msgText  = S.medio==='texto' ? document.getElementById('msgText').value.trim() : '';
 
-  // Validaciones — todos obligatorios
-  if(!nombre)   { document.getElementById('fNombre').focus();    showToast('Nombre es obligatorio','error'); return; }
-  if(!documento){ document.getElementById('fDocumento').focus(); showToast('Documento es obligatorio','error'); return; }
-  if(!correo)   { document.getElementById('fCorreo').focus();    showToast('Correo es obligatorio','error'); return; }
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)){ document.getElementById('fCorreo').focus(); showToast('Correo inválido','error'); return; }
-  if(!telefono) { document.getElementById('fTelefono').focus();  showToast('Teléfono es obligatorio','error'); return; }
+  // Validaciones
+  if(!nombre)    { document.getElementById('fNombre').focus();    showToast('El nombre es obligatorio','error'); return; }
+  if(!documento) { document.getElementById('fDocumento').focus(); showToast('El documento es obligatorio','error'); return; }
+  if(!telefono)  { document.getElementById('fTelefono').focus();  showToast('El celular es obligatorio','error'); return; }
+  if(!/^[0-9\s\+\-]{7,15}$/.test(telefono)){ document.getElementById('fTelefono').focus(); showToast('Número de celular inválido','error'); return; }
+  // Correo: obligatorio solo si el canal es "correo", opcional en los demás
+  if(S.canal === 'correo' && !correo){ document.getElementById('fCorreo').focus(); showToast('El correo es obligatorio para este canal','error'); return; }
+  if(correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)){ document.getElementById('fCorreo').focus(); showToast('El correo ingresado no es válido','error'); return; }
   if(S.medio==='audio' && !S.audioB64){ showToast('Graba tu mensaje primero','error'); return; }
   if(S.medio==='texto' && !msgText)   { document.getElementById('msgText').focus(); showToast('Escribe tu mensaje','error'); return; }
 
@@ -1297,8 +1366,19 @@ async function submitPQR(){
   btn.disabled=true; btn.innerHTML='⏳ Enviando…';
 
   try{
-    const payload={tipo:S.tipo,canal:S.canal,nombre,documento,correo,telefono,
-      descripcion:msgText||(S.medio==='audio'?'[Audio adjunto]':'[Lápiz virtual adjunto]')};
+    const payload={
+      tipo:       S.tipo,
+      canal:      S.canal,           // Canal preferido por el usuario (WhatsApp / correo / llamada)
+      nombre,
+      documento,
+      correo,
+      telefono,
+      descripcion: msgText||(S.medio==='audio'?'[Audio adjunto]':'[Lápiz virtual adjunto]'),
+      // n8n usará estos campos para contactar al usuario según su preferencia
+      contacto_preferido: S.canal,
+      confirmacion_correo: correo || null,  // null si no tiene correo — n8n usará solo el celular
+      sin_correo: !correo,                  // flag para n8n: true = notificar solo por cel/WA
+    };
 
     const res=await fetch(WEBHOOK_PQR,{
       method:'POST',headers:{'Content-Type':'application/json'},
@@ -1320,7 +1400,23 @@ async function submitPQR(){
     }
 
     document.getElementById('successTicket').textContent=data.radicado;
-    document.getElementById('successCorreo').textContent=correo;
+    // Mostrar confirmación por correo solo si lo ingresó
+    if(correo){
+      document.getElementById('successConfirmLine').style.display='block';
+      document.getElementById('successCorreo').textContent=correo;
+      document.getElementById('successSinCorreo').style.display='none';
+    } else {
+      document.getElementById('successConfirmLine').style.display='none';
+      document.getElementById('successSinCorreo').style.display='block';
+    }
+    // Mensaje personalizado según canal
+    const canalMsgs = {
+      WhatsApp: '💬 Un asesor de Tododrogas te escribirá por WhatsApp al número ' + telefono + ' en las próximas horas hábiles.',
+      correo:   '📧 Un asesor te responderá al correo ' + correo + ' en un plazo máximo de 15 días hábiles.',
+      llamada:  '📞 Un asesor te llamará al número ' + telefono + ' en las próximas horas hábiles (Lun-Vie 7am-5:30pm).'
+    };
+    const canalMsg = document.getElementById('successCanalMsg');
+    if(canalMsg) canalMsg.textContent = canalMsgs[S.canal] || 'Un asesor te contactará pronto.';
     document.getElementById('successOverlay').classList.add('show');
     startCountdown(10);
 
@@ -1365,6 +1461,50 @@ function showToast(msg,type='info'){
   t.className=`toast ${type}`; t.textContent=msg;
   tc.appendChild(t); setTimeout(()=>t.remove(),4000);
 }
+
+// ── LÓGICA CORREO OPCIONAL ──
+(function(){
+  const inp = document.getElementById('fCorreo');
+  const noteConCorreo  = document.getElementById('emailNoteConCorreo');
+  const noteSinCorreo  = document.getElementById('emailNoteSinCorreo');
+  const correoReq  = document.getElementById('correoReq');
+  const correoOpc  = document.getElementById('correoOpc');
+
+  function updateCorreoUI(){
+    const val = inp.value.trim();
+    if(val){
+      // Tiene correo: mostrar nota de confirmación, ocultar aviso sin correo
+      noteConCorreo.style.display = 'flex';
+      noteSinCorreo.style.display = 'none';
+    } else {
+      // Sin correo: ocultar nota de confirmación, mostrar aviso
+      noteConCorreo.style.display = 'none';
+      noteSinCorreo.style.display = S.canal !== 'correo' ? 'block' : 'none';
+    }
+  }
+
+  // Actualizar al escribir
+  inp.addEventListener('input', updateCorreoUI);
+
+  // Actualizar cuando cambia el canal (correo puede volverse obligatorio)
+  document.addEventListener('canalChanged', function(e){
+    const canal = e.detail;
+    if(canal === 'correo'){
+      correoReq.style.display = 'inline';
+      correoOpc.style.display = 'none';
+      noteSinCorreo.style.display = 'none';
+      noteConCorreo.style.display = 'flex';
+    } else {
+      correoReq.style.display = 'none';
+      correoOpc.style.display = 'inline';
+      updateCorreoUI();
+    }
+  });
+
+  // Estado inicial
+  noteConCorreo.style.display = 'none';
+  noteSinCorreo.style.display = 'none';
+})();
 
 // Fade in
 document.body.style.opacity='0'; document.body.style.transition='opacity .4s ease';
