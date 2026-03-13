@@ -788,38 +788,40 @@ try {
   if(saved) applyConfig(JSON.parse(saved));
 } catch(e){}
 
+// Credenciales Supabase hardcodeadas — permite que tablet/celular lean config sin localStorage del PC
+const SB_URL  = 'https://yeiupcumvdvdswfhcoty.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InllaXVwY3VtdmR2ZHN3Zmhjb3R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2MjY0MTYsImV4cCI6MjA2MDIwMjQxNn0.2M5OXY0m03yIJTypGn-C1dQV8l-QnZX1Ik8z_pNAmxk';
+
 // Polling a Supabase: revisa la config cada 30 s y actualiza QRs
-let _firstPoll = true; // flag: primera carga siempre aplica sin comparar
 async function pollSupabaseConfig(){
   try {
-    const sbRaw = localStorage.getItem('td_sb_cfg');
-    if(!sbRaw) return;
-    const sb = JSON.parse(sbRaw);
-    if(!sb.url || !sb.anon) return;
-    const r = await fetch(`${sb.url}/rest/v1/config_sistema?id=eq.main&select=data`, {
-      headers:{ apikey: sb.anon, Authorization: 'Bearer ' + sb.anon }
+    // Usar credenciales hardcodeadas; fallback a localStorage si existen
+    let sbUrl  = SB_URL;
+    let sbAnon = SB_ANON;
+    try {
+      const sbRaw = localStorage.getItem('td_sb_cfg');
+      if(sbRaw){ const sb=JSON.parse(sbRaw); if(sb.url) sbUrl=sb.url; if(sb.anon) sbAnon=sb.anon; }
+    } catch(e){}
+    const r = await fetch(`${sbUrl}/rest/v1/config_sistema?id=eq.main&select=data`, {
+      headers:{ apikey: sbAnon, Authorization: 'Bearer ' + sbAnon }
     });
     if(!r.ok) return;
     const rows = await r.json();
     if(!rows || !rows.length || !rows[0].data) return;
     const remoteCfg = rows[0].data;
-
     const newQrUrl  = remoteCfg.qrUrl || '';
     const newEncUrl = remoteCfg.canales && remoteCfg.canales.encuesta ? remoteCfg.canales.encuesta : '';
     const oldEncUrl = CFG.canales && CFG.canales.encuesta ? CFG.canales.encuesta : '';
-    const qrChanged  = newQrUrl && newQrUrl !== _lastQrUrl;
+    const qrChanged  = newQrUrl  && newQrUrl  !== _lastQrUrl;
     const encChanged = newEncUrl !== oldEncUrl;
-
-    // Primera carga: SIEMPRE aplicar (celular/tablet llegan con localStorage vacío)
-    // Siguientes polls: solo si algo cambió
-    if(_firstPoll || qrChanged || encChanged){
-      _firstPoll = false;
+    const firstLoad  = !CFG.updatedAt; // primera vez que llega data de Supabase
+    if(firstLoad || qrChanged || encChanged){
       CFG = remoteCfg;
       if(newQrUrl){ _lastQrUrl = newQrUrl; FORM_URL = newQrUrl; }
       applyQRs(); // regenera AMBOS QRs
     }
     localStorage.setItem('pqr_config', JSON.stringify(remoteCfg));
-  } catch(e){ _firstPoll = false; }
+  } catch(e){}
 }
 
 // Genera QR midiendo el contenedor real para adaptarse a cualquier pantalla
@@ -831,18 +833,11 @@ function makeQR(elId, url, fallbackSize){
     el.innerHTML='<span style="color:#6b748a;font-size:10px;text-align:center;display:block;padding:20px 4px;">Sin URL<br>configurada</span>';
     return;
   }
-  // Medir el contenedor padre
+  // Medir el contenedor padre para saber cuánto espacio hay disponible
   const parent = el.closest('.qr-frame') || el.parentElement;
-  const parentW = parent ? parent.getBoundingClientRect().width : 0;
-  // Fallback: si el contenedor aún no tiene dimensiones (frecuente en móvil con order CSS)
-  // usar el ancho del panel .right, o el viewport
-  let available = parentW > 60 ? Math.floor(parentW) - 32 : 0;
-  if(available < 60){
-    const rightPanel = document.querySelector('.right');
-    const rightW = rightPanel ? rightPanel.getBoundingClientRect().width : 0;
-    available = rightW > 60 ? Math.floor(rightW) - 56 : Math.min(window.innerWidth - 80, 200);
-  }
-  const s = Math.max(90, Math.min(200, available));
+  const available = parent ? Math.floor(parent.getBoundingClientRect().width) - 32 : 0;
+  // Usar el tamaño disponible, mínimo 90px, máximo 200px
+  const s = Math.max(90, Math.min(200, available > 60 ? available : (fallbackSize || 130)));
   el.style.minWidth = s+'px';
   el.style.minHeight = s+'px';
   el.innerHTML='<img src="https://api.qrserver.com/v1/create-qr-code/?size='+s+'x'+s+'&data='+encodeURIComponent(url)+'&bgcolor=0a0e1a&color=ffffff&qzone=1" width="'+s+'" height="'+s+'" style="display:block;border-radius:4px;width:100%;height:auto;">';
@@ -1202,14 +1197,12 @@ startCarousel();
 // requestAnimationFrame garantiza que los estilos ya están aplicados
 requestAnimationFrame(()=>{
   requestAnimationFrame(()=>{
-    applyQRs();            // intento 1: carga con localStorage si existe
+    applyQRs();
     _lastQrUrl = FORM_URL;
-    pollSupabaseConfig();  // consulta Supabase — al terminar llama applyQRs() de nuevo
+    pollSupabaseConfig();
     setInterval(pollSupabaseConfig, 30000);
   });
 });
-// Intento 2: 900ms después — por si el layout en móvil/tablet aún no tenía dimensiones
-setTimeout(applyQRs, 900);
 
 document.getElementById('btn-radicar-main').addEventListener('click', goToForm);
 document.getElementById('btn-radicar-chat').addEventListener('click', goToForm);
