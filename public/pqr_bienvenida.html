@@ -851,7 +851,8 @@ window.addEventListener('resize', ()=>{
 });
 
 // URL global de encuesta (accesible por openEncuesta)
-let ENC_URL = '';
+const ENC_DEFAULT = 'https://td-pruebas.online/pqr_encuesta.html';
+let ENC_URL = ENC_DEFAULT; // hardcodeado — Supabase puede sobreescribir
 
 // Aplica QRs una vez el DOM esté listo
 function applyQRs(){
@@ -863,7 +864,7 @@ function applyQRs(){
     catch(e){ radLbl.textContent = FORM_URL; }
   }
   // QR Encuesta
-  ENC_URL = CFG.canales && CFG.canales.encuesta ? CFG.canales.encuesta : '';
+  ENC_URL = (CFG.canales && CFG.canales.encuesta) ? CFG.canales.encuesta : ENC_DEFAULT;
   makeQR('qr-encuesta', ENC_URL, 130);
   const encLbl = document.getElementById('qr-encuesta-url');
   if(encLbl) encLbl.textContent = ENC_URL ? 'Encuesta · Escanea con tu cámara' : 'Encuesta · configura la URL en el panel';
