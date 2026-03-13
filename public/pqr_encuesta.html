@@ -278,7 +278,7 @@ body{background:var(--ink);display:flex;min-height:100vh;}
         <div class="brand-dot"></div>
         <span class="brand-name">Tododrogas · Calidad</span>
       </div>
-      <div class="sede-pill detecting" id="sedePill">
+      <div class="sede-pill detecting" id="sedePill" style="display:none;">
         <div class="sede-dot"></div>
         <span class="sede-txt" id="sedePillTxt">Detectando sede…</span>
       </div>
@@ -376,18 +376,11 @@ body{background:var(--ink);display:flex;min-height:100vh;}
           <div class="field-err" id="errTelefono">⚠ Ingresa un número válido</div>
         </div>
 
-        <!-- EPS -->
-        <div class="field-group">
-          <div class="field-label">EPS <span class="field-req">*</span></div>
-          <input class="field-inp" id="inputEps" type="text" placeholder="Ej: Savia Salud, Nueva EPS, Coosalud…" maxlength="80" autocomplete="off" oninput="validateDatos()">
-          <div class="field-err" id="errEps">⚠ Ingresa tu EPS</div>
-        </div>
-
         <!-- Sede: GPS automático o autocomplete manual -->
         <div class="field-group" id="sedeGeoGroup">
-          <div class="field-label">Sede <span style="font-size:10px;color:var(--ink3);font-weight:400;" id="sedeModoLabel">Asignación automática por GPS</span></div>
-          <!-- Box GPS (visible cuando geo funciona o está en proceso) -->
-          <div class="geo-box detecting" id="geoBox">
+          <div class="field-label">Sede <span style="font-size:10px;color:var(--ink3);font-weight:400;" id="sedeModoLabel">Escribe tu municipio o nombre del servicio</span></div>
+          <!-- Box GPS (se muestra solo si GPS asigna sede automáticamente) -->
+          <div class="geo-box detecting" id="geoBox" style="display:none;">
             <span class="geo-icon" id="geoIcon">🔍</span>
             <div class="geo-info">
               <div class="geo-label" id="geoLabel">Detectando ubicación…</div>
@@ -396,11 +389,11 @@ body{background:var(--ink);display:flex;min-height:100vh;}
             </div>
             <div class="geo-spinner" id="geoSpinner"></div>
           </div>
-          <!-- Autocomplete manual (visible cuando GPS falla) -->
-          <div id="sedeManualWrap" style="display:none;">
+          <!-- Autocomplete manual (siempre visible) -->
+          <div id="sedeManualWrap" style="display:block;">
             <div class="sede-autocomplete-wrap">
               <input class="field-inp" id="inputSedeManual" type="text"
-                placeholder="Escribe el nombre de tu sede…"
+                placeholder="Ej: Medellín, Caucasia, SAVIA, Tododrogas…"
                 autocomplete="off"
                 oninput="onSedeInput()"
                 onfocus="onSedeInput()"
@@ -536,93 +529,76 @@ body{background:var(--ink);display:flex;min-height:100vh;}
 //  Sedes sin coordenadas GPS: se usan en el autocomplete manual
 //  Para geolocalización, agrega lat/lng desde el panel_config
 // ════════════════════════════════════════════════════════
-let SEDES_LISTA = [
-  // ── PROPIOS ──────────────────────────────────────────────────────────────
-  { id:'sf-abejorral',         nombre:'Tododrogas Abejorral',            ciudad:'Abejorral',            direccion:'Carrera Santander # 48-11',                               telefono:'3117491230', contacto:'Leidy Marcela Acevedo Diaz',  modelo:'PROPIO' },
-  { id:'sf-amaga',             nombre:'Tododrogas Amagá',                ciudad:'Amagá',                direccion:'Calle 51 N 51 Bloque 1 Primer Piso',                       telefono:'3117501961', contacto:'Julian Lozano Galeano',       modelo:'PROPIO' },
-  { id:'sf-andes',             nombre:'Tododrogas Andes',                ciudad:'Andes',                direccion:'Carrera 50 # 49-68 Local 102 Edificio El Tesoro',          telefono:'3222813532', contacto:'Cristian Dario Correa Cano',   modelo:'PROPIO' },
-  { id:'sf-apartado',          nombre:'Tododrogas Apartadó',             ciudad:'Apartadó',             direccion:'Carrera 102 # 92-16/18 Barrio Industriales',               telefono:'3122701332', contacto:'Shirly Florez',                modelo:'PROPIO' },
-  { id:'sf-carepa',            nombre:'Tododrogas Carepa',               ciudad:'Carepa',               direccion:'Calle 81 con Carrera 74-12/14 Barrio Pueblo Nuevo',         telefono:'3137557913', contacto:'Juan Camilo Payares Guzman',   modelo:'PROPIO' },
-  { id:'sf-caucasia',          nombre:'Tododrogas Caucasia',             ciudad:'Caucasia',             direccion:'Carrera 20 # 3-76 CC Cauca Centro A1 Loc 120-123',         telefono:'3016160031', contacto:'Kelly Andrea Montoya',         modelo:'PROPIO' },
-  { id:'sf-chigorodo',         nombre:'Tododrogas Chigorodó',            ciudad:'Chigorodó',            direccion:'Calle 95 # 97-04 Local 2',                                 telefono:'3205041364', contacto:'Karen Florez',                  modelo:'PROPIO' },
-  { id:'sf-ciudad-bolivar',    nombre:'Tododrogas Ciudad Bolívar',       ciudad:'Ciudad Bolívar',       direccion:'Calle 49 # 50-57 Local 104',                               telefono:'3225040536', contacto:'Ana Issabel Guerra',           modelo:'PROPIO' },
-  { id:'sf-bagre',             nombre:'Tododrogas El Bagre',             ciudad:'El Bagre',             direccion:'Calle 50 # 47A-31',                                        telefono:'3013893746', contacto:'Duberlis Cordoba',              modelo:'PROPIO' },
-  { id:'sf-medellin1',         nombre:'Tododrogas Medellín',             ciudad:'Medellín',             direccion:'Carrera 49 # 48-57',                                       telefono:'3013893490', contacto:'Sara Restrepo',                 modelo:'PROPIO' },
-  { id:'sf-medellin2',         nombre:'Tododrogas Medellín 2',           ciudad:'Medellín',             direccion:'Calle 48 # 48-03',                                         telefono:'3042975293', contacto:'Jenifer Ocampo',               modelo:'PROPIO' },
-  { id:'sf-puerto-berrio',     nombre:'Tododrogas Puerto Berrío',        ciudad:'Puerto Berrío',        direccion:'Calle 48 # 4-56 Barrio El Hoyo',                           telefono:'3117505009', contacto:'Juan Felipe Campiño',          modelo:'PROPIO' },
-  { id:'sf-santa-barbara',     nombre:'Tododrogas Santa Bárbara',        ciudad:'Santa Bárbara',        direccion:'Carrera 50 # 48-17',                                       telefono:'3126909496', contacto:'Daniela Velez Diosa',          modelo:'PROPIO' },
-  { id:'sf-santafe',           nombre:'Tododrogas Santa Fe de Antioquia',ciudad:'Santa Fe de Antioquia',direccion:'Calle 10 # 7-49',                                          telefono:'312799746',  contacto:'Liliana Gonzalez',             modelo:'PROPIO' },
-  { id:'sf-segovia',           nombre:'Tododrogas Segovia',              ciudad:'Segovia',              direccion:'Calle 52 N 48-69 Calle El Palo Taratal',                   telefono:'3117511200', contacto:'Lina Marcela Espinal',         modelo:'PROPIO' },
-  { id:'sf-tamesis',           nombre:'Tododrogas Támesis',              ciudad:'Támesis',              direccion:'Carrera 10 # 9-47 Primer Piso Local 1 Edificio Embera',    telefono:'3126512620', contacto:'Veronica Marcela Higuita',     modelo:'PROPIO' },
-  { id:'sf-turbo',             nombre:'Tododrogas Turbo',                ciudad:'Turbo',                direccion:'Calle 101 # 15-14 Barrio Baltazar',                         telefono:'3117505168', contacto:'Maira Alejandra Petro Renals', modelo:'PROPIO' },
-  { id:'sf-yarumal',           nombre:'Tododrogas Yarumal',              ciudad:'Yarumal',              direccion:'Carrera 21 # 17-17 Mall Cubox LC 102',                     telefono:'3126572574', contacto:'Kelly Johana Gonzalez',        modelo:'PROPIO' },
-  { id:'sf-yolombo',           nombre:'Tododrogas Yolombó',              ciudad:'Yolombó',              direccion:'Carrera 24 Calle 18-04 Local 2 Edif SYS',                  telefono:'3117511090', contacto:'Dana Yeraldy Castrillon',      modelo:'PROPIO' },
-  { id:'sf-zaragoza',          nombre:'Tododrogas Zaragoza',             ciudad:'Zaragoza',             direccion:'Calle Principal San Gregorio 36-20',                        telefono:'3127989950', contacto:'Viviana Tobon',                modelo:'PROPIO' },
-  { id:'sf-nechi',             nombre:'Tododrogas Nechí',                ciudad:'Nechí',                direccion:'Cl 25 N.º 31A-16 Barrio San Nicolás',                      telefono:'3127998860', contacto:'Mayerlis Perruel',             modelo:'PROPIO' },
-  { id:'sf-rionegro',          nombre:'Tododrogas Rionegro',             ciudad:'Rionegro',             direccion:'Cl 52 #45-70 Local 2006',                                  telefono:'3043482192', contacto:'Vladimir Herrera',             modelo:'PROPIO' },
-  { id:'sf-la-ceja',           nombre:'Tododrogas La Ceja',              ciudad:'La Ceja',              direccion:'Carrera 24 19 40',                                          telefono:'3012653746', contacto:'Catalina Henao',               modelo:'PROPIO' },
-  { id:'sf-sopetran',          nombre:'Tododrogas Sopetrán',             ciudad:'Sopetrán',             direccion:'Carrera 10 # 11-65',                                       telefono:'3016164255', contacto:'Andrea Patiño',                modelo:'PROPIO' },
-  // ── IN HOUSE / ALIADOS EPS ────────────────────────────────────────────────
-  { id:'ih-amalfi',            nombre:'Droguería Farmavida Amalfi',       ciudad:'Amalfi',               direccion:'Calle 23 # 29-54',                                         telefono:'3127775081', contacto:'Deicy Milena Ortega',          modelo:'IN HOUSE',  eps:'Savia-Coosalud' },
-  { id:'ih-angostura',         nombre:'Droguería Coopriachon Angostura',  ciudad:'Angostura',            direccion:'Carrera 10 # 9-20',                                        telefono:'3017558749', contacto:'Cristian Molina Betancur',     modelo:'IN HOUSE',  eps:'Savia-Coosalud' },
-  { id:'ih-anori',             nombre:'Droguería San Rafael Anorí',       ciudad:'Anorí',                direccion:'Avenida 31 n 30-16',                                       telefono:'3117502301', contacto:'Keren Barrios',                modelo:'IN HOUSE',  eps:'Savia-Coosalud' },
-  { id:'ih-frontino',          nombre:'Droguería Frontifarma',            ciudad:'Frontino',             direccion:'Carrera 30 # 38-47',                                       telefono:'3117502100', contacto:'Mariana Londoño Agudelo',      modelo:'IN HOUSE',  eps:'Savia-Coosalud' },
-  { id:'ih-mutata',            nombre:'Droguería Familiar Eddy Mutatá',   ciudad:'Mutatá',               direccion:'Carrera 10 # 10-41-43',                                    telefono:'3117491234', contacto:'Luisa Almanza',               modelo:'IN HOUSE',  eps:'Savia-Coosalud' },
-  { id:'ih-necocli',           nombre:'Droguería La Píldora Necoclí',     ciudad:'Necoclí',              direccion:'Calle 51 # 48-38 Barrio Centro',                            telefono:'3117491257', contacto:'Zoraima Alvarez',             modelo:'IN HOUSE',  eps:'Savia-Coosalud' },
-  { id:'ih-remedios',          nombre:'Farmax La Droguería Remedios',     ciudad:'Remedios',             direccion:'Calle 11 # 8-12 Calle San Antonio',                        telefono:'3127983675', contacto:'Beatriz Londoño',              modelo:'IN HOUSE',  eps:'Savia-Coosalud' },
-  { id:'al-giraldo',           nombre:'ESE Hospital San Isidro Giraldo',  ciudad:'Giraldo',              direccion:'Carrera 10 # 11-05',                                       telefono:'3017558742', contacto:'Yenifer Vanessa Suarez',       modelo:'ALIADO',    eps:'Savia-Coosalud' },
-  { id:'al-armenia',           nombre:'ESE San Martín de Porres Armenia', ciudad:'Armenia Antioquia',    direccion:'Calle 11 # 6-69',                                          telefono:'3135267868', contacto:'Jenny Garces',                 modelo:'ALIADO',    eps:'Savia-Coosalud' },
-  { id:'al-briceno',           nombre:'ESE Hospital Sagrado Corazón Briceño',ciudad:'Briceño',           direccion:'Calle 11 # 8-31',                                          telefono:'3228984243', contacto:'Elkin Quiroz',                 modelo:'ALIADO',    eps:'Savia-Coosalud' },
-  { id:'al-dabeiba',           nombre:'Droguería Donde Natalia Dabeiba',  ciudad:'Dabeiba',              direccion:'Carrera 10 # 6-47',                                        telefono:'3146556968', contacto:'Natalia Rodriguez Borja',      modelo:'ALIADO',    eps:'Savia-Coosalud' },
-  { id:'al-hispania',          nombre:'Droguería Biomedic Hispania',      ciudad:'Hispania',             direccion:'Calle 50 Toledo # 50-12',                                  telefono:'3146379251', contacto:'Narlliny Velez Ruiz',          modelo:'ALIADO',    eps:'Savia-Coosalud' },
-  { id:'al-peque',             nombre:'Farmacia D'Andreé Peque',         ciudad:'Peque',                direccion:'Carrera Bolívar # 11-19',                                  telefono:'3117244853', contacto:'Omar Dario Valle',             modelo:'ALIADO',    eps:'Savia-Coosalud' },
-  { id:'al-pueblorrico',       nombre:'Droguería Familia S.G. Pueblorrico',ciudad:'Pueblorrico',         direccion:'Carrera 30 # 30-56 Local 101',                             telefono:'3208389770', contacto:'Maria Virginia Gallego',       modelo:'ALIADO',    eps:'Savia-Coosalud' },
-  { id:'al-uramita',           nombre:'Droguería H. Ramírez Uramita',     ciudad:'Uramita',              direccion:'Carrera 20 # 20-67',                                       telefono:'3207345828', contacto:'Sor Enith Ramirez Valle',      modelo:'ALIADO',    eps:'Savia-Coosalud' },
-  { id:'al-valdivia',          nombre:'Droguería Macefarma Valdivia',     ciudad:'Valdivia',             direccion:'Calle Libertador # 9-92',                                  telefono:'3146916108', contacto:'Mauricio Celada',              modelo:'ALIADO',    eps:'Savia-Coosalud' },
-  { id:'al-yali',              nombre:'Droguería El Regalo de Dios Yalí', ciudad:'Yalí',                 direccion:'Calle 20 # 19-71 Barrio La Plaza',                         telefono:'3128433477', contacto:'Sebastian Duque Rios',         modelo:'ALIADO',    eps:'Savia-Coosalud' },
-  { id:'al-anza',              nombre:'Droguería San Martín 712 Anzá',    ciudad:'Anzá',                 direccion:'Carrera 8 # 7-51',                                         telefono:'3108621609', contacto:'Ximena Cano Osorio',           modelo:'ALIADO',    eps:'Savia' },
-  { id:'ih-betulia',           nombre:'Droguería Famidrogas Betulia',     ciudad:'Betulia',              direccion:'Calle 21 # 21-42',                                         telefono:'3102731216', contacto:'Laura Yomara Rodriguez',       modelo:'IN HOUSE',  eps:'Savia' },
-  { id:'ih-buritica',          nombre:'Droguería San Antonio Buriticá',   ciudad:'Buriticá',             direccion:'Calle 6 # 5-12 Parque Principal',                          telefono:'3217133940', contacto:'Maria Isabel Higuita',         modelo:'IN HOUSE',  eps:'Savia' },
-  { id:'al-caicedo',           nombre:'ESE Hospital Guillermo Gaviria Caicedo',ciudad:'Caicedo',         direccion:'Cra. 5 # 3-23',                                            telefono:'3206499624', contacto:'Leydy Cartagena',              modelo:'ALIADO',    eps:'Savia' },
-  { id:'ih-jardin',            nombre:'Droguería Macrodescuentos #9 Jardín',ciudad:'Jardín',             direccion:'Calle 9 # 2-59',                                           telefono:'3016161590', contacto:'Maria Alejandra Torres',       modelo:'IN HOUSE',  eps:'Savia' },
-  { id:'ih-liborina',          nombre:'Droguería San Gabriel Liborina',   ciudad:'Liborina',             direccion:'Carrera 9 # 8-4 Parque Principal',                         telefono:'3017558759', contacto:'Lina Maria Betancur',          modelo:'IN HOUSE',  eps:'Savia' },
-  { id:'al-olaya',             nombre:'ESE Hospital San Miguel Olaya-Llanadas',ciudad:'Olaya',           direccion:'Carrera 10 # 10-34 Corregimiento Llanadas',                telefono:'3103887693', contacto:'Jorge Betancur',               modelo:'ALIADO',    eps:'Savia' },
-  { id:'al-sabanalarga-savia', nombre:'Droguería La Amistad Sabanalarga', ciudad:'Sabanalarga',          direccion:'Calle 17 # 18-06',                                         telefono:'3103982036', contacto:'Carlos Arturo Henao Lopera',   modelo:'ALIADO',    eps:'Savia' },
-  { id:'al-san-jeronimo',      nombre:'Droguería Santa Teresita San Jerónimo',ciudad:'San Jerónimo',     direccion:'Carrera 11 # 21-73 Sector La Carreterita',                 telefono:'3216932146', contacto:'Carolina Castaño Tabares',     modelo:'ALIADO',    eps:'Savia' },
-  { id:'ih-caceres',           nombre:'Droguería Bienestar Cáceres Coosalud',ciudad:'Cáceres',           direccion:'Calle 49 # 51-36 Brr Centro',                              telefono:'3147942070', contacto:'Mayler Sadith Roche',          modelo:'IN HOUSE',  eps:'Coosalud' },
-  { id:'ih-jerico',            nombre:'Droguería San Antonio Jericó Coosalud',ciudad:'Jericó',           direccion:'Carrera 5 # 6-09',                                         telefono:'3137557911', contacto:'Verónica Vélez Cardona',       modelo:'IN HOUSE',  eps:'Coosalud' },
-  { id:'al-puerto-nare',       nombre:'Hospital Octavio Álvarez Puerto Nare',ciudad:'Puerto Nare',       direccion:'Carrera 5 # 45-103',                                       telefono:'3137976206', contacto:'Luz Dary',                     modelo:'ALIADO',    eps:'Coosalud' },
-  { id:'al-samana',            nombre:'ESE San José Samaná',              ciudad:'Samaná',               direccion:'Carrera 9 # 4-79',                                         telefono:'3233993183', contacto:'Leidy Johana Quintero Henao',  modelo:'ALIADO',    eps:'Coosalud' },
-  { id:'al-sabanalarga-cos',   nombre:'ESE Hospital San Pedro Sabanalarga Coosalud',ciudad:'Sabanalarga', direccion:'Carrera 17 # 15-94',                                      telefono:'3103714980', contacto:'Dora Elcy Uribe Perez',        modelo:'ALIADO',    eps:'Coosalud' },
-  { id:'ih-taraza',            nombre:'Droguería Kirius La Bomba Tarazá Coosalud',ciudad:'Tarazá',       direccion:'Carrera 28 # 27-26',                                       telefono:'3127989952', contacto:'Yándila Jiménez',              modelo:'IN HOUSE',  eps:'Coosalud' },
-  { id:'ih-barbosa',           nombre:'Droguería La Solidaria Barbosa',   ciudad:'Barbosa',              direccion:'Calle 15 No. 17-22',                                       telefono:'6044065478', contacto:'Valentina Carvajal Ceballos',  modelo:'IN HOUSE',  eps:'Coosalud' },
-  { id:'ih-girardota',         nombre:'Droguería Familiar E&M Girardota', ciudad:'Girardota',            direccion:'Carrera 15 No. 5-42',                                      telefono:'3242548560', contacto:'Rosa Maria Otero',             modelo:'IN HOUSE',  eps:'Salud Total / Nueva EPS' },
-  { id:'ih-rionegro-st',       nombre:'Droguerías Oriente Rionegro',      ciudad:'Rionegro',             direccion:'Carrera 48 # 51-15 Sector Centro San Francisco',           telefono:'6046146969', contacto:'Doris Bonilla',               modelo:'IN HOUSE',  eps:'Salud Total / Nueva EPS' },
-  { id:'al-concordia',         nombre:'Droguería La Nuestra Concordia',   ciudad:'Concordia',            direccion:'Calle 19 No. 19-30',                                       telefono:'6048442509', contacto:'Beatriz Londoño',              modelo:'ALIADO',    eps:'Salud Total' },
-  { id:'al-copacabana',        nombre:'Droguería Alma Salud 1 Copacabana',ciudad:'Copacabana',           direccion:'Calle 40 No. 84-18',                                       telefono:'3146893813', contacto:'Isabel Cristina Caro',         modelo:'ALIADO',    eps:'Salud Total' },
-  { id:'ih-sabaneta',          nombre:'Droguería Innova Farma Sabaneta',  ciudad:'Sabaneta',             direccion:'Calle 73 Sur # 46-09 Entre Amigos Sabaneta',               telefono:'',           contacto:'Juan Camilo Cruz',             modelo:'IN HOUSE',  eps:'Nueva EPS' },
+const SEDES_LISTA = [
+  { id:'abejorral', municipio:'ABEJORRAL', nombre:'SERVICIO FARMACÉUTICO TODODROGAS ABEJORRAL', direccion:'CARRERA SANTANDER # 48 - 11', contacto:'LEIDY MARCELA ACEVEDO DIAZ', telefono:'3117491230', horario:'L A V 7:00 - 3:30 S 8:00 - 11:00', modelo:'PROPIO', eps:'TODAS' },
+  { id:'amaga', municipio:'AMAGA', nombre:'SERVICIO FARMACÉUTICO TODODROGAS AMAGA', direccion:'CALLE 51 N 51 BLOQUE 1 PRIMER PISO', contacto:'JULIAN LOZANO GALEANO', telefono:'3117501961', horario:'L A V 7:00 - 3:30 S 8:00 - 11:00', modelo:'PROPIO', eps:'TODAS' },
+  { id:'andes', municipio:'ANDES', nombre:'SERVICIO FARMACÉUTICO TODODROGAS ANDES', direccion:'CARRERA 50 # 49-68 LOCAL 102 - EDIFICIO EL TESORO', contacto:'CRISTIAN DARIO CORREA CANO', telefono:'3222813532', horario:'L A V 7:00 - 3:30 S 8:00 - 11:00', modelo:'PROPIO', eps:'TODAS' },
+  { id:'apartado', municipio:'APARTADO', nombre:'SERVICIO FARMACÉUTICO TODODROGAS APARTADO', direccion:'CARRERA 102 # 92 - 16/18 (ESQUINA) BARRIO INDUSTRIALES', contacto:'SHIRLY FLOREZ', telefono:'3122701332', horario:'L A V 7:00 - 3:30 S 8:00 - 11:00', modelo:'PROPIO', eps:'TODAS' },
+  { id:'carepa', municipio:'CAREPA', nombre:'SERVICIO FARMACÉUTICO TODODROGAS CAREPA', direccion:'CALLE 81 CON CARRERA 74-12/14 - BARRIO PUEBLO NUEVO', contacto:'JUAN CAMILO PAYARES GUZMAN', telefono:'3137557913', horario:'L A V 7:00 - 3:30 S 8:00 - 11:00', modelo:'PROPIO', eps:'TODAS' },
+  { id:'caucasia', municipio:'CAUCASIA', nombre:'SERVICIO FARMACÉUTICO TODODROGAS CAUCASIA', direccion:'CARRERA 20 # 3-76 CC CAUCA CENTRO A 1 LOCALES 120-121-122-123', contacto:'KELLY ANDREA MONTOYA', telefono:'301 6160031', horario:'L A V 7:00 - 3:30 S 8:00 - 11:00', modelo:'PROPIO', eps:'TODAS' },
+  { id:'chigorodo', municipio:'CHIGORODO', nombre:'SERVICIO FARMACÉUTICO TODODROGAS CHIGORODO', direccion:'CALLE 95 # 97 04 LOCAL 2 CHIGORODÓ', contacto:'KAREN FLOREZ', telefono:'3205041364', horario:'L A V 7:00 - 3:30 S 8:00 - 11:00', modelo:'PROPIO', eps:'TODAS' },
+  { id:'ciudad-bolivar', municipio:'CIUDAD BOLIVAR', nombre:'SERVICIO FARMACÉUTICO TODODROGAS CIUDAD BOLIVAR', direccion:'CALLE 49 # 50-57 LOCAL # 104', contacto:'ANA ISSABEL GUERRA', telefono:'322 5040536', horario:'L A V 7:00 - 3:30 S 8:00 - 11:00', modelo:'PROPIO', eps:'TODAS' },
+  { id:'el-bagre', municipio:'EL BAGRE', nombre:'SERVICIO FARMACÉUTICO TODODROGAS EL BAGRE', direccion:'CALLE 50 #47A-31', contacto:'DUBERLIS CORDOBA', telefono:'301 3893746', horario:'L A V 7:00 - 3:30 S 8:00 - 11:00', modelo:'PROPIO', eps:'TODAS' },
+  { id:'medellin', municipio:'MEDELLIN', nombre:'SERVICIO FARMACÉUTICO TODODROGAS MEDELLIN', direccion:'CARRERA 49 # 48 -57', contacto:'SARA RESTREPO', telefono:'301 3893490', horario:'L A V 7:00 - 3:30 S 8:00 - 11:00', modelo:'PROPIO', eps:'TODAS' },
+  { id:'medellin2', municipio:'MEDELLIN', nombre:'SERVICIO FARMACÉUTICO TODODROGAS MEDELLIN 2', direccion:'CALLE 48 # 48-03', contacto:'JENIFER OCAMPO', telefono:'304 2975293', horario:'L A V 7:00 - 3:30 S 8:00 - 11:00', modelo:'PROPIO', eps:'TODAS' },
+  { id:'puerto-berrio', municipio:'PUERTO BERRIO', nombre:'SERVICIO FARMACÉUTICO TODODROGAS PUERTO BERRIO', direccion:'CALLE 48 # 4-56 BARRIO EL HOYO', contacto:'JUAN FELIPE CAMPIÑO', telefono:'3117505009', horario:'L A V 7:00 - 3:30 S 8:00 - 11:00', modelo:'PROPIO', eps:'TODAS' },
+  { id:'santa-barbara', municipio:'SANTA BARBARA', nombre:'SERVICIO FARMACÉUTICO TODODROGAS SANTA BARBARA', direccion:'CARRERA 50 # 48-17', contacto:'DANIELA VELEZ DIOSA', telefono:'3126909496', horario:'L A V 7:00 - 3:30 S 8:00 - 11:00', modelo:'PROPIO', eps:'TODAS' },
+  { id:'santa-fe-de-antioquia', municipio:'SANTA FE DE ANTIOQUIA', nombre:'SERVICIO FARMACÉUTICO TODODROGAS SANTA FE ANTIOQUIA', direccion:'CALLE 10 # 7-49', contacto:'LILIANA GONZALEZ', telefono:'312799746', horario:'L A V 7:00 - 3:30 S 8:00 - 11:00', modelo:'PROPIO', eps:'TODAS' },
+  { id:'segovia', municipio:'SEGOVIA', nombre:'SERVICIO FARMACÉUTICO TODODROGAS SEGOVIA', direccion:'CALLE 52 N 48-69 CALLE EL PALO TARATAL', contacto:'LINA MARCELA ESPINAL', telefono:'3117511200', horario:'L A V 7:00 - 3:30 S 8:00 - 11:00', modelo:'PROPIO', eps:'TODAS' },
+  { id:'tamesis', municipio:'TAMESIS', nombre:'SERVICIO FARMACÉUTICO TODODROGAS TAMESIS', direccion:'CARRERA 10 # 9-47 PRIMER PISO LOCAL 1 EDIFICIO EMBERA', contacto:'VERONICA MARCELA HIGUITA HIGUITA', telefono:'3126512620', horario:'L A V 7:00 - 3:30 S 8:00 - 11:00', modelo:'PROPIO', eps:'TODAS' },
+  { id:'turbo', municipio:'TURBO', nombre:'SERVICIO FARMACÉUTICO TODODROGAS TURBO', direccion:'CALLE 101 # 15-14 BARRIO BALTAZAR FUNDACION NUEVOS HORIZONTES', contacto:'MAIRA ALEJANDRA PETRO RENALS', telefono:'3117505168', horario:'L A V 7:00 - 3:30 S 8:00 - 11:00', modelo:'PROPIO', eps:'TODAS' },
+  { id:'yarumal', municipio:'YARUMAL', nombre:'SERVICIO FARMACÉUTICO TODODROGAS YARUMAL', direccion:'CARRERA 21 # 17-17 MALL COMERCIAL CUBOX LC 102', contacto:'KELLY JOHANA GONZALEZ', telefono:'3126572574', horario:'L A V 7:00 - 3:30 S 8:00 - 11:00', modelo:'PROPIO', eps:'TODAS' },
+  { id:'yolombo', municipio:'YOLOMBO', nombre:'SERVICIO FARMACÉUTICO TODODROGAS YOLOMBO', direccion:'CARRERA 24 CALLE 18-04 LOCAL 2 EDIF SYS', contacto:'DANA YERALDY CASTRILLON', telefono:'3117511090', horario:'L A V 7:00 - 3:30 S 8:00 - 11:00', modelo:'PROPIO', eps:'TODAS' },
+  { id:'zaragoza', municipio:'ZARAGOZA', nombre:'SERVICIO FARMACÉUTICO TODODROGAS ZARAGOZA', direccion:'CALLE PRINCIPAL SAN GREGORIO 36-20', contacto:'VIVIANA TOBON', telefono:'3127989950', horario:'L A V 7:00 - 3:30 S 8:00 - 11:00', modelo:'PROPIO', eps:'TODAS' },
+  { id:'nechi', municipio:'NECHI', nombre:'SERVICIO FARMACÉUTICO TODODROGAS NECHI', direccion:'CL 25 N.º 31A – 16, Municipio de Nechí (Antioquia), barrio San Nicolás', contacto:'MAYERLIS PERRUEL', telefono:'3127998860', horario:'L A V 7:00 - 3:30 S 8:00 - 11:00', modelo:'PROPIO', eps:'TODAS' },
+  { id:'rionegro', municipio:'RIONEGRO', nombre:'SERVICIO FARMACÉUTICO TODODROGAS RIONEGRO', direccion:'CL 52 #45-70 Local 2006', contacto:'VLADIMIR HERRERA', telefono:'3043482192', horario:'', modelo:'PROPIO', eps:'TODAS' },
+  { id:'la-ceja', municipio:'LA CEJA', nombre:'SERVICIO FARMACÉUTICO TODODROGAS CEJA', direccion:'CARRERA 24 19 40', contacto:'CATALINA HENAO', telefono:'3012653746', horario:'', modelo:'PROPIO', eps:'TODAS' },
+  { id:'sopetran', municipio:'SOPETRAN', nombre:'SERVICIO FARMACEUTICO TODO DROGAS SOPETRAN', direccion:'CARRERA 10 # 11-65', contacto:'ANDREA PATIÑO', telefono:'3016164255', horario:'L A V 7:00 - 3:30 S 8:00 - 11:00', modelo:'PROPIO - PAQUETEO', eps:'' },
+  { id:'amalfi', municipio:'AMALFI', nombre:'DROGUERIA FARMAVIDA', direccion:'CALLE 23 # 29-54 DROGUERIA FARMAVIDA', contacto:'DEICY MILENA ORTEGA', telefono:'3127775081', horario:'L A V 7:00 - 12:00 1:00 - 3:30 S 8:00 - 11:00', modelo:'IN HOUSE', eps:'SAVIA-COOSALUD' },
+  { id:'angostura', municipio:'ANGOSTURA', nombre:'DROGUERIA COOPRIACHON ANGOSTURA', direccion:'CARRERA 10 # 9-20', contacto:'CRISTIAN MOLINA BETANCUR', telefono:'3017558749', horario:'L - V 7:00 12:00 1:00 - 4:00 S 8:00 - 11:00', modelo:'IN HOUSE', eps:'SAVIA-COOSALUD' },
+  { id:'anori', municipio:'ANORI', nombre:'DROGUERIA SAN RAFAEL ANORI', direccion:'AVENIDA  31 n 30-16', contacto:'KEREN BARRIOS', telefono:'3117502301', horario:'L - V 7:00 12:00 1:00 - 4:00 S 8:00 - 11:00', modelo:'IN HOUSE', eps:'SAVIA-COOSALUD' },
+  { id:'frontino', municipio:'FRONTINO', nombre:'DROGUERIA FRONTIFARMA', direccion:'CARRERA 30#38-47', contacto:'MARIANA LONDOÑO AGUDELO', telefono:'3117502100', horario:'L - V 7:00 12:00 1:00 - 4:00 S 8:00 - 11:00', modelo:'IN HOUSE', eps:'SAVIA-COOSALUD' },
+  { id:'mutata', municipio:'MUTATA', nombre:'DROGUERIA FAMILIAR EDDY', direccion:'CARRERA  10# 10-41-43', contacto:'LUISA ALMANZA', telefono:'3117491234', horario:'L - V 7:00 12:00 1:00 - 4:00 S 8:00 - 11:00', modelo:'IN HOUSE', eps:'SAVIA-COOSALUD' },
+  { id:'necocli', municipio:'NECOCLI', nombre:'DROGUERIA LA PILDORA', direccion:'CALLE 51 # 48-38-BARRIO CENTRO', contacto:'ZORAIMA ALVAREZ', telefono:'3117491257', horario:'L - V 7:00 12:00 1:00 - 4:00 S 8:00 - 11:00', modelo:'IN HOUSE', eps:'SAVIA-COOSALUD' },
+  { id:'remedios', municipio:'REMEDIOS', nombre:'FARMAX LA DROGUERIA S.A.S', direccion:'CALLE 11 # 8-12 CALLE SAN ANTONIO', contacto:'BEATRIZ LONDÑO', telefono:'3127983675', horario:'L - V 7:00 12:00 1:00 - 4:00 S 8:00 - 11:00', modelo:'IN HOUSE', eps:'SAVIA-COOSALUD' },
+  { id:'giraldo', municipio:'GIRALDO', nombre:'EMPRESA SOCIAL DEL ESTADO HOSPITAL SAN ISIDRO', direccion:'CARRERA 10 # 11-05', contacto:'YENIFER VANESSA SUAREZ', telefono:'3017558742', horario:'L - V 7:00 12:00 1:00 - 4:00 S 8:00 - 11:00', modelo:'IN HOUSE', eps:'SAVIA-COOSALUD' },
+  { id:'armenia', municipio:'ARMENIA', nombre:'EMPRESA SOCIAL DEL ESTAFO SAN MARTIN DE PORRES', direccion:'CALLE 11 # 6-69', contacto:'JENNY GARCES', telefono:'3135267868', horario:'L - V 7:00 12:00 y 1:00 - 4:00 S 8:00 - 11:00', modelo:'ALIADO', eps:'SAVIA-COOSALUD' },
+  { id:'brice-o', municipio:'BRICEÑO', nombre:'E.S.E HOSPITAL EL SAGRADO CORAZON', direccion:'CALLE 11 # 8-31', contacto:'ELKIN QUIROZ', telefono:'3228984243', horario:'L - V 7:00 12:00 y 1:00 - 4:00 S 8:00 - 11:00', modelo:'ALIADO', eps:'SAVIA-COOSALUD' },
+  { id:'dabeiba', municipio:'DABEIBA', nombre:'DROGUERIA DONDE NATALIA', direccion:'CARRERA  10 # 6-47', contacto:'NATALIA RODRIGUEZ BORJA', telefono:'3146556968', horario:'L - V 7:00 12:00 y 1:00 - 4:00 S 8:00 - 11:00', modelo:'ALIADO', eps:'SAVIA-COOSALUD' },
+  { id:'hispania', municipio:'HISPANIA', nombre:'DROGUERIA BIOMEDIC', direccion:'CALLE 50 TOLEDO # 50-12', contacto:'NARLLINY VELEZ RUIZ', telefono:'3146379251', horario:'L - V 7:00 12:00 y 1:00 - 4:00 S 8:00 - 11:00', modelo:'ALIADO', eps:'SAVIA-COOSALUD' },
+  { id:'peque', municipio:'PEQUE', nombre:'FARMACIA D´ANDREÉ', direccion:'CARRERA BOLIVAR #11-19', contacto:'OMAR DARIO VALLE VALLE', telefono:'3117244853', horario:'L - V 8:00 12:00 y 1:00 - 4:00 S 9:00 - 11:00', modelo:'ALIADO', eps:'SAVIA-COOSALUD' },
+  { id:'pueblorrico', municipio:'PUEBLORRICO', nombre:'DROGUERIA FAMILIA S.G.', direccion:'CARRERA 30 #30 - 56 LOCAL 101', contacto:'MARIA VIRIGINIA GALLEGO', telefono:'3208389770', horario:'L - V 8:00 12:00 y 1:00 - 4:00 S 9:00 - 11:00', modelo:'ALIADO', eps:'SAVIA-COOSALUD' },
+  { id:'uramita', municipio:'URAMITA', nombre:'DROGUERIA H. RAMIREZ', direccion:'CARRERA 20 #20-67', contacto:'SOR ENITH RAMIREZ VALLE', telefono:'3207345828', horario:'L - V 8:00 12:00 y 1:00 - 4:00 S 9:00 - 11:00', modelo:'ALIADO', eps:'SAVIA-COOSALUD' },
+  { id:'valdivia', municipio:'VALDIVIA', nombre:'DROGUERIA MACEFARMA DROGUERIA', direccion:'CALLE LIBERTADOR # 9-92', contacto:'MAURICIO CELADA', telefono:'3146916108', horario:'L - V 8:00 12:00 y 1:00 - 4:00 S 9:00 - 11:00', modelo:'ALIADO', eps:'SAVIA-COOSALUD' },
+  { id:'yali', municipio:'YALI', nombre:'DROGUERIA EL REGALO DE DIOS', direccion:'CALLE 20 # 19-71 -BARRIO LA PLAZA', contacto:'SEBASTIAN DUQUE RIOS', telefono:'312 8433477', horario:'L - V 8:00 12:00 y 1:00 - 4:00 S 9:00 - 11:00', modelo:'ALIADO', eps:'SAVIA-COOSALUD' },
+  { id:'anza', municipio:'ANZA', nombre:'DROGUERIA SAN MARTIN 712', direccion:'CARRERA 8 # 7-51', contacto:'XIMENA CANO OSORIO', telefono:'3108621609', horario:'L - V 7:00 12:00 y 1:00 - 4:00 S 8:00 - 11:00', modelo:'ALIADO', eps:'SAVIA' },
+  { id:'betulia', municipio:'BETULIA', nombre:'DROGUERIA FAMIDROGAS', direccion:'CALLE 21 # 21-42', contacto:'LAURA YOMARA RODRIGUEZ', telefono:'3102731216', horario:'L - V 7:00 12:00 1:00 - 4:00 S 8:00 - 11:00', modelo:'IN HOUSE', eps:'SAVIA' },
+  { id:'buritica', municipio:'BURITICA', nombre:'DROGUERIA SAN ANTONIO', direccion:'CALLE 6 # 5-12 PARQUE PRINCIPAL', contacto:'MARIA ISABEL HIGUITA GUEVARA', telefono:'3217133940', horario:'L - V 7:00 12:00 1:00 - 4:00 S 8:00 - 11:00', modelo:'IN HOUSE', eps:'SAVIA' },
+  { id:'caicedo', municipio:'CAICEDO', nombre:'E.S.E Hospital Guillermo Gaviria Correa', direccion:'Cra. 5 #3-23', contacto:'LEYDY CARTAGENA', telefono:'3206499624', horario:'L - V 7:00 12:00 y 1:00 - 4:00 S 8:00 - 11:00', modelo:'ALIADO', eps:'SAVIA' },
+  { id:'jardin', municipio:'JARDIN', nombre:'DROGUERIA MACRODESCUENTOS # 9', direccion:'CALLE 9 # 2 - 59', contacto:'MARIA ALEJANDRA TORRES', telefono:'3016161590', horario:'L - V 7:00 12:00 1:00 - 4:00 S 8:00 - 11:00', modelo:'IN HOUSE', eps:'SAVIA' },
+  { id:'liborina', municipio:'LIBORINA', nombre:'DROGUERIA SAN GABRIEL', direccion:'CARRERA 9 #8-4 PARQUE PRINCIPAL', contacto:'LINA MARIA BETANCUR', telefono:'3017558759', horario:'LUNES, MARTES, JUEVES VIERNES 8:00-12:30 2:30 A 5:30 MIERCOLES 8:00 - 12:00', modelo:'IN HOUSE', eps:'SAVIA' },
+  { id:'olaya-llanadas', municipio:'OLAYA - LLANADAS', nombre:'EMPRESA SOCIAL DEL ESTADO HOSPITAL SAN MIGUEL', direccion:'CARRERA 10 # 10-34 CORREGIMIENTO LLANADAS', contacto:'JORGE BETANCUR', telefono:'3103887693', horario:'L - V 8:00 12:00 y 1:00 - 4:00 S 9:00 - 11:00', modelo:'ALIADO', eps:'SAVIA' },
+  { id:'sabanalarga', municipio:'SABANALARGA', nombre:'DROGUERIA LA AMISTAD', direccion:'CALLE  17 # 18-06', contacto:'CARLOS ARTURO HENAO LOPERA', telefono:'3103982036', horario:'L - V 8:00 12:00 y 1:00 - 4:00 S 9:00 - 11:00', modelo:'ALIADO', eps:'SAVIA' },
+  { id:'san-jeronimo', municipio:'SAN JERONIMO', nombre:'DROGURIA SANTA TERESITA DE SAN JERONIMO', direccion:'CARRERA 11 # 21-73 SECTOR LA CARRETERITA', contacto:'CAROLINA CASTAÑO TABARES', telefono:'3216932146', horario:'L - V 8:00 12:00 y 1:00 - 4:00 S 9:00 - 11:00', modelo:'ALIADO', eps:'SAVIA' },
+  { id:'caceres', municipio:'CACERES', nombre:'DROGUERIA BIENESTAR CACERES - COOSALUD', direccion:'CALLE 49 #51-36 BRR CENTRO', contacto:'MAYLER SADITH ROCHE', telefono:'3147942070', horario:'L - V 7:00 12:00 1:00 - 4:00 S 8:00 - 11:00', modelo:'IN HOUSE', eps:'COOSALUD' },
+  { id:'jerico', municipio:'JERICO', nombre:'DROGUERIA SAN ANTONIO', direccion:'CARRERA 5 #6 -09', contacto:'VERÓNICA VÉLEZ CARDONA', telefono:'3137557911', horario:'L - V 800 12:00 1:00 - 4:00 S 8:00 - 11:00', modelo:'IN HOUSE', eps:'COOSALUD' },
+  { id:'puerto-nare', municipio:'PUERTO NARE', nombre:'HOSPITAL OCTAVIO ALVAREZ', direccion:'CARRERA 5 # 45-103', contacto:'LUZ DARY', telefono:'3137976206', horario:'L - V 800 12:00 1:00 - 4:00 S 8:00 - 11:00', modelo:'ALIADO', eps:'COOSALUD' },
+  { id:'samana', municipio:'SAMANA', nombre:'EMPRESA SOCIAL DEL ESTADO SAN JOSE SAMANÁ', direccion:'CARRERA 9 # 4-79', contacto:'LEIDY JOHANA QUINTERO HENAO', telefono:'3233993183', horario:'L - V 800 12:00 1:00 - 4:00 S 8:00 - 11:00', modelo:'ALIADO', eps:'COOSALUD' },
+  { id:'sabanalarga2', municipio:'SABANALARGA', nombre:'EMPRESA SOCIAL DEL ESTADO HOSPITAL DEL SAN PEDRO - COOSALUD', direccion:'CARRERA 17 #15-94', contacto:'DORA ELCY URIBE PEREZ', telefono:'3103714980 3108368922', horario:'L - V 800 12:00 1:00 - 4:00 S 8:00 - 11:00', modelo:'ALIADO', eps:'COOSALUD' },
+  { id:'taraza', municipio:'TARAZA', nombre:'DROGUERIA KIRIUS LA BOMBA TARAZA - COOSALUD', direccion:'CARRERA 28 #27-26', contacto:'YÁNDILA JIMÉNEZ', telefono:'3127989952', horario:'L - V 7:00 12:00 1:00 - 4:00 S 8:00 - 11:00', modelo:'IN HOUSE', eps:'COOSALUD' },
+  { id:'barbosa', municipio:'BARBOSA', nombre:'DROGUERIA LA SOLIDARIA', direccion:'CALLE 15 No. 17-22', contacto:'VALENTINA CARVAJAL CEBALLOS', telefono:'6044065478', horario:'L - V 7:00 12:00 1:00 - 4:00 S 8:00 - 11:00', modelo:'IN HOUSE', eps:'SALUD TOTAL -NUEVA EPS' },
+  { id:'girardota', municipio:'GIRARDOTA', nombre:'DROGUERIA FAMILIAR E&M', direccion:'CARRERA 15 No. 5-42', contacto:'ROSA MARIA OTERGA', telefono:'3242548560', horario:'L - V 7:00 12:00 1:00 - 4:00 S 8:00 - 11:00', modelo:'IN HOUSE', eps:'SALUD TOTAL -NUEVA EPS' },
+  { id:'rionegro2', municipio:'RIONEGRO', nombre:'DROGUERIAS ORIENTE', direccion:'CARRERA 48 # 51- 15 SECTOR CENTRO - SAN FRANCISCO', contacto:'DORIS BONILLA', telefono:'6046146969', horario:'L - V 7:00 12:00 1:00 - 4:00 S 8:00 - 11:00', modelo:'IN HOUSE', eps:'SALUD TOTAL' },
+  { id:'concordia', municipio:'CONCORDIA', nombre:'DROGUERIA LA NUESTRA', direccion:'CALLE 19 No. 19-30', contacto:'BEATRIZ LONDOÑO', telefono:'6048442509', horario:'L - V 7:00 12:00 1:00 - 4:00 S 8:00 - 11:00', modelo:'ALIADO', eps:'SALUD TOTAL' },
+  { id:'copacabana', municipio:'COPACABANA', nombre:'DROGUERIA ALMA SALUD 1', direccion:'CALLE40 No. 84-18', contacto:'ISABEL CRISTINA CARO', telefono:'3146893813', horario:'L - V 7:00 12:00 1:00 - 4:00 S 8:00 - 11:00', modelo:'ALIADO', eps:'SALUD TOTAL' },
+  { id:'sabaneta', municipio:'SABANETA', nombre:'DROGUERIA INNOVA FARMA', direccion:'CALLE  73 sur # 46 - 09. ENTRE AMIGOS SABANETA', contacto:'JUAN CAMILO CRUZ', telefono:'Todavia no tiene', horario:'L - V 7:00 12:00 1:00 - 4:00 S 8:00 - 11:00', modelo:'IN HOUSE', eps:'NUEVA EPS' },
 ];
 // ════════════════════════════════════════════════════════
-//  SUPABASE CONFIG — lee de td_sb_cfg (guardado por panel_config)
+//  SUPABASE CONFIG
 // ════════════════════════════════════════════════════════
+const SUPABASE_URL    = 'https://TU_PROYECTO.supabase.co';
+const SUPABASE_KEY    = 'TU_ANON_KEY';
 const TABLE_ENCUESTAS = 'encuestas_satisfaccion';
-let SUPABASE_URL = '';
-let SUPABASE_KEY = '';
-try {
-  const _sb = JSON.parse(localStorage.getItem('td_sb_cfg') || '{}');
-  SUPABASE_URL = _sb.url  || '';
-  SUPABASE_KEY = _sb.anon || _sb.key || '';
-} catch(e) {}
-
-// Lee sedes desde panel_config (td_sedes_encuesta) — si no hay, usa la lista local
-try {
-  const _sedesGuardadas = JSON.parse(localStorage.getItem('td_sedes_encuesta') || 'null');
-  if (_sedesGuardadas && _sedesGuardadas.length) {
-    SEDES_LISTA = _sedesGuardadas
-      .filter(s => s.activa !== false)
-      .map(s => ({ id: s.id, nombre: s.nombre, ciudad: s.ciudad, direccion: s.direccion || '' }));
-  }
-} catch(e) {}
 
 // ════════════════════════════════════════════════════════
 //  ESTADO GLOBAL
@@ -651,10 +627,6 @@ let   geoFailed = false;
 //  INIT
 // ════════════════════════════════════════════════════════
 (async function init(){
-  // Verifica que las credenciales Supabase estén configuradas
-  if(!SUPABASE_URL || !SUPABASE_KEY){
-    console.warn('[Encuesta] Supabase no configurado — configura las credenciales en panel_config.');
-  }
   buildStars();
   iniciarParticulas();
   iniciarGeolocalizacion();
@@ -717,10 +689,9 @@ function activarModoManual(motivo){
   geoFailed = true;
   geoResult.estado = 'manual';
 
-  // Ocultar geoBox, mostrar autocomplete
+  // sedeManualWrap ya visible — solo asegurar geoBox oculto y actualizar label
   document.getElementById('geoBox').style.display = 'none';
-  document.getElementById('sedeManualWrap').style.display = 'block';
-  document.getElementById('sedeModoLabel').textContent = 'Selección manual · ' + motivo;
+  document.getElementById('sedeModoLabel').textContent = motivo ? 'GPS no disponible · Busca tu sede' : 'Escribe tu municipio o nombre del servicio';
 
   // Actualizar pill y card del left
   const pill = document.getElementById('sedePill');
@@ -741,6 +712,12 @@ function activarModoManual(motivo){
 
 function setGeoEstado(estado, nombre, dist, icono){
   const box  = document.getElementById('geoBox');
+  // Mostrar geoBox solo cuando GPS tiene resultado (found o error), ocultarlo en detecting
+  if(estado === 'found'){
+    box.style.display = 'flex';
+    document.getElementById('sedeManualWrap').style.display = 'none';
+    document.getElementById('sedePill').style.display = '';
+  }
   const pill = document.getElementById('sedePill');
   const card = document.getElementById('sedeCard');
   box.className  = 'geo-box '+estado;
@@ -772,8 +749,10 @@ function onSedeInput(){
 
   const results = SEDES_LISTA.filter(s =>
     s.nombre.toLowerCase().includes(q) ||
-    s.ciudad.toLowerCase().includes(q)
-  ).slice(0, 8);
+    s.municipio.toLowerCase().includes(q) ||
+    (s.eps && s.eps.toLowerCase().includes(q)) ||
+    (s.modelo && s.modelo.toLowerCase().includes(q))
+  ).slice(0, 10);
 
   if(!results.length){
     dd.innerHTML = '<div class="ac-empty">No se encontró esa sede. Intenta con otra palabra.</div>';
@@ -783,10 +762,13 @@ function onSedeInput(){
 
   dd.innerHTML = results.map((s, i) => {
     const nm = s.nombre.replace(new RegExp(`(${q})`, 'gi'), '<span class="ac-match">$1</span>');
+    const srv = s.servicio ? `<div style="font-size:10px;color:#6b748a;margin-top:1px;">${s.servicio}</div>` : '';
+    const epsBadge = s.eps ? `<span style="font-size:9px;background:rgba(37,99,235,.12);color:#60a5fa;border-radius:4px;padding:1px 5px;white-space:nowrap;">${s.eps}</span>` : '';
+    const modBadge = s.modelo && s.modelo!=='PROPIO' ? `<span style="font-size:9px;background:rgba(16,185,129,.1);color:#34d399;border-radius:4px;padding:1px 5px;white-space:nowrap;margin-top:2px;">${s.modelo}</span>` : '';
     return `<div class="ac-item" data-idx="${i}" data-id="${s.id}" onmousedown="selectSede('${s.id}')">
       <span>🏥</span>
-      <span style="flex:1;">${nm}</span>
-      <span class="ac-ciudad">${s.ciudad}</span>
+      <div style="flex:1;min-width:0;"><div>${nm}</div>${srv}</div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;"><span class="ac-ciudad">${s.municipio}</span>${epsBadge}${modBadge}</div>
     </div>`;
   }).join('');
   dd.classList.add('open');
@@ -807,7 +789,7 @@ function selectSede(id){
   // Ocultar input, mostrar badge
   document.getElementById('inputSedeManual').style.display = 'none';
   document.getElementById('sedeSelectedBadge').style.display = 'flex';
-  document.getElementById('sedeSelectedName').textContent = sede.nombre + ' · ' + sede.ciudad;
+  document.getElementById('sedeSelectedName').textContent = sede.nombre + ' · ' + sede.municipio;
   document.getElementById('errSede').classList.remove('show');
 
   // Actualizar panel izquierdo
@@ -816,7 +798,7 @@ function selectSede(id){
   document.getElementById('sedeCardIcon').textContent = '✅';
   document.getElementById('sedeCardLabel').textContent = 'Sede seleccionada manualmente';
   document.getElementById('sedeCardName').textContent = sede.nombre;
-  document.getElementById('sedeCardDist').textContent = sede.ciudad + ' · ' + sede.direccion;
+  document.getElementById('sedeCardDist').textContent = sede.municipio + ' · ' + sede.direccion;
   document.getElementById('sedeCardBadge').className = 'sc-badge ok';
   document.getElementById('sedeCardBadge').textContent = 'Confirmada';
 
@@ -858,14 +840,12 @@ function validateDatos(){
   const documento = document.getElementById('inputDocumento').value.trim();
   const correo    = document.getElementById('inputCorreo').value.trim();
   const telefono  = document.getElementById('inputTelefono').value.replace(/\D/g,'');
-  const eps       = document.getElementById('inputEps').value.trim();
   const sedeOk    = geoResult.estado === 'found' || (geoResult.estado === 'manual' && sedeManualSelected);
 
   const ok = nombre.length >= 2
           && documento.length >= 3
           && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)
           && telefono.length >= 7
-          && eps.length >= 2
           && sedeOk;
 
   const btn = document.getElementById('btnNext');
@@ -878,7 +858,6 @@ function goToSurvey(){
   const documento = document.getElementById('inputDocumento').value.trim();
   const correo    = document.getElementById('inputCorreo').value.trim();
   const telefono  = document.getElementById('inputTelefono').value.trim();
-  const eps       = document.getElementById('inputEps').value.trim();
   let ok = true;
 
   if(nombre.length < 2)     { markErr('inputNombre','errNombre',true); ok=false; }
@@ -889,8 +868,6 @@ function goToSurvey(){
   else                       { markErr('inputCorreo','errCorreo',false); }
   if(telefono.replace(/\D/g,'').length < 7){ markErr('inputTelefono','errTelefono',true); ok=false; }
   else                       { markErr('inputTelefono','errTelefono',false); }
-  if(eps.length < 2)        { markErr('inputEps','errEps',true); ok=false; }
-  else                       { markErr('inputEps','errEps',false); }
 
   const sedeOk = geoResult.estado === 'found' || (geoResult.estado === 'manual' && sedeManualSelected);
   if(!sedeOk && geoFailed){
@@ -900,7 +877,7 @@ function goToSurvey(){
 
   const sede = geoResult.sede;
   userData = {
-    nombre, documento, correo, telefono, eps,
+    nombre, documento, correo, telefono,
     sede_id:        sede.id,
     sede_nombre:    sede.nombre,
     sede_ciudad:    sede.ciudad || '',
@@ -992,7 +969,6 @@ async function submitSurvey(){
     documento:      userData.documento,
     correo:         userData.correo,
     telefono:       userData.telefono,
-    eps:            userData.eps || '',
     sede_id:        userData.sede_id,
     sede_nombre:    userData.sede_nombre,
     sede_ciudad:    userData.sede_ciudad,
@@ -1013,9 +989,6 @@ async function submitSurvey(){
   };
 
   let saved=false;
-  if(!SUPABASE_URL || !SUPABASE_KEY){
-    console.warn('Supabase no configurado — guardando offline');
-  } else {
   try{
     const r=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_ENCUESTAS}`,{
       method:'POST',
@@ -1030,7 +1003,6 @@ async function submitSurvey(){
     saved = r.ok || r.status===201;
     if(!saved) console.error('Supabase error:', r.status, await r.text());
   }catch(e){ console.warn('Sin conexión Supabase:', e.message); }
-  }
 
   if(!saved){
     try{
@@ -1078,12 +1050,12 @@ function resetAll(){
   userData={}; sedeManualSelected=null; geoFailed=false;
   // Reiniciar geo
   geoResult={ sede:null, distancia_m:null, lat:null, lng:null, estado:'detecting' };
-  document.getElementById('geoBox').style.display='flex';
-  document.getElementById('sedeManualWrap').style.display='none';
+  document.getElementById('geoBox').style.display='none';
+  document.getElementById('sedeManualWrap').style.display='block';
   document.getElementById('inputSedeManual').style.display='block';
   document.getElementById('inputSedeManual').value='';
   document.getElementById('sedeSelectedBadge').style.display='none';
-  document.getElementById('sedeModoLabel').textContent='Asignación automática por GPS';
+  document.getElementById('sedeModoLabel').textContent='Escribe tu municipio o nombre del servicio';
   setGeoEstado('detecting','Detectando tu ubicación…','Por favor permite el acceso a tu ubicación','🔍');
   goStep('step3','step1');
   iniciarGeolocalizacion();
