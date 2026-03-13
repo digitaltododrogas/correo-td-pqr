@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>PQRSFD · Tododrogas</title>
+<title>PQR · Tododrogas</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -16,7 +16,7 @@
   --shadow-xl:0 20px 60px rgba(8,13,26,.22),0 4px 16px rgba(8,13,26,.1);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;font-family:'Sora',sans-serif;overflow:hidden}
+html,body{height:100%;font-family:'Sora',sans-serif;overflow-x:hidden;}
 body{background:var(--ink);display:flex;min-height:100vh;}
 
 /* ════ LAYOUT ════ */
@@ -223,11 +223,13 @@ body{background:var(--ink);display:flex;min-height:100vh;}
 .qr-card .qr-frame{margin:0;width:100%;}
 .qr-card-url{font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--blue);text-align:center;}
 .right{
-  width:430px;min-width:390px;
+  /* Ancho fluido: 38% en desktop, nunca menos de 300px ni más de 480px */
+  width:clamp(300px, 38vw, 480px);
+  flex-shrink:0;
   background:var(--surface);
   display:flex;flex-direction:column;align-items:center;justify-content:space-between;
   overflow-y:auto;
-  padding:28px 28px 24px;
+  padding:clamp(14px,2.5vw,28px) clamp(12px,2.2vw,28px) 20px;
   box-shadow:-10px 0 48px rgba(8,13,26,.14);
   gap:0;
 }
@@ -423,6 +425,91 @@ body{background:var(--ink);display:flex;min-height:100vh;}
   border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
   flex-shrink:0;transition:all .15s;box-shadow:0 4px 14px rgba(37,99,235,.35);}
 .send-btn:hover{transform:scale(1.06);}
+
+/* ════ RESPONSIVE FLUID ════
+   Estrategia: clamp() para todo, breakpoints solo para cambios de layout
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── Tablet (< 900px): sigue siendo 2 columnas pero más compacto ── */
+@media (max-width:900px){
+  .right{
+    width:clamp(280px,42vw,380px);
+    padding:16px 14px;
+  }
+  .rp-title{font-size:clamp(20px,4vw,28px);}
+  .qr-frame{padding:10px !important;}
+  #qr-encuesta,#qr-radicar{
+    min-width:clamp(90px,15vw,130px) !important;
+    min-height:clamp(90px,15vw,130px) !important;
+  }
+  .agent-right{width:180px;}
+  .carousel-text{font-size:clamp(20px,3.2vw,36px);}
+}
+
+/* ── Móvil / pantalla angosta (< 650px): una sola columna ── */
+@media (max-width:650px){
+  html,body{overflow-x:hidden;overflow-y:auto;height:auto;}
+  .layout{
+    flex-direction:column;
+    min-height:100svh;
+    min-height:100vh;
+  }
+  /* Panel QR primero (arriba) */
+  .right{
+    order:1;
+    width:100% !important;
+    max-width:100%;
+    flex-shrink:0;
+    height:auto;
+    overflow-y:visible;
+    padding:20px 16px 16px;
+    box-shadow:none;
+    border-bottom:1px solid rgba(255,255,255,.07);
+    justify-content:flex-start;
+    gap:14px;
+  }
+  /* Panel izquierdo (carrusel + chat) abajo */
+  .left{
+    order:2;
+    flex:none;
+    width:100%;
+    min-height:50vh;
+    overflow:visible;
+  }
+  /* QRs a tamaño cómodo para pantallas pequeñas */
+  .qr-frame{padding:12px !important;margin:0 !important;}
+  #qr-encuesta,#qr-radicar{
+    min-width:clamp(100px,28vw,150px) !important;
+    min-height:clamp(100px,28vw,150px) !important;
+  }
+  .rp-title{font-size:clamp(22px,7vw,32px);}
+  .rp-sub{font-size:12px;}
+  /* Carrusel compacto */
+  .carousel-section{padding:14px 16px 10px;}
+  .carousel-text{font-size:clamp(18px,6vw,28px);}
+  /* Agent row vertical */
+  .agent-row{flex-direction:column;}
+  .agent-right{
+    width:100%;
+    border-top:1px solid rgba(255,255,255,.08);
+    border-left:none;
+    padding:10px 16px 14px;
+  }
+  .agent-divider{display:none;}
+  /* Stats bar */
+  .stats-bar{flex-wrap:wrap;padding:10px 12px !important;}
+}
+
+/* ── Móvil muy pequeño (< 380px) ── */
+@media (max-width:380px){
+  .right{padding:14px 10px;}
+  #qr-encuesta,#qr-radicar{
+    min-width:clamp(80px,26vw,120px) !important;
+    min-height:clamp(80px,26vw,120px) !important;
+  }
+  .rp-title{font-size:20px;}
+  .horario-badge{font-size:9px;padding:4px 10px;}
+}
 </style>
 </head>
 <body>
@@ -441,7 +528,7 @@ body{background:var(--ink);display:flex;min-height:100vh;}
     <div class="l-top">
       <div class="brand-pill">
         <div class="brand-dot"></div>
-        <span class="brand-name">Tododrogas · PQRSFD</span>
+        <span class="brand-name">Tododrogas · PQR</span>
       </div>
       <div class="live-pill">
         <div class="live-dot"></div>
@@ -456,7 +543,7 @@ body{background:var(--ink);display:flex;min-height:100vh;}
       <div class="carousel-wrap">
         <div class="carousel-slide" id="carouselSlide">
           <div class="carousel-text" id="carouselText">Cargando…</div>
-          <div class="carousel-sub" id="carouselSub">Sistema PQRSFD · Tododrogas</div>
+          <div class="carousel-sub" id="carouselSub">Sistema PQR · Tododrogas</div>
         </div>
       </div>
 
@@ -470,7 +557,7 @@ body{background:var(--ink);display:flex;min-height:100vh;}
             <div class="agent-online"></div>
           </div>
           <div class="agent-info">
-            <div class="agent-name">Nova TD · Asistente IA</div>
+            <div class="agent-name">Nova · Asistente IA</div>
             <div class="agent-desc">Resuelvo tus dudas antes de radicar.<br>Disponible 24/7, respondo al instante.</div>
             <div class="agent-caps">
               <span class="acap">Preguntas frecuentes</span>
@@ -539,7 +626,7 @@ body{background:var(--ink);display:flex;min-height:100vh;}
       </div>
 
       <div style="width:100%;border-top:1px solid rgba(255,255,255,.06);padding-top:10px;text-align:center;">
-        <span style="font-size:9px;font-weight:800;color:rgba(255,255,255,.45);letter-spacing:2px;text-transform:uppercase;font-family:'JetBrains Mono',monospace;">◈ ATENCIÓN AL CIUDADANO ◈</span>
+        <span style="font-size:9px;font-weight:800;color:rgba(255,255,255,.45);letter-spacing:2px;text-transform:uppercase;font-family:'JetBrains Mono',monospace;">◈ 11 CANALES DE ATENCIÓN AL CIUDADANO ◈</span>
       </div>
 
     </div>
@@ -553,14 +640,14 @@ body{background:var(--ink);display:flex;min-height:100vh;}
       <div class="rp-title">¡Bienvenido!</div>
       <div class="horario-badge" style="margin:10px auto 0;background:linear-gradient(135deg,rgba(37,99,235,.15),rgba(37,99,235,.05));border-color:rgba(37,99,235,.5);box-shadow:0 4px 18px rgba(29,78,216,.35);">
         <div class="h-dot" style="background:#3b82f6;box-shadow:0 0 6px #3b82f6;"></div>
-        <span style="color:#4d7fc4;font-weight:600;">Lun-Vier 7 a.m-5:30 p.m. · Nova TD 24/7</span>
+        <span style="color:#4d7fc4;font-weight:600;">Lun-Vier 7 a.m-5:30 p.m. · Nova 24/7</span>
       </div>
     </div>
 
     <!-- ZONA ENCUESTA -->
     <div style="width:100%;display:flex;flex-direction:column;align-items:center;gap:6px;">
       <!-- ETIQUETA ENCUESTA -->
-      <div style="width:100%;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 14px;border-radius:12px;background:linear-gradient(135deg,rgba(37,99,235,.15),rgba(37,99,235,.05));border:1px solid rgba(37,99,235,.4);">
+      <div id="btn-encuesta-wrap" onclick="openEncuesta()" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 14px;border-radius:12px;background:linear-gradient(135deg,rgba(37,99,235,.15),rgba(37,99,235,.05));border:1px solid rgba(37,99,235,.4);cursor:pointer;transition:border-color .2s,opacity .2s;">
         <div style="display:flex;align-items:center;gap:7px;">
           <span style="font-size:18px;">⭐</span>
           <div style="font-size:14px;font-weight:900;color:#fff;background:#2563eb;padding:2px 10px;border-radius:6px;letter-spacing:.3px;">Encuesta de satisfacción</div>
@@ -598,7 +685,7 @@ body{background:var(--ink);display:flex;min-height:100vh;}
 
     <!-- FOOTER -->
     <p class="footer-note" style="margin:0;text-align:center;">
-      Tododrogas CIA S.A.S · Sistema PQRSFD © 2026<br>
+      Tododrogas CIA S.A.S · Sistema PQR © 2026<br>
       <strong>Confidencial · Tu información está protegida</strong>
     </p>
 
@@ -613,7 +700,7 @@ body{background:var(--ink);display:flex;min-height:100vh;}
       <div class="mh-left">
         <div class="mh-av">🤖</div>
         <div>
-          <div class="mh-name">Nova TD · Asistente PQR</div>
+          <div class="mh-name">Nova · Asistente PQR</div>
           <div class="mh-status"><div class="mh-sdot"></div> En línea · Responde al instante</div>
         </div>
       </div>
@@ -654,7 +741,7 @@ body{background:var(--ink);display:flex;min-height:100vh;}
     </div>
 
     <div class="esc-bar" id="escBar">
-      ⚠️ Nova TD no logró resolver tu consulta del todo. ¿Deseas que un asesor te contacte formalmente?
+      ⚠️ Nova no logró resolver tu consulta del todo. ¿Deseas que un asesor te contacte formalmente?
       <br><button class="esc-btn" id="btn-radicar-chat">📋 Radicar mi solicitud</button>
     </div>
 
@@ -729,8 +816,8 @@ async function pollSupabaseConfig(){
   } catch(e){}
 }
 
-// Genera QR en el contenedor dado con la URL dada
-function makeQR(elId, url, size){
+// Genera QR midiendo el contenedor real para adaptarse a cualquier pantalla
+function makeQR(elId, url, fallbackSize){
   const el = document.getElementById(elId);
   if(!el) return;
   el.innerHTML = '';
@@ -738,9 +825,25 @@ function makeQR(elId, url, size){
     el.innerHTML='<span style="color:#6b748a;font-size:10px;text-align:center;display:block;padding:20px 4px;">Sin URL<br>configurada</span>';
     return;
   }
-  const s = size||130;
-  el.innerHTML='<img src="https://api.qrserver.com/v1/create-qr-code/?size='+s+'x'+s+'&data='+encodeURIComponent(url)+'&bgcolor=0a0e1a&color=ffffff&qzone=1" width="'+s+'" height="'+s+'" style="display:block;border-radius:4px;">';
+  // Medir el contenedor padre para saber cuánto espacio hay disponible
+  const parent = el.closest('.qr-frame') || el.parentElement;
+  const available = parent ? Math.floor(parent.getBoundingClientRect().width) - 32 : 0;
+  // Usar el tamaño disponible, mínimo 90px, máximo 200px
+  const s = Math.max(90, Math.min(200, available > 60 ? available : (fallbackSize || 130)));
+  el.style.minWidth = s+'px';
+  el.style.minHeight = s+'px';
+  el.innerHTML='<img src="https://api.qrserver.com/v1/create-qr-code/?size='+s+'x'+s+'&data='+encodeURIComponent(url)+'&bgcolor=0a0e1a&color=ffffff&qzone=1" width="'+s+'" height="'+s+'" style="display:block;border-radius:4px;width:100%;height:auto;">';
 }
+
+// Regenera QRs al cambiar tamaño de ventana (orientación, resize)
+let _qrResizeTimer = null;
+window.addEventListener('resize', ()=>{
+  clearTimeout(_qrResizeTimer);
+  _qrResizeTimer = setTimeout(applyQRs, 250);
+});
+
+// URL global de encuesta (accesible por openEncuesta)
+let ENC_URL = '';
 
 // Aplica QRs una vez el DOM esté listo
 function applyQRs(){
@@ -752,10 +855,37 @@ function applyQRs(){
     catch(e){ radLbl.textContent = FORM_URL; }
   }
   // QR Encuesta
-  const encUrl = CFG.canales && CFG.canales.encuesta ? CFG.canales.encuesta : '';
-  makeQR('qr-encuesta', encUrl, 130);
+  ENC_URL = CFG.canales && CFG.canales.encuesta ? CFG.canales.encuesta : '';
+  makeQR('qr-encuesta', ENC_URL, 130);
   const encLbl = document.getElementById('qr-encuesta-url');
-  if(encLbl) encLbl.textContent = encUrl ? 'Encuesta · Escanea con tu cámara' : 'Encuesta · configura la URL en el panel';
+  if(encLbl) encLbl.textContent = ENC_URL ? 'Encuesta · Escanea con tu cámara' : 'Encuesta · configura la URL en el panel';
+  // Estilo del botón encuesta según tenga URL o no
+  const btnWrap = document.getElementById('btn-encuesta-wrap');
+  if(btnWrap){
+    if(ENC_URL){
+      btnWrap.style.opacity = '1';
+      btnWrap.style.borderColor = 'rgba(37,99,235,.7)';
+      btnWrap.title = 'Abrir encuesta de satisfacción';
+    } else {
+      btnWrap.style.opacity = '0.65';
+      btnWrap.style.cursor = 'default';
+      btnWrap.title = 'URL no configurada — panel de administración';
+    }
+  }
+}
+
+// Abre la encuesta en nueva pestaña (toque del botón en móvil)
+function openEncuesta(){
+  if(ENC_URL){
+    window.open(ENC_URL, '_blank');
+  } else {
+    const lbl = document.getElementById('qr-encuesta-url');
+    if(lbl){
+      lbl.style.color = '#f87171';
+      lbl.textContent = '⚠ Configura la URL en el panel de administración';
+      setTimeout(()=>{ lbl.style.color=''; lbl.textContent='Encuesta · configura la URL en el panel'; }, 3000);
+    }
+  }
 }
 
 let cIdx = 0;
@@ -1054,12 +1184,25 @@ setTimeout(()=>{ document.body.style.opacity='1'; },50);
 
 // ── INIT ──
 startCarousel();
-applyQRs();
-_lastQrUrl = FORM_URL; // fijar URL inicial para detectar cambios
-pollSupabaseConfig();   // primera verificación inmediata
-setInterval(pollSupabaseConfig, 30000); // polling cada 30 segundos
+
+// Esperar a que el DOM esté pintado para medir contenedores correctamente
+// requestAnimationFrame garantiza que los estilos ya están aplicados
+requestAnimationFrame(()=>{
+  requestAnimationFrame(()=>{
+    applyQRs();
+    _lastQrUrl = FORM_URL;
+    pollSupabaseConfig();
+    setInterval(pollSupabaseConfig, 30000);
+  });
+});
+
 document.getElementById('btn-radicar-main').addEventListener('click', goToForm);
 document.getElementById('btn-radicar-chat').addEventListener('click', goToForm);
+
+// También re-aplicar al cambiar orientación en móvil/tablet
+window.addEventListener('orientationchange', ()=>{
+  setTimeout(applyQRs, 400); // esperar que el viewport actualice sus dimensiones
+});
 </script>
 </body>
 </html>
