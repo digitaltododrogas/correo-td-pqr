@@ -740,15 +740,7 @@ table.agents-tbl tr:hover td{background:var(--bg)}
       <label class="form-label">Archivo de firma <span style="color:var(--red)">*</span></label>
       <input type="file" id="firmaFile" accept="*/*"
         style="font-size:12px;color:var(--ink2);width:100%;padding:8px;border:1.5px solid var(--border);border-radius:var(--r2);background:#fff;cursor:pointer"
-        onchange="
-          const f=this.files[0];
-          if(!f)return;
-          const size=f.size>1048576?(f.size/1048576).toFixed(1)+' MB':Math.round(f.size/1024)+' KB';
-          document.getElementById('firmaPreview').innerHTML=
-            '<div style=\'display:inline-flex;align-items:center;gap:6px;background:#fff;border:1.5px solid var(--purple-l);border-radius:8px;padding:4px 10px;font-size:11px;margin-top:6px;color:var(--purple)\'>'+
-            getFileIcon(f.name)+' '+f.name+' <span style=\'color:var(--ink3)\'>'+size+'</span></div>';
-          document.getElementById('firmaError').style.display='none';
-        ">
+        onchange="(function(f){if(!f)return;var size=f.size>1048576?(f.size/1048576).toFixed(1)+' MB':Math.round(f.size/1024)+' KB';document.getElementById('firmaPreview').innerHTML='<div style=\'display:inline-flex;align-items:center;gap:6px;background:#fff;border:1.5px solid var(--purple-l);border-radius:8px;padding:4px 10px;font-size:11px;margin-top:6px;color:var(--purple)\'>'+getFileIcon(f.name)+' '+f.name+' <span style=\'color:var(--ink3)\'>'+size+'</span></div>';document.getElementById('firmaError').style.display='none';})(this.files[0])">
       <div id="firmaPreview"></div>
     </div>
     <div class="form-field">
@@ -997,10 +989,9 @@ function renderAgentes() {
     const pend=E.filter(e=>e.asignado_a===a.id&&e.estado==='pendiente').length;
     const gest=E.filter(e=>e.asignado_a===a.id&&e.estado==='gestion').length;
     const sol=E.filter(e=>e.asignado_a===a.id&&(e.estado==='solucionado'||e.estado==='gestionado')).length;
-    const pteFirma=E.filter(e=>e.asignado_a===a.id&&e.estado==='pendiente_firma').length;
     const gr=H.filter(h=>(h.metadata?.agente_id||h.agente_id)===a.id).length;
     const pct=tot>0?Math.round(sol/tot*100):0;
-    const carga=pend+gest+pteFirma;
+    const carga=pend+gest;
     return `<tr>
       <td><div style="display:flex;align-items:center;gap:9px">
         <div class="agent-av-sm" style="background:${COLORS[i%COLORS.length]}">${(a.nombre||'?').charAt(0).toUpperCase()}</div>
@@ -1025,6 +1016,7 @@ function renderSLA() {
   const now=new Date(), E=state.emails;
   const act=E.filter(e=>e.estado==='pendiente'||e.estado==='gestion'||e.estado==='pendiente_firma');
   const conH=act.map(e=>({...e,horas:Math.round((now-new Date(e.fecha))/3600000)}));
+  const riesgo=conH.filter(e=>e.horas>=24&&e.horas<72);
   const vencidos=conH.filter(e=>e.horas>=72);
   const altaPend=E.filter(e=>e.prioridad==='alta'&&e.estado==='pendiente').length;
   const reab=state.historial.filter(h=>(h.evento||h.accion||'').toLowerCase().includes('reabiert')).length;
@@ -1142,7 +1134,6 @@ async function exportarExcel() {
       const pend=corr.filter(e=>e.estado==='pendiente').length;
       const gest=corr.filter(e=>e.estado==='gestion').length;
       const sol=corr.filter(e=>e.estado==='solucionado'||e.estado==='gestionado').length;
-      const pteFirma=corr.filter(e=>e.estado==='pendiente_firma').length;
       const tot=corr.length;
       const tiempos=corr.map(email=>{
         const fR=email.fecha?new Date(email.fecha):null;
@@ -1153,7 +1144,7 @@ async function exportarExcel() {
       const prom=tiempos.length?Math.round(tiempos.reduce((a,b)=>a+b,0)/tiempos.length):'';
       return {
         'Agente_ID':ag.id||'','Agente_Nombre':ag.nombre||'','Agente_Email':ag.email||'','Estado':ag.activo?'Activo':'Inactivo',
-        'Total_Correos':tot,'Pendientes':pend,'En_Gestion':gest,'Solucionados':sol,'Pte_Firma':pteFirma,'Gestiones_Registradas':gA.length,
+        'Total_Correos':tot,'Pendientes':pend,'En_Gestion':gest,'Solucionados':sol,'Gestiones_Registradas':gA.length,
         'Prom_Min_Primera_Resp':prom,'Pct_Resolucion':tot>0?Math.round(sol/tot*100)+'%':'0%'
       };
     });
@@ -1423,45 +1414,45 @@ async function selectEmail(id) {
 
   // Bloquear panel según estado
   const _mgmtBtnRow = document.querySelector('#mgmtPanel .mgmt-btn-row');
-  const _btnAdd = _mgmtBtnRow ? _mgmtBtnRow.querySelector('.btn-primary') : null;
-  const _btnSol = _mgmtBtnRow ? _mgmtBtnRow.querySelector('.btn-success') : null;
-  const _btnFirma = _mgmtBtnRow ? _mgmtBtnRow.querySelector('.btn-purple') : null;
+  const _btnAdd  = _mgmtBtnRow ? _mgmtBtnRow.querySelector('.btn-primary') : null;
+  const _btnSol  = _mgmtBtnRow ? _mgmtBtnRow.querySelector('.btn-success') : null;
+  const _btnFirma= _mgmtBtnRow ? _mgmtBtnRow.querySelector('.btn-purple')  : null;
   let _lockMsg = document.getElementById('adminMgmtLockMsg');
 
   if(email.estado==='solucionado') {
-    if(_btnAdd) _btnAdd.style.display='none';
-    if(_btnSol) _btnSol.style.display='none';
-    if(_btnFirma) _btnFirma.style.display='none';
-    if(!_lockMsg) {
-      _lockMsg = document.createElement('div');
-      _lockMsg.id = 'adminMgmtLockMsg';
+    if(_btnAdd)  _btnAdd.style.display='none';
+    if(_btnSol)  _btnSol.style.display='none';
+    if(_btnFirma)_btnFirma.style.display='none';
+    if(!_lockMsg){
+      _lockMsg=document.createElement('div');
+      _lockMsg.id='adminMgmtLockMsg';
       _lockMsg.style.cssText='border-radius:var(--r2);padding:10px 12px;font-size:11px;font-weight:700;line-height:1.5;margin-top:6px';
       if(_mgmtBtnRow) _mgmtBtnRow.appendChild(_lockMsg);
     }
-    _lockMsg.style.background='var(--green-l)'; _lockMsg.style.color='var(--green)';
+    _lockMsg.style.background='var(--green-l)';_lockMsg.style.color='var(--green)';
     _lockMsg.innerHTML='✅ Ticket solucionado<br><span style="font-weight:400">Usa "Reabrir ticket" para continuar la gestión</span>';
     _lockMsg.style.display='';
-    document.querySelectorAll('.priority-btn').forEach(b=>{ b.disabled=true; b.style.opacity='0.4'; b.style.cursor='not-allowed'; });
+    document.querySelectorAll('.priority-btn').forEach(b=>{b.disabled=true;b.style.opacity='0.4';b.style.cursor='not-allowed';});
   } else if(email.estado==='pendiente_firma') {
-    if(_btnAdd) _btnAdd.style.display='none';
-    if(_btnSol) _btnSol.style.display='none';
-    if(_btnFirma) _btnFirma.style.display='';
-    if(!_lockMsg) {
-      _lockMsg = document.createElement('div');
-      _lockMsg.id = 'adminMgmtLockMsg';
+    if(_btnAdd)  _btnAdd.style.display='none';
+    if(_btnSol)  _btnSol.style.display='none';
+    if(_btnFirma)_btnFirma.style.display='';
+    if(!_lockMsg){
+      _lockMsg=document.createElement('div');
+      _lockMsg.id='adminMgmtLockMsg';
       _lockMsg.style.cssText='border-radius:var(--r2);padding:10px 12px;font-size:11px;font-weight:700;line-height:1.5;margin-top:6px';
       if(_mgmtBtnRow) _mgmtBtnRow.appendChild(_lockMsg);
     }
-    _lockMsg.style.background='var(--purple-l)'; _lockMsg.style.color='var(--purple)';
+    _lockMsg.style.background='var(--purple-l)';_lockMsg.style.color='var(--purple)';
     _lockMsg.innerHTML='✍️ Esperando firma de cierre<br><span style="font-weight:400">Adjunta la firma para cerrar definitivamente</span>';
     _lockMsg.style.display='';
-    document.querySelectorAll('.priority-btn').forEach(b=>{ b.disabled=true; b.style.opacity='0.4'; b.style.cursor='not-allowed'; });
+    document.querySelectorAll('.priority-btn').forEach(b=>{b.disabled=true;b.style.opacity='0.4';b.style.cursor='not-allowed';});
   } else {
-    if(_btnAdd) _btnAdd.style.display='';
-    if(_btnSol) _btnSol.style.display='';
-    if(_btnFirma) _btnFirma.style.display='none';
+    if(_btnAdd)  _btnAdd.style.display='';
+    if(_btnSol)  _btnSol.style.display='';
+    if(_btnFirma)_btnFirma.style.display='none';
     if(_lockMsg) _lockMsg.style.display='none';
-    document.querySelectorAll('.priority-btn').forEach(b=>{ b.disabled=false; b.style.opacity=''; b.style.cursor=''; });
+    document.querySelectorAll('.priority-btn').forEach(b=>{b.disabled=false;b.style.opacity='';b.style.cursor='';});
   }
 
   // Load timeline
@@ -1614,7 +1605,6 @@ async function setPriority(prio, btn) {
 async function marcarSolucionado() {
   const id = state.selectedId;
   if(!id) return;
-  // Ahora va a pendiente_firma — no cierra directo
   const email = state.emails.find(e=>e.id===id);
   if(!confirm('¿Marcar este ticket como "Pendiente por firma"?\n\nDeberás adjuntar la firma de cierre para cerrar definitivamente.')) return;
   await sb(`correos?id=eq.${id}`, 'PATCH', {estado:'pendiente_firma'});
@@ -1625,8 +1615,7 @@ async function marcarSolucionado() {
 }
 
 function abrirModalFirma() {
-  const id = state.selectedId;
-  if(!id) return;
+  if(!state.selectedId) return;
   document.getElementById('firmaFile').value = '';
   document.getElementById('firmaObs').value = '';
   document.getElementById('firmaPreview').innerHTML = '';
@@ -1640,84 +1629,61 @@ async function confirmarFirma() {
   const fileInput = document.getElementById('firmaFile');
   const obs = document.getElementById('firmaObs').value.trim();
   const errorEl = document.getElementById('firmaError');
-
   if(!fileInput.files.length) {
     errorEl.textContent = '⚠️ Debes adjuntar la firma de cierre para continuar.';
-    errorEl.style.display = 'block';
-    return;
+    errorEl.style.display = 'block'; return;
   }
   const file = fileInput.files[0];
-  if(file.size > 50 * 1024 * 1024) {
+  if(file.size > 50*1024*1024) {
     errorEl.textContent = '⚠️ El archivo supera 50 MB.';
-    errorEl.style.display = 'block';
-    return;
+    errorEl.style.display = 'block'; return;
   }
-
   const btn = document.getElementById('btnConfirmarFirma');
   btn.disabled = true;
   btn.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0"/></svg> Guardando…';
   errorEl.style.display = 'none';
-
   try {
     const email = state.emails.find(e=>e.id===id);
-    const agentId = sessionStorage.getItem('pqr_agent_id') || 'admin';
-
-    // 1. Subir firma a Supabase Storage
+    const agentId = sessionStorage.getItem('pqr_agent_id')||'admin';
     const ts = Date.now();
-    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
     const storagePath = `firmas/${id}/${ts}_${safeName}`;
+    // 1. Subir a Storage
     const uploadRes = await fetch(`${SB_URL}/storage/v1/object/adjuntos-pqr/${storagePath}`, {
-      method: 'POST',
-      headers: {
-        'apikey': SB_KEY,
-        'Authorization': 'Bearer ' + SB_KEY,
-        'Content-Type': file.type || 'application/octet-stream',
-        'x-upsert': 'true',
-      },
+      method:'POST',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':file.type||'application/octet-stream','x-upsert':'true'},
       body: file,
     });
-    if(!uploadRes.ok) throw new Error('Error subiendo firma: ' + await uploadRes.text());
-
-    // 2. URL firmada (10 años)
+    if(!uploadRes.ok) throw new Error('Error subiendo firma: '+await uploadRes.text());
+    // 2. URL firmada 10 años
     const signRes = await fetch(`${SB_URL}/storage/v1/object/sign/adjuntos-pqr/${storagePath}`, {
-      method: 'POST',
-      headers: {'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json'},
-      body: JSON.stringify({expiresIn: 315360000}),
+      method:'POST',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'},
+      body: JSON.stringify({expiresIn:315360000}),
     });
     const signData = signRes.ok ? await signRes.json() : {};
     const firmaUrl = signData.signedURL ? `${SB_URL}/storage/v1${signData.signedURL}` : `${SB_URL}/storage/v1/object/adjuntos-pqr/${storagePath}`;
-
     // 3. Registrar en tabla adjuntos
-    await sb('adjuntos', 'POST', {
-      correo_id:      id,
-      attachment_id:  `firma_${id}_${Date.now()}`,
-      nombre:         file.name,
-      tipo_contenido: file.type || 'application/octet-stream',
-      tamano_bytes:   file.size,
-      es_inline:      false,
-      storage_url:    firmaUrl,
-      direccion:      'firma_cierre',
-      enviado_por:    agentId,
+    await sb('adjuntos','POST',{
+      correo_id:id, attachment_id:`firma_${id}_${ts}`,
+      nombre:file.name, tipo_contenido:file.type||'application/octet-stream',
+      tamano_bytes:file.size, es_inline:false, storage_url:firmaUrl,
+      direccion:'firma_cierre', enviado_por:agentId,
     });
-
     // 4. Cambiar estado a solucionado
-    await sb(`correos?id=eq.${id}`, 'PATCH', {estado:'solucionado', fecha_resolucion: new Date().toISOString()});
-
-    // 5. Registrar en historial
+    await sb(`correos?id=eq.${id}`,'PATCH',{estado:'solucionado',fecha_resolucion:new Date().toISOString()});
+    // 5. Historial
     await addHistorialEvent(id, email, 'firma_confirmada', {
-      por: 'admin',
-      agente_id: agentId,
-      firma_archivo: file.name,
-      firma_url: firmaUrl,
-      observaciones: obs || 'Firma de cierre adjuntada',
+      por:'admin', agente_id:agentId,
+      firma_archivo:file.name, firma_url:firmaUrl,
+      observaciones:obs||'Firma de cierre adjuntada',
     });
-
-    showToast('Ticket cerrado con firma ✅', 'success');
+    showToast('Ticket cerrado con firma ✅','success');
     closeModal('modalFirma');
     await loadEmails();
     selectEmail(id);
   } catch(e) {
-    errorEl.textContent = '⚠️ ' + e.message.substring(0, 100);
+    errorEl.textContent = '⚠️ '+e.message.substring(0,100);
     errorEl.style.display = 'block';
     btn.disabled = false;
     btn.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Confirmar y cerrar ticket';
@@ -1808,13 +1774,116 @@ async function saveGestion() {
 }
 
 // Reply
+// ─────────────────────────────────────────────────────────
+// SISTEMA DE ADJUNTOS ESTILO OUTLOOK
+// ─────────────────────────────────────────────────────────
+const ATTACH_MAX_FILE_MB  = 35;
+const ATTACH_MAX_TOTAL_MB = 150;
+const ATTACH_INLINE_MB    = 3.9;
+const ATTACH_CHUNK_BYTES  = 3 * 1024 * 1024;
+const _attachedFiles = new Map();
+let _attachCounter = 0;
+
+function _fmtSize(bytes){
+  if(bytes>1048576) return (bytes/1048576).toFixed(1)+' MB';
+  if(bytes>1024) return Math.round(bytes/1024)+' KB';
+  return bytes+' B';
+}
+function _attachRender(){
+  const preview=document.getElementById('replyFilesPreview');
+  if(!preview) return;
+  preview.innerHTML='';
+  let totalBytes=0;
+  _attachedFiles.forEach(({file,id})=>{
+    totalBytes+=file.size;
+    const isLarge=file.size>ATTACH_INLINE_MB*1024*1024;
+    const pill=document.createElement('div');
+    pill.id='attach-pill-'+id;
+    pill.style.cssText='display:inline-flex;align-items:center;gap:6px;background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:4px 8px 4px 10px;font-size:11px;font-weight:500;color:var(--ink2);margin:2px;max-width:260px;position:relative';
+    pill.innerHTML=`<span style="flex-shrink:0;font-size:14px">${getFileIcon(file.name)}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px" title="${esc(file.name)}">${esc(file.name)}</span><span style="color:var(--ink3);flex-shrink:0">${_fmtSize(file.size)}</span>${isLarge?'<span style="background:#EFF6FF;color:#3B82F6;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;flex-shrink:0">CHUNKED</span>':''}<div id="attach-progress-${id}" style="display:none;position:absolute;bottom:0;left:0;height:2px;background:#3B82F6;border-radius:0 0 0 6px;transition:width .2s"></div><button onclick="_attachRemove('${id}')" title="Quitar" style="flex-shrink:0;background:none;border:none;cursor:pointer;color:var(--ink3);font-size:15px;line-height:1;padding:0 2px">×</button>`;
+    preview.appendChild(pill);
+  });
+  const totalEl=document.getElementById('replyAttachTotal');
+  if(totalEl){
+    const pct=Math.min(100,(totalBytes/(ATTACH_MAX_TOTAL_MB*1024*1024))*100);
+    const color=pct>85?'#e53e3e':pct>60?'#f59e0b':'#3B82F6';
+    totalEl.innerHTML=_attachedFiles.size>0?`<div style="display:flex;align-items:center;gap:8px;margin-top:6px"><div style="flex:1;height:3px;background:var(--border);border-radius:2px"><div style="height:3px;width:${pct}%;background:${color};border-radius:2px"></div></div><span style="font-size:10px;color:var(--ink3)">${(totalBytes/1048576).toFixed(1)} / ${ATTACH_MAX_TOTAL_MB} MB</span></div>`:'';
+  }
+}
+function _attachRemove(id){
+  _attachedFiles.forEach((v,k)=>{if(v.id===id)_attachedFiles.delete(k);});
+  _attachRender();
+}
+function _attachAdd(files){
+  let totalBytes=0;
+  _attachedFiles.forEach(({file})=>totalBytes+=file.size);
+  for(const file of files){
+    if(file.size>ATTACH_MAX_FILE_MB*1024*1024){showToast(`"${file.name}" supera ${ATTACH_MAX_FILE_MB} MB`,'error');continue;}
+    if(totalBytes+file.size>ATTACH_MAX_TOTAL_MB*1024*1024){showToast(`Total de adjuntos supera ${ATTACH_MAX_TOTAL_MB} MB`,'error');break;}
+    if(!_attachedFiles.has(file.name)){_attachedFiles.set(file.name,{file,id:'a'+(++_attachCounter)});totalBytes+=file.size;}
+  }
+  _attachRender();
+}
+function _fileToBase64(file){
+  return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});
+}
+async function _uploadLargeAttachment(token,userId,draftId,file,progressId){
+  const sessionRes=await fetch(`https://graph.microsoft.com/v1.0/users/${userId}/messages/${draftId}/attachments/createUploadSession`,{
+    method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+    body:JSON.stringify({AttachmentItem:{attachmentType:'file',name:file.name,size:file.size}})
+  });
+  if(!sessionRes.ok) throw new Error('Upload session: '+await sessionRes.text());
+  const {uploadUrl}=await sessionRes.json();
+  let offset=0;
+  const progEl=document.getElementById('attach-progress-'+progressId);
+  while(offset<file.size){
+    const end=Math.min(offset+ATTACH_CHUNK_BYTES,file.size);
+    const chunkRes=await fetch(uploadUrl,{method:'PUT',headers:{'Content-Length':String(end-offset),'Content-Range':`bytes ${offset}-${end-1}/${file.size}`,'Content-Type':file.type||'application/octet-stream'},body:file.slice(offset,end)});
+    if(!chunkRes.ok&&chunkRes.status!==202&&chunkRes.status!==201) throw new Error(`Chunk ${chunkRes.status}`);
+    offset=end;
+    if(progEl){progEl.style.display='block';progEl.style.width=Math.round(offset/file.size*100)+'%';}
+  }
+}
+async function _buildAndSendMail(token,userId,payload){
+  return fetch(`https://graph.microsoft.com/v1.0/users/${userId}/sendMail`,{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({message:payload,saveToSentItems:true})});
+}
+async function _buildAndSendMailWithLargeAttachments(token,userId,payload,largeFiles){
+  const draftRes=await fetch(`https://graph.microsoft.com/v1.0/users/${userId}/messages`,{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  if(!draftRes.ok) throw new Error('Error creando borrador: '+await draftRes.text());
+  const draft=await draftRes.json();
+  for(const {file,id:fid} of largeFiles) await _uploadLargeAttachment(token,userId,draft.id,file,fid);
+  return fetch(`https://graph.microsoft.com/v1.0/users/${userId}/messages/${draft.id}/send`,{method:'POST',headers:{'Authorization':'Bearer '+token}});
+}
+
+async function _guardarAdjuntosEnStorage(correoId,archivos,enviadoPor){
+  const resultados=[];
+  for(const {file} of archivos){
+    try{
+      const ts=Date.now();
+      const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+      const storagePath=`saliente/${correoId}/${ts}_${safeName}`;
+      const storageUrl=`${SB_URL}/storage/v1/object/adjuntos-pqr/${storagePath}`;
+      const uploadRes=await fetch(storageUrl,{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':file.type||'application/octet-stream','x-upsert':'true'},body:file});
+      if(!uploadRes.ok) throw new Error(`Storage ${uploadRes.status}`);
+      const signRes=await fetch(`${SB_URL}/storage/v1/object/sign/adjuntos-pqr/${storagePath}`,{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({expiresIn:315360000})});
+      const signData=signRes.ok?await signRes.json():{};
+      const finalUrl=signData.signedURL?`${SB_URL}/storage/v1${signData.signedURL}`:storageUrl;
+      await sb('adjuntos','POST',{correo_id:correoId,attachment_id:`sal_${correoId}_${ts}`,nombre:file.name,tipo_contenido:file.type||'application/octet-stream',tamano_bytes:file.size,es_inline:false,storage_url:finalUrl,direccion:'saliente',enviado_por:enviadoPor||'admin'});
+      resultados.push({nombre:file.name,ok:true});
+    }catch(err){
+      console.warn(`[adjuntos-storage] "${file.name}":`,err.message);
+      resultados.push({nombre:file.name,ok:false,error:err.message});
+    }
+  }
+  return resultados;
+}
+
 function toggleReply() {
   const area = document.getElementById('replyBoxArea');
   if(area.innerHTML) { area.innerHTML=''; return; }
   const email = state.emails.find(e=>e.id===state.selectedId);
   area.innerHTML = `
     <div class="reply-box" style="border:1px solid var(--border);border-radius:var(--r);background:#fff;overflow:hidden;box-shadow:var(--shadow)">
-      <!-- Header campos Para, CC y Asunto -->
       <div style="border-bottom:1px solid var(--border)">
         <div style="display:flex;align-items:center;padding:7px 12px;border-bottom:1px solid var(--border);gap:8px">
           <span style="font-size:11px;font-weight:700;color:var(--ink3);min-width:44px">Para</span>
@@ -1829,7 +1898,6 @@ function toggleReply() {
           <input id="replySubject" value="RE: ${esc(email?.asunto||'')}" style="flex:1;border:none;outline:none;font-size:12px;font-family:'Franklin Gothic Book','Franklin Gothic Medium',Arial,sans-serif;color:var(--ink);background:transparent"/>
         </div>
       </div>
-      <!-- Área de escritura + hilo histórico -->
       <div id="replyEditor" contenteditable="true" style="min-height:120px;padding:12px 14px;font-size:13px;font-family:'Franklin Gothic Book','Franklin Gothic Medium',Arial,sans-serif;color:var(--ink);outline:none;line-height:1.6"></div>
       <div style="border-top:1px solid var(--border);padding:10px 14px;background:#fafafa">
         <div style="font-size:11px;color:var(--ink3);margin-bottom:6px;font-family:'Franklin Gothic Book',Arial,sans-serif">───────── Mensaje original ─────────</div>
@@ -1837,7 +1905,7 @@ function toggleReply() {
           <b>De:</b> ${esc(email?.remitente_nombre||'')} &lt;${esc(email?.remitente||'')}&gt;<br>
           <b>Enviado:</b> ${email?.sent_at ? new Date(email.sent_at).toLocaleString('es-CO',{dateStyle:'full',timeStyle:'short'}) : ''}<br>
           <b>Para:</b> ${esc((email?.to_recipients||[]).map(r=>r?.emailAddress?.address||r).filter(Boolean).join('; '))}<br>
-          <b>CC:</b> ${esc((email?.cc_recipients||[]).map(r=>r?.emailAddress?.address||r).filter(Boolean).join('; ') || '(ninguno)')}<br>
+          <b>CC:</b> ${esc((email?.cc_recipients||[]).map(r=>r?.emailAddress?.address||r).filter(Boolean).join('; ')||'(ninguno)')}<br>
           <b>Asunto:</b> ${esc(email?.asunto||'')}
         </div>
         <div style="margin-top:8px;font-size:12px;color:var(--ink2);font-family:'Franklin Gothic Book',Arial,sans-serif;max-height:180px;overflow-y:auto;border-left:3px solid var(--border);padding-left:10px">${email?.body_content||email?.raw?.body_preview||''}</div>
@@ -1848,18 +1916,16 @@ function toggleReply() {
            ondragleave="this.style.background='var(--bg2)'"
            ondrop="event.preventDefault();this.style.background='var(--bg2)';_attachAdd(event.dataTransfer.files)">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-          <label for="replyFiles" style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;font-weight:700;color:var(--ink3);padding:4px 10px;border:1.5px solid var(--border);border-radius:6px;background:#fff;transition:all .15s" onmouseover="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--ink3)'">
+          <label for="replyFiles" style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;font-weight:700;color:var(--ink3);padding:4px 10px;border:1.5px solid var(--border);border-radius:6px;background:#fff">
             <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
             Adjuntar
           </label>
-          <span style="font-size:10px;color:var(--ink3)">o arrastra archivos aquí · máx. ${ATTACH_MAX_FILE_MB} MB/archivo · ${ATTACH_MAX_TOTAL_MB} MB total · incluye .eml, .msg</span>
+          <span style="font-size:10px;color:var(--ink3)">o arrastra · máx. ${ATTACH_MAX_FILE_MB} MB/archivo · ${ATTACH_MAX_TOTAL_MB} MB total · incluye .eml</span>
         </div>
-        <input type="file" id="replyFiles" multiple style="display:none"
-               accept="*/*">
+        <input type="file" id="replyFiles" multiple style="display:none" accept="*/*">
         <div id="replyFilesPreview" style="display:flex;flex-wrap:wrap;gap:4px"></div>
         <div id="replyAttachTotal"></div>
       </div>
-      <!-- Acciones -->
       <div style="display:flex;justify-content:flex-end;gap:6px;padding:10px 12px;border-top:1px solid var(--border);background:var(--bg)">
         <button class="btn btn-ghost" onclick="document.getElementById('replyBoxArea').innerHTML=''">Cancelar</button>
         <button class="btn btn-primary" onclick="sendReply()">
@@ -1868,11 +1934,9 @@ function toggleReply() {
         </button>
       </div>
     </div>`;
-  // Limpiar mapa de adjuntos al abrir nueva respuesta
   _attachedFiles.clear(); _attachRender();
   document.getElementById('replyFiles').addEventListener('change', function() {
-    _attachAdd(this.files);
-    this.value = ''; // reset para permitir agregar el mismo archivo de nuevo
+    _attachAdd(this.files); this.value='';
   });
   document.getElementById('replyEditor').focus();
 }
@@ -1888,157 +1952,56 @@ async function sendReply() {
   if(!body || body==='<br>') { showToast('Escribe un mensaje','info'); return; }
   if(!toInput) { showToast('Escribe un destinatario','info'); return; }
 
-  // Hilo histórico
-  const hiloHTML=`
-    <br><br>
-    <div style="border-left:3px solid #ccc;padding-left:10px;color:#555;font-family:'Franklin Gothic Book',Arial,sans-serif;font-size:12px">
-      <b>De:</b> ${esc(email?.remitente_nombre||'')} &lt;${esc(email?.remitente||'')}&gt;<br>
-      <b>Enviado:</b> ${email?.sent_at ? new Date(email.sent_at).toLocaleString('es-CO',{dateStyle:'full',timeStyle:'short'}) : ''}<br>
-      <b>Para:</b> ${esc((email?.to_recipients||[]).map(r=>r?.emailAddress?.address||r).filter(Boolean).join('; '))}<br>
-      <b>CC:</b> ${esc((email?.cc_recipients||[]).map(r=>r?.emailAddress?.address||r).filter(Boolean).join('; ')||'(ninguno)')}<br>
-      <b>Asunto:</b> ${esc(email?.asunto||'')}<br><br>
-      ${email?.body_content||''}
-    </div>`;
+  const hiloHTML=`<br><br><div style="border-left:3px solid #ccc;padding-left:10px;color:#555;font-family:'Franklin Gothic Book',Arial,sans-serif;font-size:12px"><b>De:</b> ${esc(email?.remitente_nombre||'')} &lt;${esc(email?.remitente||'')}&gt;<br><b>Enviado:</b> ${email?.sent_at?new Date(email.sent_at).toLocaleString('es-CO',{dateStyle:'full',timeStyle:'short'}):''}<br><b>Para:</b> ${esc((email?.to_recipients||[]).map(r=>r?.emailAddress?.address||r).filter(Boolean).join('; '))}<br><b>CC:</b> ${esc((email?.cc_recipients||[]).map(r=>r?.emailAddress?.address||r).filter(Boolean).join('; ')||'(ninguno)')}<br><b>Asunto:</b> ${esc(email?.asunto||'')}<br><br>${email?.body_content||''}</div>`;
 
-  // Separar adjuntos pequeños (inline base64) y grandes (upload session)
-  const inlineFiles = [];
-  const largeFiles = [];
-  const INLINE_LIMIT = ATTACH_INLINE_MB * 1024 * 1024;
-  _attachedFiles.forEach(({file, id: fid})=>{
-    if(file.size <= INLINE_LIMIT) inlineFiles.push({file, id: fid});
-    else largeFiles.push({file, id: fid});
+  const inlineFiles=[], largeFiles=[];
+  _attachedFiles.forEach(({file,id:fid})=>{
+    if(file.size<=ATTACH_INLINE_MB*1024*1024) inlineFiles.push({file,id:fid});
+    else largeFiles.push({file,id:fid});
   });
 
   const sendBtn = document.querySelector('#replyBoxArea .btn-primary');
-  if(sendBtn){ sendBtn.disabled=true; sendBtn.innerHTML='<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0"/></svg> Enviando…'; }
+  if(sendBtn){sendBtn.disabled=true;sendBtn.innerHTML='<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0"/></svg> Enviando…';}
 
   try {
     const token = await getGraphToken();
-    const userId = window.GRAPH_USER_ID || '';
-
-    // Procesar adjuntos pequeños como base64
+    const userId = window.GRAPH_USER_ID||'';
     const attachments = [];
     for(const {file} of inlineFiles){
-      const base64 = await _fileToBase64(file);
+      const base64=await _fileToBase64(file);
       attachments.push({'@odata.type':'#microsoft.graph.fileAttachment',name:file.name,contentType:file.type||'application/octet-stream',contentBytes:base64});
     }
-
     const messagePayload = {
-      subject: subject || ('RE: '+email.asunto),
-      body: {contentType:'HTML', content:`<div style="font-family:'Franklin Gothic Book',Arial,sans-serif;font-size:13px">${body}${hiloHTML}</div>`},
-      toRecipients: [{emailAddress:{address:toInput}}],
+      subject: subject||('RE: '+email.asunto),
+      body:{contentType:'HTML',content:`<div style="font-family:'Franklin Gothic Book',Arial,sans-serif;font-size:13px">${body}${hiloHTML}</div>`},
+      toRecipients:[{emailAddress:{address:toInput}}],
     };
-    if(ccInput){
-      messagePayload.ccRecipients=ccInput.split(';').map(s=>s.trim()).filter(Boolean).map(a=>({emailAddress:{address:a}}));
-    }
-    if(attachments.length > 0) messagePayload.attachments = attachments;
+    if(ccInput) messagePayload.ccRecipients=ccInput.split(';').map(s=>s.trim()).filter(Boolean).map(a=>({emailAddress:{address:a}}));
+    if(attachments.length>0) messagePayload.attachments=attachments;
 
-    let r;
-    if(largeFiles.length > 0){
-      // Ruta: borrador + upload sessions + enviar
-      r = await _buildAndSendMailWithLargeAttachments(token, userId, messagePayload, largeFiles);
-    } else {
-      // Ruta directa (todo inline)
-      r = await _buildAndSendMail(token, userId, messagePayload);
-    }
+    const r = largeFiles.length>0
+      ? await _buildAndSendMailWithLargeAttachments(token,userId,messagePayload,largeFiles)
+      : await _buildAndSendMail(token,userId,messagePayload);
 
-    const totalAdj = _attachedFiles.size;
-    if(r.ok || r.status===202 || r.status===200) {
-      const adjInfo = totalAdj > 0 ? ` (${totalAdj} adjunto${totalAdj>1?'s':''})` : '';
+    const totalAdj=_attachedFiles.size;
+    if(r.ok||r.status===202||r.status===200){
+      const adjInfo=totalAdj>0?` (${totalAdj} adjunto${totalAdj>1?'s':''})` :'';
       showToast('Respuesta enviada ✓'+adjInfo,'success');
-
-      // Guardar adjuntos salientes en Supabase Storage (no bloqueante)
-      const todosLosArchivos = [...inlineFiles, ...largeFiles];
-      if(todosLosArchivos.length > 0) {
-        const agentId = sessionStorage.getItem('pqr_agent_id') || 'admin';
-        _guardarAdjuntosEnStorage(id, todosLosArchivos, agentId)
-          .then(res => {
-            const fallidos = res.filter(r => !r.ok);
-            if(fallidos.length > 0)
-              console.warn('[adjuntos-storage] Sin guardar:', fallidos.map(f=>f.nombre).join(', '));
-          })
-          .catch(err => console.warn('[adjuntos-storage] Error general:', err.message));
+      const todosLosArchivos=[...inlineFiles,...largeFiles];
+      if(todosLosArchivos.length>0){
+        const agentId=sessionStorage.getItem('pqr_agent_id')||'admin';
+        _guardarAdjuntosEnStorage(id,todosLosArchivos,agentId)
+          .then(res=>{const f=res.filter(r=>!r.ok);if(f.length)console.warn('[adjuntos-storage] Sin guardar:',f.map(x=>x.nombre).join(', '));})
+          .catch(err=>console.warn('[adjuntos-storage]',err.message));
       }
-
-      await addHistorialEvent(id, email, 'correo_respondido', {
-        por: 'admin',
-        adjuntos: totalAdj,
-        adjuntos_nombres: [..._attachedFiles.keys()],
-        observaciones: 'Respuesta enviada: '+body.replace(/<[^>]*>/g,'').substring(0,100)
-      });
+      await addHistorialEvent(id,email,'correo_respondido',{por:'admin',adjuntos:totalAdj,adjuntos_nombres:[..._attachedFiles.keys()],observaciones:'Respuesta enviada: '+body.replace(/<[^>]*>/g,'').substring(0,100)});
       _attachedFiles.clear();
       document.getElementById('replyBoxArea').innerHTML='';
     } else throw new Error(await r.text());
-  } catch(e) {
+  } catch(e){
     showToast('Error al enviar: '+e.message.substring(0,80),'error');
-    if(sendBtn){ sendBtn.disabled=false; sendBtn.innerHTML='<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Enviar'; }
+    if(sendBtn){sendBtn.disabled=false;sendBtn.innerHTML='<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Enviar';}
   }
-
-// ──────────────────────────────────────────────
-// GUARDAR ADJUNTOS SALIENTES EN SUPABASE STORAGE
-// Sube cada archivo al bucket adjuntos-pqr y registra
-// una fila en la tabla adjuntos con direccion='saliente'.
-// Se llama DESPUÉS de confirmar el envío por Graph API.
-// Un fallo aquí NO revierte el correo ya enviado.
-// ──────────────────────────────────────────────
-async function _guardarAdjuntosEnStorage(correoId, archivos, enviadoPor) {
-  const resultados = [];
-  for (const {file} of archivos) {
-    try {
-      // 1. Nombre de archivo único en el bucket: saliente/{correoId}/{timestamp}_{nombre}
-      const ts = Date.now();
-      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-      const storagePath = `saliente/${correoId}/${ts}_${safeName}`;
-      const storageUrl  = `${SB_URL}/storage/v1/object/adjuntos-pqr/${storagePath}`;
-
-      // 2. Subir binario a Supabase Storage
-      const uploadRes = await fetch(storageUrl, {
-        method: 'POST',
-        headers: {
-          'apikey':         SB_KEY,
-          'Authorization':  'Bearer ' + SB_KEY,
-          'Content-Type':   file.type || 'application/octet-stream',
-          'x-upsert':       'true',
-        },
-        body: file,
-      });
-      if (!uploadRes.ok) throw new Error(`Storage upload ${uploadRes.status}: ${await uploadRes.text()}`);
-
-      // 3. URL pública firmada (bucket privado → signed URL de 10 años)
-      const signRes = await fetch(`${SB_URL}/storage/v1/object/sign/adjuntos-pqr/${storagePath}`, {
-        method: 'POST',
-        headers: {
-          'apikey':        SB_KEY,
-          'Authorization': 'Bearer ' + SB_KEY,
-          'Content-Type':  'application/json',
-        },
-        body: JSON.stringify({ expiresIn: 315360000 }), // 10 años en segundos
-      });
-      const signData = signRes.ok ? await signRes.json() : {};
-      const finalUrl = signData.signedURL
-        ? `${SB_URL}/storage/v1${signData.signedURL}`
-        : storageUrl;
-
-      // 4. Registrar fila en tabla adjuntos
-      await sb('adjuntos', 'POST', {
-        correo_id:      correoId,
-        attachment_id:  `sal_${correoId}_${ts}`,
-        nombre:         file.name,
-        tipo_contenido: file.type || 'application/octet-stream',
-        tamano_bytes:   file.size,
-        es_inline:      false,
-        storage_url:    finalUrl,
-        direccion:      'saliente',
-        enviado_por:    enviadoPor || 'admin',
-      });
-
-      resultados.push({ nombre: file.name, ok: true, url: finalUrl });
-    } catch (err) {
-      console.warn(`[adjuntos-storage] No se pudo guardar "${file.name}":`, err.message);
-      resultados.push({ nombre: file.name, ok: false, error: err.message });
-    }
-  }
-  return resultados;
 }
 
 // ──────────────────────────────────────────────
@@ -2206,160 +2169,6 @@ function getFileIcon(n=''){
   if(['js','ts','html','css','json','xml','py','java','cs','php','sql'].includes(e))return '💻';
   if(['ics','vcf'].includes(e))return '📅';
   return '📎';
-}
-
-// ─────────────────────────────────────────────────────────
-// SISTEMA DE ADJUNTOS ESTILO OUTLOOK
-// Límites: 35 MB por archivo, 150 MB total (igual que Exchange/Outlook)
-// Archivos < 4 MB → base64 inline
-// Archivos 4 MB – 35 MB → Graph API Upload Session (chunked)
-// ─────────────────────────────────────────────────────────
-const ATTACH_MAX_FILE_MB  = 35;   // límite por archivo (Exchange Online)
-const ATTACH_MAX_TOTAL_MB = 150;  // límite total del mensaje
-const ATTACH_INLINE_MB    = 3.9;  // umbral para cambiar a upload session
-const ATTACH_CHUNK_BYTES  = 3 * 1024 * 1024; // chunks de 3 MB para upload session
-
-// Mapa de archivos seleccionados: fileName → { file, id }
-const _attachedFiles = new Map();
-let _attachCounter = 0;
-
-function _fmtSize(bytes){
-  if(bytes > 1048576) return (bytes/1048576).toFixed(1)+' MB';
-  if(bytes > 1024) return Math.round(bytes/1024)+' KB';
-  return bytes+' B';
-}
-
-function _attachRender(){
-  const preview = document.getElementById('replyFilesPreview');
-  if(!preview) return;
-  preview.innerHTML = '';
-  let totalBytes = 0;
-  _attachedFiles.forEach(({file,id})=>{
-    totalBytes += file.size;
-    const isLarge = file.size > ATTACH_INLINE_MB * 1024 * 1024;
-    const pill = document.createElement('div');
-    pill.id = 'attach-pill-'+id;
-    pill.style.cssText = 'display:inline-flex;align-items:center;gap:6px;background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:4px 8px 4px 10px;font-size:11px;font-weight:500;color:var(--ink2);margin:2px;max-width:260px;position:relative';
-    pill.innerHTML = `
-      <span style="flex-shrink:0;font-size:14px">${getFileIcon(file.name)}</span>
-      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px" title="${esc(file.name)}">${esc(file.name)}</span>
-      <span style="color:var(--ink3);flex-shrink:0">${_fmtSize(file.size)}</span>
-      ${isLarge ? '<span style="background:#EFF6FF;color:#3B82F6;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;flex-shrink:0">CHUNKED</span>' : ''}
-      <div id="attach-progress-${id}" style="display:none;position:absolute;bottom:0;left:0;height:2px;background:#3B82F6;border-radius:0 0 0 6px;transition:width .2s"></div>
-      <button onclick="_attachRemove('${id}')" title="Quitar adjunto" style="flex-shrink:0;background:none;border:none;cursor:pointer;color:var(--ink3);font-size:15px;line-height:1;padding:0 2px;border-radius:4px;transition:color .15s" onmouseover="this.style.color='#e53e3e'" onmouseout="this.style.color='var(--ink3)'">×</button>
-    `;
-    preview.appendChild(pill);
-  });
-  // Barra de total
-  const totalEl = document.getElementById('replyAttachTotal');
-  if(totalEl){
-    const totalMB = (totalBytes/1048576).toFixed(1);
-    const pct = Math.min(100,(totalBytes/(ATTACH_MAX_TOTAL_MB*1024*1024))*100);
-    const color = pct > 85 ? '#e53e3e' : pct > 60 ? '#f59e0b' : '#3B82F6';
-    totalEl.innerHTML = _attachedFiles.size > 0
-      ? `<div style="display:flex;align-items:center;gap:8px;margin-top:6px">
-           <div style="flex:1;height:3px;background:var(--border);border-radius:2px"><div style="height:3px;width:${pct}%;background:${color};border-radius:2px;transition:width .3s"></div></div>
-           <span style="font-size:10px;color:var(--ink3);white-space:nowrap">${totalMB} / ${ATTACH_MAX_TOTAL_MB} MB</span>
-         </div>`
-      : '';
-  }
-}
-
-function _attachRemove(id){
-  _attachedFiles.forEach((v,k)=>{ if(v.id===id) _attachedFiles.delete(k); });
-  _attachRender();
-}
-
-function _attachAdd(files){
-  let totalBytes = 0;
-  _attachedFiles.forEach(({file})=>totalBytes += file.size);
-  for(const file of files){
-    if(file.size > ATTACH_MAX_FILE_MB * 1024 * 1024){
-      showToast(`"${file.name}" supera ${ATTACH_MAX_FILE_MB} MB (límite por archivo)`,'error'); continue;
-    }
-    if(totalBytes + file.size > ATTACH_MAX_TOTAL_MB * 1024 * 1024){
-      showToast(`Total de adjuntos supera ${ATTACH_MAX_TOTAL_MB} MB`,'error'); break;
-    }
-    if(!_attachedFiles.has(file.name)){
-      _attachedFiles.set(file.name, { file, id: 'a'+(++_attachCounter) });
-      totalBytes += file.size;
-    }
-  }
-  _attachRender();
-}
-
-// Convierte File a base64 puro (sin prefijo data:...)
-function _fileToBase64(file){
-  return new Promise((res,rej)=>{
-    const r=new FileReader();
-    r.onload=()=>res(r.result.split(',')[1]);
-    r.onerror=rej;
-    r.readAsDataURL(file);
-  });
-}
-
-// Upload session para archivos grandes (Graph API)
-// Crea un draft, adjunta via upload session, devuelve el draftId
-async function _uploadLargeAttachment(token, userId, draftId, file, progressId){
-  const createUrl = `https://graph.microsoft.com/v1.0/users/${userId}/messages/${draftId}/attachments/createUploadSession`;
-  const sessionRes = await fetch(createUrl,{
-    method:'POST',
-    headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
-    body:JSON.stringify({AttachmentItem:{attachmentType:'file',name:file.name,size:file.size}})
-  });
-  if(!sessionRes.ok) throw new Error('Upload session: '+(await sessionRes.text()));
-  const {uploadUrl} = await sessionRes.json();
-  // Subir en chunks
-  let offset = 0;
-  const progEl = document.getElementById('attach-progress-'+progressId);
-  while(offset < file.size){
-    const end = Math.min(offset + ATTACH_CHUNK_BYTES, file.size);
-    const chunk = file.slice(offset, end);
-    const chunkRes = await fetch(uploadUrl,{
-      method:'PUT',
-      headers:{
-        'Content-Length': String(end-offset),
-        'Content-Range': `bytes ${offset}-${end-1}/${file.size}`,
-        'Content-Type': file.type || 'application/octet-stream'
-      },
-      body: chunk
-    });
-    if(!chunkRes.ok && chunkRes.status !== 202 && chunkRes.status !== 201 && chunkRes.status !== 200)
-      throw new Error(`Chunk upload error ${chunkRes.status}`);
-    offset = end;
-    if(progEl){ const pct=Math.round(offset/file.size*100); progEl.style.display='block'; progEl.style.width=pct+'%'; }
-  }
-}
-
-async function _buildAndSendMail(token, userId, messagePayload){
-  const r = await fetch(`https://graph.microsoft.com/v1.0/users/${userId}/sendMail`,{
-    method:'POST',
-    headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
-    body:JSON.stringify({message:messagePayload,saveToSentItems:true})
-  });
-  return r;
-}
-
-async function _buildAndSendMailWithLargeAttachments(token, userId, messagePayload, largeFiles){
-  // 1. Crear borrador
-  const draftRes = await fetch(`https://graph.microsoft.com/v1.0/users/${userId}/messages`,{
-    method:'POST',
-    headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
-    body:JSON.stringify(messagePayload)
-  });
-  if(!draftRes.ok) throw new Error('Error creando borrador: '+(await draftRes.text()));
-  const draft = await draftRes.json();
-  const draftId = draft.id;
-  // 2. Subir adjuntos grandes via upload session
-  for(const {file, id} of largeFiles){
-    await _uploadLargeAttachment(token, userId, draftId, file, id);
-  }
-  // 3. Enviar el borrador
-  const sendRes = await fetch(`https://graph.microsoft.com/v1.0/users/${userId}/messages/${draftId}/send`,{
-    method:'POST',
-    headers:{'Authorization':'Bearer '+token}
-  });
-  return sendRes;
 }
 function showToast(msg,type='info'){
   const tc=document.getElementById('toasts'),t=document.createElement('div');
