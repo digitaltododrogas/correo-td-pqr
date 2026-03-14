@@ -31,6 +31,7 @@
   --orange:   #ea580c;
   --orange-l: #fff7ed;
   --purple:   #7c3aed;
+  --purple-l: #f5f3ff;
   --shadow:   0 1px 3px rgba(10,14,26,.08), 0 4px 12px rgba(10,14,26,.04);
   --shadow-l: 0 2px 8px rgba(10,14,26,.12), 0 8px 24px rgba(10,14,26,.08);
   --r:12px; --r2:8px;
@@ -112,6 +113,9 @@ body{background:var(--bg);color:var(--ink);font-family:'Poppins',sans-serif;heig
 .badge.gestionado{background:var(--orange-l);color:var(--orange)}
 .badge.solucionado{background:var(--green-l);color:var(--green)}
 .badge.reabierto{background:var(--red-l);color:var(--red)}
+.badge.pendiente_firma{background:var(--purple-l);color:var(--purple)}
+.btn-purple{background:var(--purple-l);color:var(--purple);border:1.5px solid var(--purple-l)}
+.btn-purple:hover{background:#ede9fe}
 .empty-state{padding:40px 16px;text-align:center;color:var(--ink3)}
 .empty-state .ei-icon{font-size:32px;margin-bottom:8px}
 .empty-state p{font-size:12px}
@@ -391,6 +395,11 @@ table.agents-tbl tr:hover td{background:var(--bg)}
         Solucionados
         <span class="folder-cnt" id="fc-solucionado">0</span>
       </div>
+      <div class="folder-item" onclick="setFolder('pendiente_firma',this)" style="color:var(--purple)">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Pte. por firma
+        <span class="folder-cnt" id="fc-pendiente_firma" style="background:var(--purple-l);color:var(--purple)">0</span>
+      </div>
       <div class="folders-divider"></div>
       <div class="folders-title" style="margin-top:8px">Por agente</div>
       <div id="folderAgents"></div>
@@ -435,6 +444,10 @@ table.agents-tbl tr:hover td{background:var(--bg)}
             <button class="btn btn-success" onclick="marcarSolucionado()">
               <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
               Solucionado
+            </button>
+            <button class="btn btn-purple" onclick="abrirModalFirma()" style="display:none">
+              <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              Confirmar firma
             </button>
             <button class="btn btn-danger" onclick="reabrirTicket()">
               <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
@@ -715,6 +728,44 @@ table.agents-tbl tr:hover td{background:var(--bg)}
   <div class="tl-modal" id="tlDetailContent"></div>
 </div>
 
+<!-- ══ MODAL: FIRMA DE CIERRE ══ -->
+<div class="modal-backdrop" id="modalFirma" onclick="if(event.target===this)closeModal('modalFirma')">
+  <div class="gestion-modal" style="max-width:480px">
+    <h3 style="color:var(--purple)">✍️ Firma de cierre</h3>
+    <div class="modal-sub" style="background:var(--purple-l);color:var(--purple);border-radius:var(--r2);padding:10px 12px;margin-bottom:14px;font-size:11px;line-height:1.6">
+      Para cerrar definitivamente este ticket debes adjuntar la firma de cierre.<br>
+      <strong>Sin firma no es posible marcar el ticket como solucionado.</strong>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Archivo de firma <span style="color:var(--red)">*</span></label>
+      <input type="file" id="firmaFile" accept="*/*"
+        style="font-size:12px;color:var(--ink2);width:100%;padding:8px;border:1.5px solid var(--border);border-radius:var(--r2);background:#fff;cursor:pointer"
+        onchange="
+          const f=this.files[0];
+          if(!f)return;
+          const size=f.size>1048576?(f.size/1048576).toFixed(1)+' MB':Math.round(f.size/1024)+' KB';
+          document.getElementById('firmaPreview').innerHTML=
+            '<div style=\'display:inline-flex;align-items:center;gap:6px;background:#fff;border:1.5px solid var(--purple-l);border-radius:8px;padding:4px 10px;font-size:11px;margin-top:6px;color:var(--purple)\'>'+
+            getFileIcon(f.name)+' '+f.name+' <span style=\'color:var(--ink3)\'>'+size+'</span></div>';
+          document.getElementById('firmaError').style.display='none';
+        ">
+      <div id="firmaPreview"></div>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Observaciones de cierre <span style="font-weight:400;color:var(--ink3)">(opcional)</span></label>
+      <textarea class="form-input" id="firmaObs" rows="3" placeholder="Ej: Firma de conformidad del ciudadano adjunta..." style="resize:vertical;min-height:70px"></textarea>
+    </div>
+    <div id="firmaError" style="display:none;background:var(--red-l);color:var(--red);border-radius:var(--r2);padding:8px 12px;font-size:11px;font-weight:700;margin-bottom:10px"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modalFirma')">Cancelar</button>
+      <button class="btn btn-purple" id="btnConfirmarFirma" onclick="confirmarFirma()" style="background:var(--purple);color:#fff">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Confirmar y cerrar ticket
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- TOASTS -->
 <div id="toasts"></div>
 
@@ -789,9 +840,10 @@ function renderOverview() {
   const E=state.emails, H=state.historial;
   const total=E.length, pend=E.filter(e=>e.estado==='pendiente').length,
         gest=E.filter(e=>e.estado==='gestion').length,
-        sol=E.filter(e=>e.estado==='solucionado'||e.estado==='gestionado').length;
-  const backlog=pend+gest;
-  const alta=E.filter(e=>e.prioridad==='alta'&&e.estado!=='solucionado'&&e.estado!=='gestionado').length;
+        sol=E.filter(e=>e.estado==='solucionado'||e.estado==='gestionado').length,
+        pteFirma=E.filter(e=>e.estado==='pendiente_firma').length;
+  const backlog=pend+gest+pteFirma;
+  const alta=E.filter(e=>e.prioridad==='alta'&&e.estado!=='solucionado'&&e.estado!=='gestionado'&&e.estado!=='pendiente_firma').length;
   const reab=H.filter(h=>(h.evento||h.accion||'').toLowerCase().includes('reabiert')).length;
   document.getElementById('mKpiTotal').textContent=total;
   document.getElementById('mKpiPend').textContent=pend;
@@ -819,9 +871,9 @@ function renderOverview() {
   chartEstados=destroyChart(chartEstados);
   chartEstados=new Chart(document.getElementById('chartEstados').getContext('2d'),{
     type:'doughnut',
-    data:{labels:['Pendiente','En Gestión','Gestionado','Solucionado'],
-      datasets:[{data:['pendiente','gestion','gestionado','solucionado'].map(s=>E.filter(e=>e.estado===s).length),
-        backgroundColor:['#fef9c3','#eff4ff','#fff7ed','#dcfce7'],borderColor:['#ca8a04','#2563eb','#ea580c','#16a34a'],borderWidth:2}]},
+    data:{labels:['Pendiente','En Gestión','Gestionado','Solucionado','Pte. firma'],
+      datasets:[{data:['pendiente','gestion','gestionado','solucionado','pendiente_firma'].map(s=>E.filter(e=>e.estado===s).length),
+        backgroundColor:['#fef9c3','#eff4ff','#fff7ed','#dcfce7','#f5f3ff'],borderColor:['#ca8a04','#2563eb','#ea580c','#16a34a','#7c3aed'],borderWidth:2}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'right',labels:{font:{family:'Poppins',size:11},padding:10}}}}
   });
 
@@ -889,7 +941,7 @@ function renderOperaciones() {
   });
 
   // Prioridad en backlog activo
-  const act=E.filter(e=>e.estado==='pendiente'||e.estado==='gestion');
+  const act=E.filter(e=>e.estado==='pendiente'||e.estado==='gestion'||e.estado==='pendiente_firma');
   chartPrioBacklog=destroyChart(chartPrioBacklog);
   chartPrioBacklog=new Chart(document.getElementById('chartPrioBacklog').getContext('2d'),{
     type:'doughnut',
@@ -945,9 +997,10 @@ function renderAgentes() {
     const pend=E.filter(e=>e.asignado_a===a.id&&e.estado==='pendiente').length;
     const gest=E.filter(e=>e.asignado_a===a.id&&e.estado==='gestion').length;
     const sol=E.filter(e=>e.asignado_a===a.id&&(e.estado==='solucionado'||e.estado==='gestionado')).length;
+    const pteFirma=E.filter(e=>e.asignado_a===a.id&&e.estado==='pendiente_firma').length;
     const gr=H.filter(h=>(h.metadata?.agente_id||h.agente_id)===a.id).length;
     const pct=tot>0?Math.round(sol/tot*100):0;
-    const carga=pend+gest;
+    const carga=pend+gest+pteFirma;
     return `<tr>
       <td><div style="display:flex;align-items:center;gap:9px">
         <div class="agent-av-sm" style="background:${COLORS[i%COLORS.length]}">${(a.nombre||'?').charAt(0).toUpperCase()}</div>
@@ -970,9 +1023,8 @@ function renderAgentes() {
 // ── TAB 4: SLA & RIESGO ─────────────────────
 function renderSLA() {
   const now=new Date(), E=state.emails;
-  const act=E.filter(e=>e.estado==='pendiente'||e.estado==='gestion');
+  const act=E.filter(e=>e.estado==='pendiente'||e.estado==='gestion'||e.estado==='pendiente_firma');
   const conH=act.map(e=>({...e,horas:Math.round((now-new Date(e.fecha))/3600000)}));
-  const riesgo=conH.filter(e=>e.horas>=24&&e.horas<72);
   const vencidos=conH.filter(e=>e.horas>=72);
   const altaPend=E.filter(e=>e.prioridad==='alta'&&e.estado==='pendiente').length;
   const reab=state.historial.filter(h=>(h.evento||h.accion||'').toLowerCase().includes('reabiert')).length;
@@ -1090,6 +1142,7 @@ async function exportarExcel() {
       const pend=corr.filter(e=>e.estado==='pendiente').length;
       const gest=corr.filter(e=>e.estado==='gestion').length;
       const sol=corr.filter(e=>e.estado==='solucionado'||e.estado==='gestionado').length;
+      const pteFirma=corr.filter(e=>e.estado==='pendiente_firma').length;
       const tot=corr.length;
       const tiempos=corr.map(email=>{
         const fR=email.fecha?new Date(email.fecha):null;
@@ -1100,7 +1153,7 @@ async function exportarExcel() {
       const prom=tiempos.length?Math.round(tiempos.reduce((a,b)=>a+b,0)/tiempos.length):'';
       return {
         'Agente_ID':ag.id||'','Agente_Nombre':ag.nombre||'','Agente_Email':ag.email||'','Estado':ag.activo?'Activo':'Inactivo',
-        'Total_Correos':tot,'Pendientes':pend,'En_Gestion':gest,'Solucionados':sol,'Gestiones_Registradas':gA.length,
+        'Total_Correos':tot,'Pendientes':pend,'En_Gestion':gest,'Solucionados':sol,'Pte_Firma':pteFirma,'Gestiones_Registradas':gA.length,
         'Prom_Min_Primera_Resp':prom,'Pct_Resolucion':tot>0?Math.round(sol/tot*100)+'%':'0%'
       };
     });
@@ -1203,7 +1256,7 @@ function setSort(s, el) {
 
 function updateFolderCounts() {
   document.getElementById('fc-todos').textContent = state.emails.length;
-  ['pendiente','gestion','gestionado','solucionado'].forEach(s=>{
+  ['pendiente','gestion','gestionado','solucionado','pendiente_firma'].forEach(s=>{
     const el = document.getElementById('fc-'+s);
     if(el) el.textContent = state.emails.filter(e=>e.estado===s).length;
   });
@@ -1295,7 +1348,7 @@ function renderEmailList() {
 }
 
 function estadoLabel(s){
-  return {pendiente:'Pendiente',gestion:'En gestión',gestionado:'Gestionado',solucionado:'Solucionado',reabierto:'Reabierto'}[s]||s;
+  return {pendiente:'Pendiente',gestion:'En gestión',gestionado:'Gestionado',solucionado:'Solucionado',reabierto:'Reabierto',pendiente_firma:'Pte. por firma'}[s]||s;
 }
 
 // ──────────────────────────────────────────────
@@ -1330,6 +1383,8 @@ async function selectEmail(id) {
     <div class="ev-actions">
       ${email.estado==='solucionado' ? `
         <span style="display:inline-flex;align-items:center;gap:5px;background:var(--green-l);color:var(--green);font-size:11px;font-weight:700;padding:5px 12px;border-radius:var(--r2)">🔒 Ticket cerrado · solo lectura</span>
+      ` : email.estado==='pendiente_firma' ? `
+        <span style="display:inline-flex;align-items:center;gap:5px;background:var(--purple-l);color:var(--purple);font-size:11px;font-weight:700;padding:5px 12px;border-radius:var(--r2)">✍️ Pendiente por firma · adjunta la firma para cerrar</span>
       ` : `
       <button class="btn btn-ghost" onclick="toggleReply()">
         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 00-4-4H4"/></svg>
@@ -1359,26 +1414,45 @@ async function selectEmail(id) {
     b.classList.toggle('active-prio', b.dataset.p===email.prioridad);
   });
 
-  // Bloquear panel si está solucionado (admin puede reabrir pero no añadir gestión/marcar sol)
+  // Bloquear panel según estado
   const _mgmtBtnRow = document.querySelector('#mgmtPanel .mgmt-btn-row');
   const _btnAdd = _mgmtBtnRow ? _mgmtBtnRow.querySelector('.btn-primary') : null;
   const _btnSol = _mgmtBtnRow ? _mgmtBtnRow.querySelector('.btn-success') : null;
-  let _lockMsg = document.getElementById('adminMgmtSolucionadoMsg');
+  const _btnFirma = _mgmtBtnRow ? _mgmtBtnRow.querySelector('.btn-purple') : null;
+  let _lockMsg = document.getElementById('adminMgmtLockMsg');
+
   if(email.estado==='solucionado') {
     if(_btnAdd) _btnAdd.style.display='none';
     if(_btnSol) _btnSol.style.display='none';
+    if(_btnFirma) _btnFirma.style.display='none';
     if(!_lockMsg) {
       _lockMsg = document.createElement('div');
-      _lockMsg.id = 'adminMgmtSolucionadoMsg';
-      _lockMsg.style.cssText='background:var(--green-l);color:var(--green);border-radius:var(--r2);padding:10px 12px;font-size:11px;font-weight:700;line-height:1.5;margin-top:6px';
-      _lockMsg.innerHTML='✅ Ticket solucionado<br><span style="font-weight:400">Usa "Reabrir ticket" para continuar la gestión</span>';
+      _lockMsg.id = 'adminMgmtLockMsg';
+      _lockMsg.style.cssText='border-radius:var(--r2);padding:10px 12px;font-size:11px;font-weight:700;line-height:1.5;margin-top:6px';
       if(_mgmtBtnRow) _mgmtBtnRow.appendChild(_lockMsg);
     }
+    _lockMsg.style.background='var(--green-l)'; _lockMsg.style.color='var(--green)';
+    _lockMsg.innerHTML='✅ Ticket solucionado<br><span style="font-weight:400">Usa "Reabrir ticket" para continuar la gestión</span>';
+    _lockMsg.style.display='';
+    document.querySelectorAll('.priority-btn').forEach(b=>{ b.disabled=true; b.style.opacity='0.4'; b.style.cursor='not-allowed'; });
+  } else if(email.estado==='pendiente_firma') {
+    if(_btnAdd) _btnAdd.style.display='none';
+    if(_btnSol) _btnSol.style.display='none';
+    if(_btnFirma) _btnFirma.style.display='';
+    if(!_lockMsg) {
+      _lockMsg = document.createElement('div');
+      _lockMsg.id = 'adminMgmtLockMsg';
+      _lockMsg.style.cssText='border-radius:var(--r2);padding:10px 12px;font-size:11px;font-weight:700;line-height:1.5;margin-top:6px';
+      if(_mgmtBtnRow) _mgmtBtnRow.appendChild(_lockMsg);
+    }
+    _lockMsg.style.background='var(--purple-l)'; _lockMsg.style.color='var(--purple)';
+    _lockMsg.innerHTML='✍️ Esperando firma de cierre<br><span style="font-weight:400">Adjunta la firma para cerrar definitivamente</span>';
     _lockMsg.style.display='';
     document.querySelectorAll('.priority-btn').forEach(b=>{ b.disabled=true; b.style.opacity='0.4'; b.style.cursor='not-allowed'; });
   } else {
     if(_btnAdd) _btnAdd.style.display='';
     if(_btnSol) _btnSol.style.display='';
+    if(_btnFirma) _btnFirma.style.display='none';
     if(_lockMsg) _lockMsg.style.display='none';
     document.querySelectorAll('.priority-btn').forEach(b=>{ b.disabled=false; b.style.opacity=''; b.style.cursor=''; });
   }
@@ -1418,6 +1492,7 @@ function renderTimeline(events, container) {
     observacion:'orange', observacion_añadida:'orange',
     solucionado:'green', cerrado:'green',
     reabierto:'red',
+    pendiente_firma:'purple', firma_confirmada:'purple',
     respondido:'purple', correo_respondido:'purple',
     info:'blue', escalado:'orange',
   };
@@ -1532,7 +1607,113 @@ async function setPriority(prio, btn) {
 async function marcarSolucionado() {
   const id = state.selectedId;
   if(!id) return;
-  openGestionModal('solucionado');
+  // Ahora va a pendiente_firma — no cierra directo
+  const email = state.emails.find(e=>e.id===id);
+  if(!confirm('¿Marcar este ticket como "Pendiente por firma"?\n\nDeberás adjuntar la firma de cierre para cerrar definitivamente.')) return;
+  await sb(`correos?id=eq.${id}`, 'PATCH', {estado:'pendiente_firma'});
+  await addHistorialEvent(id, email, 'pendiente_firma', {por:'admin', observaciones:'Ticket marcado como pendiente de firma de cierre'});
+  showToast('Ticket pendiente por firma ✍️','info');
+  await loadEmails();
+  selectEmail(id);
+}
+
+function abrirModalFirma() {
+  const id = state.selectedId;
+  if(!id) return;
+  document.getElementById('firmaFile').value = '';
+  document.getElementById('firmaObs').value = '';
+  document.getElementById('firmaPreview').innerHTML = '';
+  document.getElementById('firmaError').style.display = 'none';
+  document.getElementById('modalFirma').classList.add('show');
+}
+
+async function confirmarFirma() {
+  const id = state.selectedId;
+  if(!id) return;
+  const fileInput = document.getElementById('firmaFile');
+  const obs = document.getElementById('firmaObs').value.trim();
+  const errorEl = document.getElementById('firmaError');
+
+  if(!fileInput.files.length) {
+    errorEl.textContent = '⚠️ Debes adjuntar la firma de cierre para continuar.';
+    errorEl.style.display = 'block';
+    return;
+  }
+  const file = fileInput.files[0];
+  if(file.size > 50 * 1024 * 1024) {
+    errorEl.textContent = '⚠️ El archivo supera 50 MB.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  const btn = document.getElementById('btnConfirmarFirma');
+  btn.disabled = true;
+  btn.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0"/></svg> Guardando…';
+  errorEl.style.display = 'none';
+
+  try {
+    const email = state.emails.find(e=>e.id===id);
+    const agentId = sessionStorage.getItem('pqr_agent_id') || 'admin';
+
+    // 1. Subir firma a Supabase Storage
+    const ts = Date.now();
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const storagePath = `firmas/${id}/${ts}_${safeName}`;
+    const uploadRes = await fetch(`${SB_URL}/storage/v1/object/adjuntos-pqr/${storagePath}`, {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+        'Content-Type': file.type || 'application/octet-stream',
+        'x-upsert': 'true',
+      },
+      body: file,
+    });
+    if(!uploadRes.ok) throw new Error('Error subiendo firma: ' + await uploadRes.text());
+
+    // 2. URL firmada (10 años)
+    const signRes = await fetch(`${SB_URL}/storage/v1/object/sign/adjuntos-pqr/${storagePath}`, {
+      method: 'POST',
+      headers: {'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json'},
+      body: JSON.stringify({expiresIn: 315360000}),
+    });
+    const signData = signRes.ok ? await signRes.json() : {};
+    const firmaUrl = signData.signedURL ? `${SB_URL}/storage/v1${signData.signedURL}` : `${SB_URL}/storage/v1/object/adjuntos-pqr/${storagePath}`;
+
+    // 3. Registrar en tabla adjuntos
+    await sb('adjuntos', 'POST', {
+      correo_id:      id,
+      nombre:         file.name,
+      tipo_contenido: file.type || 'application/octet-stream',
+      tamano_bytes:   file.size,
+      es_inline:      false,
+      storage_url:    firmaUrl,
+      direccion:      'firma_cierre',
+      enviado_por:    agentId,
+    });
+
+    // 4. Cambiar estado a solucionado
+    await sb(`correos?id=eq.${id}`, 'PATCH', {estado:'solucionado', fecha_resolucion: new Date().toISOString()});
+
+    // 5. Registrar en historial
+    await addHistorialEvent(id, email, 'firma_confirmada', {
+      por: 'admin',
+      agente_id: agentId,
+      firma_archivo: file.name,
+      firma_url: firmaUrl,
+      observaciones: obs || 'Firma de cierre adjuntada',
+    });
+
+    showToast('Ticket cerrado con firma ✅', 'success');
+    closeModal('modalFirma');
+    await loadEmails();
+    selectEmail(id);
+  } catch(e) {
+    errorEl.textContent = '⚠️ ' + e.message.substring(0, 100);
+    errorEl.style.display = 'block';
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Confirmar y cerrar ticket';
+  }
 }
 
 async function reabrirTicket() {
@@ -1653,14 +1834,22 @@ function toggleReply() {
         </div>
         <div style="margin-top:8px;font-size:12px;color:var(--ink2);font-family:'Franklin Gothic Book',Arial,sans-serif;max-height:180px;overflow-y:auto;border-left:3px solid var(--border);padding-left:10px">${email?.body_content||email?.raw?.body_preview||''}</div>
       </div>
-      <!-- Adjuntos -->
-      <div style="padding:8px 12px;background:var(--bg2);border-top:1px solid var(--border)">
-        <label style="font-size:11px;font-weight:700;color:var(--ink3);display:flex;align-items:center;gap:6px;cursor:pointer;margin-bottom:4px">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-          Adjuntar archivos <span style="font-weight:400">(máx. 3 MB por archivo)</span>
-        </label>
-        <input type="file" id="replyFiles" multiple style="font-size:11px;font-family:'Franklin Gothic Book',Arial,sans-serif;color:var(--ink2);width:100%">
-        <div id="replyFilesPreview" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px"></div>
+      <!-- Adjuntos estilo Outlook -->
+      <div id="replyAttachZone" style="padding:8px 12px;background:var(--bg2);border-top:1px solid var(--border);transition:background .15s"
+           ondragover="event.preventDefault();this.style.background='#EFF6FF'"
+           ondragleave="this.style.background='var(--bg2)'"
+           ondrop="event.preventDefault();this.style.background='var(--bg2)';_attachAdd(event.dataTransfer.files)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <label for="replyFiles" style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;font-weight:700;color:var(--ink3);padding:4px 10px;border:1.5px solid var(--border);border-radius:6px;background:#fff;transition:all .15s" onmouseover="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--ink3)'">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            Adjuntar
+          </label>
+          <span style="font-size:10px;color:var(--ink3)">o arrastra archivos aquí · máx. ${ATTACH_MAX_FILE_MB} MB/archivo · ${ATTACH_MAX_TOTAL_MB} MB total · incluye .eml, .msg</span>
+        </div>
+        <input type="file" id="replyFiles" multiple style="display:none"
+               accept="*/*">
+        <div id="replyFilesPreview" style="display:flex;flex-wrap:wrap;gap:4px"></div>
+        <div id="replyAttachTotal"></div>
       </div>
       <!-- Acciones -->
       <div style="display:flex;justify-content:flex-end;gap:6px;padding:10px 12px;border-top:1px solid var(--border);background:var(--bg)">
@@ -1671,16 +1860,11 @@ function toggleReply() {
         </button>
       </div>
     </div>`;
+  // Limpiar mapa de adjuntos al abrir nueva respuesta
+  _attachedFiles.clear(); _attachRender();
   document.getElementById('replyFiles').addEventListener('change', function() {
-    const preview = document.getElementById('replyFilesPreview');
-    preview.innerHTML = '';
-    Array.from(this.files).forEach(f => {
-      const size = f.size > 1048576 ? (f.size/1048576).toFixed(1)+' MB' : Math.round(f.size/1024)+' KB';
-      const pill = document.createElement('span');
-      pill.style.cssText = 'display:inline-flex;align-items:center;gap:5px;background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:3px 10px;font-size:11px;font-weight:500;color:var(--ink2);margin:2px';
-      pill.innerHTML = `${getFileIcon(f.name)} ${esc(f.name)} <span style="color:var(--ink3)">${size}</span>`;
-      preview.appendChild(pill);
-    });
+    _attachAdd(this.files);
+    this.value = ''; // reset para permitir agregar el mismo archivo de nuevo
   });
   document.getElementById('replyEditor').focus();
 }
@@ -1708,24 +1892,29 @@ async function sendReply() {
       ${email?.body_content||''}
     </div>`;
 
-  // Procesar adjuntos
-  const filesInput = document.getElementById('replyFiles');
-  const attachments = [];
-  if(filesInput?.files?.length){
-    for(const file of filesInput.files){
-      if(file.size > 3*1024*1024){ showToast(`"${file.name}" supera 3 MB`,'error'); return; }
-      const base64 = await new Promise((res,rej)=>{
-        const r = new FileReader();
-        r.onload = () => res(r.result.split(',')[1]);
-        r.onerror = rej;
-        r.readAsDataURL(file);
-      });
-      attachments.push({'@odata.type':'#microsoft.graph.fileAttachment',name:file.name,contentType:file.type||'application/octet-stream',contentBytes:base64});
-    }
-  }
+  // Separar adjuntos pequeños (inline base64) y grandes (upload session)
+  const inlineFiles = [];
+  const largeFiles = [];
+  const INLINE_LIMIT = ATTACH_INLINE_MB * 1024 * 1024;
+  _attachedFiles.forEach(({file, id: fid})=>{
+    if(file.size <= INLINE_LIMIT) inlineFiles.push({file, id: fid});
+    else largeFiles.push({file, id: fid});
+  });
+
+  const sendBtn = document.querySelector('#replyBoxArea .btn-primary');
+  if(sendBtn){ sendBtn.disabled=true; sendBtn.innerHTML='<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0"/></svg> Enviando…'; }
 
   try {
     const token = await getGraphToken();
+    const userId = window.GRAPH_USER_ID || '';
+
+    // Procesar adjuntos pequeños como base64
+    const attachments = [];
+    for(const {file} of inlineFiles){
+      const base64 = await _fileToBase64(file);
+      attachments.push({'@odata.type':'#microsoft.graph.fileAttachment',name:file.name,contentType:file.type||'application/octet-stream',contentBytes:base64});
+    }
+
     const messagePayload = {
       subject: subject || ('RE: '+email.asunto),
       body: {contentType:'HTML', content:`<div style="font-family:'Franklin Gothic Book',Arial,sans-serif;font-size:13px">${body}${hiloHTML}</div>`},
@@ -1736,18 +1925,111 @@ async function sendReply() {
     }
     if(attachments.length > 0) messagePayload.attachments = attachments;
 
-    const r = await fetch(`https://graph.microsoft.com/v1.0/users/${window.GRAPH_USER_ID||''}/sendMail`,{
-      method:'POST',
-      headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
-      body:JSON.stringify({message:messagePayload,saveToSentItems:true})
-    });
-    if(r.ok||r.status===202) {
-      const adjInfo = attachments.length>0 ? ` (${attachments.length} adjunto${attachments.length>1?'s':''})` : '';
+    let r;
+    if(largeFiles.length > 0){
+      // Ruta: borrador + upload sessions + enviar
+      r = await _buildAndSendMailWithLargeAttachments(token, userId, messagePayload, largeFiles);
+    } else {
+      // Ruta directa (todo inline)
+      r = await _buildAndSendMail(token, userId, messagePayload);
+    }
+
+    const totalAdj = _attachedFiles.size;
+    if(r.ok || r.status===202 || r.status===200) {
+      const adjInfo = totalAdj > 0 ? ` (${totalAdj} adjunto${totalAdj>1?'s':''})` : '';
       showToast('Respuesta enviada ✓'+adjInfo,'success');
-      await addHistorialEvent(id, email, 'correo_respondido', {por:'admin',adjuntos:attachments.length,observaciones:'Respuesta enviada: '+body.replace(/<[^>]*>/g,'').substring(0,100)});
+
+      // Guardar adjuntos salientes en Supabase Storage (no bloqueante)
+      const todosLosArchivos = [...inlineFiles, ...largeFiles];
+      if(todosLosArchivos.length > 0) {
+        const agentId = sessionStorage.getItem('pqr_agent_id') || 'admin';
+        _guardarAdjuntosEnStorage(id, todosLosArchivos, agentId)
+          .then(res => {
+            const fallidos = res.filter(r => !r.ok);
+            if(fallidos.length > 0)
+              console.warn('[adjuntos-storage] Sin guardar:', fallidos.map(f=>f.nombre).join(', '));
+          })
+          .catch(err => console.warn('[adjuntos-storage] Error general:', err.message));
+      }
+
+      await addHistorialEvent(id, email, 'correo_respondido', {
+        por: 'admin',
+        adjuntos: totalAdj,
+        adjuntos_nombres: [..._attachedFiles.keys()],
+        observaciones: 'Respuesta enviada: '+body.replace(/<[^>]*>/g,'').substring(0,100)
+      });
+      _attachedFiles.clear();
       document.getElementById('replyBoxArea').innerHTML='';
     } else throw new Error(await r.text());
-  } catch(e) { showToast('Error al enviar: '+e.message.substring(0,60),'error'); }
+  } catch(e) {
+    showToast('Error al enviar: '+e.message.substring(0,80),'error');
+    if(sendBtn){ sendBtn.disabled=false; sendBtn.innerHTML='<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Enviar'; }
+  }
+
+// ──────────────────────────────────────────────
+// GUARDAR ADJUNTOS SALIENTES EN SUPABASE STORAGE
+// Sube cada archivo al bucket adjuntos-pqr y registra
+// una fila en la tabla adjuntos con direccion='saliente'.
+// Se llama DESPUÉS de confirmar el envío por Graph API.
+// Un fallo aquí NO revierte el correo ya enviado.
+// ──────────────────────────────────────────────
+async function _guardarAdjuntosEnStorage(correoId, archivos, enviadoPor) {
+  const resultados = [];
+  for (const {file} of archivos) {
+    try {
+      // 1. Nombre de archivo único en el bucket: saliente/{correoId}/{timestamp}_{nombre}
+      const ts = Date.now();
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const storagePath = `saliente/${correoId}/${ts}_${safeName}`;
+      const storageUrl  = `${SB_URL}/storage/v1/object/adjuntos-pqr/${storagePath}`;
+
+      // 2. Subir binario a Supabase Storage
+      const uploadRes = await fetch(storageUrl, {
+        method: 'POST',
+        headers: {
+          'apikey':         SB_KEY,
+          'Authorization':  'Bearer ' + SB_KEY,
+          'Content-Type':   file.type || 'application/octet-stream',
+          'x-upsert':       'true',
+        },
+        body: file,
+      });
+      if (!uploadRes.ok) throw new Error(`Storage upload ${uploadRes.status}: ${await uploadRes.text()}`);
+
+      // 3. URL pública firmada (bucket privado → signed URL de 10 años)
+      const signRes = await fetch(`${SB_URL}/storage/v1/object/sign/adjuntos-pqr/${storagePath}`, {
+        method: 'POST',
+        headers: {
+          'apikey':        SB_KEY,
+          'Authorization': 'Bearer ' + SB_KEY,
+          'Content-Type':  'application/json',
+        },
+        body: JSON.stringify({ expiresIn: 315360000 }), // 10 años en segundos
+      });
+      const signData = signRes.ok ? await signRes.json() : {};
+      const finalUrl = signData.signedURL
+        ? `${SB_URL}/storage/v1${signData.signedURL}`
+        : storageUrl;
+
+      // 4. Registrar fila en tabla adjuntos
+      await sb('adjuntos', 'POST', {
+        correo_id:      correoId,
+        nombre:         file.name,
+        tipo_contenido: file.type || 'application/octet-stream',
+        tamano_bytes:   file.size,
+        es_inline:      false,
+        storage_url:    finalUrl,
+        direccion:      'saliente',
+        enviado_por:    enviadoPor || 'admin',
+      });
+
+      resultados.push({ nombre: file.name, ok: true, url: finalUrl });
+    } catch (err) {
+      console.warn(`[adjuntos-storage] No se pudo guardar "${file.name}":`, err.message);
+      resultados.push({ nombre: file.name, ok: false, error: err.message });
+    }
+  }
+  return resultados;
 }
 
 // ──────────────────────────────────────────────
@@ -1900,7 +2182,176 @@ async function syncAll() {
 // ──────────────────────────────────────────────
 function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-function getFileIcon(n=''){const e=(n.split('.').pop()||'').toLowerCase();if(['pdf'].includes(e))return '📄';if(['doc','docx'].includes(e))return '📝';if(['xls','xlsx'].includes(e))return '📊';return '📎'}
+function getFileIcon(n=''){
+  const e=(n.split('.').pop()||'').toLowerCase();
+  if(['pdf'].includes(e))return '📄';
+  if(['doc','docx','odt','rtf'].includes(e))return '📝';
+  if(['xls','xlsx','csv','ods'].includes(e))return '📊';
+  if(['ppt','pptx','odp'].includes(e))return '📊';
+  if(['jpg','jpeg','png','gif','bmp','webp','svg','tiff','ico'].includes(e))return '🖼️';
+  if(['mp4','avi','mov','wmv','mkv','webm'].includes(e))return '🎬';
+  if(['mp3','wav','ogg','m4a','flac','aac'].includes(e))return '🎵';
+  if(['zip','rar','7z','tar','gz','bz2'].includes(e))return '🗜️';
+  if(['eml','msg','emlx'].includes(e))return '📧';
+  if(['txt','md','log'].includes(e))return '📃';
+  if(['js','ts','html','css','json','xml','py','java','cs','php','sql'].includes(e))return '💻';
+  if(['ics','vcf'].includes(e))return '📅';
+  return '📎';
+}
+
+// ─────────────────────────────────────────────────────────
+// SISTEMA DE ADJUNTOS ESTILO OUTLOOK
+// Límites: 35 MB por archivo, 150 MB total (igual que Exchange/Outlook)
+// Archivos < 4 MB → base64 inline
+// Archivos 4 MB – 35 MB → Graph API Upload Session (chunked)
+// ─────────────────────────────────────────────────────────
+const ATTACH_MAX_FILE_MB  = 35;   // límite por archivo (Exchange Online)
+const ATTACH_MAX_TOTAL_MB = 150;  // límite total del mensaje
+const ATTACH_INLINE_MB    = 3.9;  // umbral para cambiar a upload session
+const ATTACH_CHUNK_BYTES  = 3 * 1024 * 1024; // chunks de 3 MB para upload session
+
+// Mapa de archivos seleccionados: fileName → { file, id }
+const _attachedFiles = new Map();
+let _attachCounter = 0;
+
+function _fmtSize(bytes){
+  if(bytes > 1048576) return (bytes/1048576).toFixed(1)+' MB';
+  if(bytes > 1024) return Math.round(bytes/1024)+' KB';
+  return bytes+' B';
+}
+
+function _attachRender(){
+  const preview = document.getElementById('replyFilesPreview');
+  if(!preview) return;
+  preview.innerHTML = '';
+  let totalBytes = 0;
+  _attachedFiles.forEach(({file,id})=>{
+    totalBytes += file.size;
+    const isLarge = file.size > ATTACH_INLINE_MB * 1024 * 1024;
+    const pill = document.createElement('div');
+    pill.id = 'attach-pill-'+id;
+    pill.style.cssText = 'display:inline-flex;align-items:center;gap:6px;background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:4px 8px 4px 10px;font-size:11px;font-weight:500;color:var(--ink2);margin:2px;max-width:260px;position:relative';
+    pill.innerHTML = `
+      <span style="flex-shrink:0;font-size:14px">${getFileIcon(file.name)}</span>
+      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px" title="${esc(file.name)}">${esc(file.name)}</span>
+      <span style="color:var(--ink3);flex-shrink:0">${_fmtSize(file.size)}</span>
+      ${isLarge ? '<span style="background:#EFF6FF;color:#3B82F6;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;flex-shrink:0">CHUNKED</span>' : ''}
+      <div id="attach-progress-${id}" style="display:none;position:absolute;bottom:0;left:0;height:2px;background:#3B82F6;border-radius:0 0 0 6px;transition:width .2s"></div>
+      <button onclick="_attachRemove('${id}')" title="Quitar adjunto" style="flex-shrink:0;background:none;border:none;cursor:pointer;color:var(--ink3);font-size:15px;line-height:1;padding:0 2px;border-radius:4px;transition:color .15s" onmouseover="this.style.color='#e53e3e'" onmouseout="this.style.color='var(--ink3)'">×</button>
+    `;
+    preview.appendChild(pill);
+  });
+  // Barra de total
+  const totalEl = document.getElementById('replyAttachTotal');
+  if(totalEl){
+    const totalMB = (totalBytes/1048576).toFixed(1);
+    const pct = Math.min(100,(totalBytes/(ATTACH_MAX_TOTAL_MB*1024*1024))*100);
+    const color = pct > 85 ? '#e53e3e' : pct > 60 ? '#f59e0b' : '#3B82F6';
+    totalEl.innerHTML = _attachedFiles.size > 0
+      ? `<div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+           <div style="flex:1;height:3px;background:var(--border);border-radius:2px"><div style="height:3px;width:${pct}%;background:${color};border-radius:2px;transition:width .3s"></div></div>
+           <span style="font-size:10px;color:var(--ink3);white-space:nowrap">${totalMB} / ${ATTACH_MAX_TOTAL_MB} MB</span>
+         </div>`
+      : '';
+  }
+}
+
+function _attachRemove(id){
+  _attachedFiles.forEach((v,k)=>{ if(v.id===id) _attachedFiles.delete(k); });
+  _attachRender();
+}
+
+function _attachAdd(files){
+  let totalBytes = 0;
+  _attachedFiles.forEach(({file})=>totalBytes += file.size);
+  for(const file of files){
+    if(file.size > ATTACH_MAX_FILE_MB * 1024 * 1024){
+      showToast(`"${file.name}" supera ${ATTACH_MAX_FILE_MB} MB (límite por archivo)`,'error'); continue;
+    }
+    if(totalBytes + file.size > ATTACH_MAX_TOTAL_MB * 1024 * 1024){
+      showToast(`Total de adjuntos supera ${ATTACH_MAX_TOTAL_MB} MB`,'error'); break;
+    }
+    if(!_attachedFiles.has(file.name)){
+      _attachedFiles.set(file.name, { file, id: 'a'+(++_attachCounter) });
+      totalBytes += file.size;
+    }
+  }
+  _attachRender();
+}
+
+// Convierte File a base64 puro (sin prefijo data:...)
+function _fileToBase64(file){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=()=>res(r.result.split(',')[1]);
+    r.onerror=rej;
+    r.readAsDataURL(file);
+  });
+}
+
+// Upload session para archivos grandes (Graph API)
+// Crea un draft, adjunta via upload session, devuelve el draftId
+async function _uploadLargeAttachment(token, userId, draftId, file, progressId){
+  const createUrl = `https://graph.microsoft.com/v1.0/users/${userId}/messages/${draftId}/attachments/createUploadSession`;
+  const sessionRes = await fetch(createUrl,{
+    method:'POST',
+    headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+    body:JSON.stringify({AttachmentItem:{attachmentType:'file',name:file.name,size:file.size}})
+  });
+  if(!sessionRes.ok) throw new Error('Upload session: '+(await sessionRes.text()));
+  const {uploadUrl} = await sessionRes.json();
+  // Subir en chunks
+  let offset = 0;
+  const progEl = document.getElementById('attach-progress-'+progressId);
+  while(offset < file.size){
+    const end = Math.min(offset + ATTACH_CHUNK_BYTES, file.size);
+    const chunk = file.slice(offset, end);
+    const chunkRes = await fetch(uploadUrl,{
+      method:'PUT',
+      headers:{
+        'Content-Length': String(end-offset),
+        'Content-Range': `bytes ${offset}-${end-1}/${file.size}`,
+        'Content-Type': file.type || 'application/octet-stream'
+      },
+      body: chunk
+    });
+    if(!chunkRes.ok && chunkRes.status !== 202 && chunkRes.status !== 201 && chunkRes.status !== 200)
+      throw new Error(`Chunk upload error ${chunkRes.status}`);
+    offset = end;
+    if(progEl){ const pct=Math.round(offset/file.size*100); progEl.style.display='block'; progEl.style.width=pct+'%'; }
+  }
+}
+
+async function _buildAndSendMail(token, userId, messagePayload){
+  const r = await fetch(`https://graph.microsoft.com/v1.0/users/${userId}/sendMail`,{
+    method:'POST',
+    headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+    body:JSON.stringify({message:messagePayload,saveToSentItems:true})
+  });
+  return r;
+}
+
+async function _buildAndSendMailWithLargeAttachments(token, userId, messagePayload, largeFiles){
+  // 1. Crear borrador
+  const draftRes = await fetch(`https://graph.microsoft.com/v1.0/users/${userId}/messages`,{
+    method:'POST',
+    headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+    body:JSON.stringify(messagePayload)
+  });
+  if(!draftRes.ok) throw new Error('Error creando borrador: '+(await draftRes.text()));
+  const draft = await draftRes.json();
+  const draftId = draft.id;
+  // 2. Subir adjuntos grandes via upload session
+  for(const {file, id} of largeFiles){
+    await _uploadLargeAttachment(token, userId, draftId, file, id);
+  }
+  // 3. Enviar el borrador
+  const sendRes = await fetch(`https://graph.microsoft.com/v1.0/users/${userId}/messages/${draftId}/send`,{
+    method:'POST',
+    headers:{'Authorization':'Bearer '+token}
+  });
+  return sendRes;
+}
 function showToast(msg,type='info'){
   const tc=document.getElementById('toasts'),t=document.createElement('div');
   t.className=`toast ${type}`;t.innerHTML=`<span>${msg}</span>`;
