@@ -753,6 +753,13 @@ function abrirModalFirma() {
   document.getElementById('firmaObs').value='';
   document.getElementById('firmaPreview').innerHTML='';
   document.getElementById('firmaError').style.display='none';
+  // Resetear botón por si quedó en estado "Guardando..." de un intento anterior
+  const btn=document.getElementById('btnConfirmarFirma');
+  if(btn){
+    btn.disabled=false;
+    btn.innerHTML='<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Confirmar y cerrar ticket';
+    btn.style.background='var(--purple)';btn.style.color='#fff';
+  }
   document.getElementById('modalFirma').classList.add('show');
 }
 
@@ -762,8 +769,15 @@ async function confirmarFirma() {
   const fileInput=document.getElementById('firmaFile');
   const obs=document.getElementById('firmaObs').value.trim();
   const errorEl=document.getElementById('firmaError');
+  const btn=document.getElementById('btnConfirmarFirma');
 
-  if(!fileInput.files.length){
+  // Asegurar estado limpio del botón antes de cualquier validación
+  if(btn && btn.disabled){
+    btn.disabled=false;
+    btn.innerHTML='<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Confirmar y cerrar ticket';
+  }
+
+  if(!fileInput || !fileInput.files || !fileInput.files.length){
     errorEl.textContent='⚠️ Debes adjuntar la firma de cierre para continuar.';
     errorEl.style.display='block'; return;
   }
@@ -773,9 +787,7 @@ async function confirmarFirma() {
     errorEl.style.display='block'; return;
   }
 
-  const btn=document.getElementById('btnConfirmarFirma');
-  btn.disabled=true;
-  btn.innerHTML='<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0"/></svg> Guardando…';
+  if(btn){ btn.disabled=true; btn.innerHTML='<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0"/></svg> Guardando…'; }
   errorEl.style.display='none';
 
   try {
