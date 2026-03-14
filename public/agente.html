@@ -404,13 +404,13 @@ async function sb(path, method='GET', body=null) {
       'apikey': SB_KEY,
       'Authorization': 'Bearer ' + SB_KEY,
       'Content-Type': 'application/json',
-      'Prefer': method==='POST' ? 'return=representation' : 'return=minimal',
+      'Prefer': 'return=minimal',
     },
     body: body ? JSON.stringify(body) : undefined,
   });
   if (!r.ok && r.status !== 201 && r.status !== 204) throw new Error(await r.text());
-  if (r.status === 204) return null;
-  return r.json();
+  if (r.status === 204 || r.status === 201) return null;
+  try { return await r.json(); } catch { return null; }
 }
 
 // ──────────────────────────────────────────────
@@ -451,25 +451,32 @@ let _gestionForSolucionado = false;
 // DATA
 // ──────────────────────────────────────────────
 async function loadEmails() {
-  const data = await sb(`correos?asignado_a=eq.${AGENT_ID}&order=received_at.desc&limit=200`);
-  state.emails = (data||[]).map(e=>({
-    id: e.id,
-    message_id: e.message_id,
-    asunto: e.subject || '(Sin asunto)',
-    remitente: e.from_email || '',
-    remitente_nombre: e.from_name || '',
-    fecha: e.received_at || e.created_at,
-    estado: e.estado || 'pendiente',
-    prioridad: e.prioridad || '',
-    body_content: e.body_content || e.body_preview || '',
-    body_type: e.body_type || 'text',
-    has_attachments: e.has_attachments || false,
-    is_read: e.is_read || false,
-    to_recipients: e.to_recipients || [],
-    cc_recipients: e.cc_recipients || [],
-    sent_at: e.sent_at || e.received_at || e.created_at,
-    raw: e,
-  }));
+  try {
+    const data = await sb(`correos?asignado_a=eq.${AGENT_ID}&order=received_at.desc&limit=200`);
+    state.emails = (data||[]).map(e=>({
+      id: e.id,
+      message_id: e.message_id,
+      asunto: e.subject || '(Sin asunto)',
+      remitente: e.from_email || '',
+      remitente_nombre: e.from_name || '',
+      fecha: e.received_at || e.created_at,
+      estado: e.estado || 'pendiente',
+      prioridad: e.prioridad || '',
+      body_content: e.body_content || e.body_preview || '',
+      body_type: e.body_type || 'text',
+      has_attachments: e.has_attachments || false,
+      is_read: e.is_read || false,
+      to_recipients: e.to_recipients || [],
+      cc_recipients: e.cc_recipients || [],
+      sent_at: e.sent_at || e.received_at || e.created_at,
+      raw: e,
+    }));
+  } catch(err) {
+    console.error('[loadEmails] Error:', err.message);
+    state.emails = [];
+    const listEl = document.getElementById('emailList');
+    if(listEl) listEl.innerHTML = `<div class="empty-state"><div class="ei-icon">⚠️</div><p style="color:var(--red)">Error al cargar correos.<br><small>${err.message.substring(0,80)}</small></p></div>`;
+  }
   updateFolderCounts();
   renderEmailList();
 }
@@ -792,7 +799,7 @@ async function confirmarFirma() {
     const signData=signRes.ok?await signRes.json():{};
     const firmaUrl=signData.signedURL?`${SB_URL}/storage/v1${signData.signedURL}`:`${SB_URL}/storage/v1/object/adjuntos-pqr/${storagePath}`;
     // 3. Registrar en tabla adjuntos
-    await sb('adjuntos','POST',{correo_id:id,nombre:file.name,tipo_contenido:file.type||'application/octet-stream',tamano_bytes:file.size,es_inline:false,storage_url:firmaUrl,direccion:'firma_cierre',enviado_por:AGENT_ID});
+    await sb('adjuntos','POST',{correo_id:id,attachment_id:`firma_${id}_${Date.now()}`,nombre:file.name,tipo_contenido:file.type||'application/octet-stream',tamano_bytes:file.size,es_inline:false,storage_url:firmaUrl,direccion:'firma_cierre',enviado_por:AGENT_ID});
     // 4. Cambiar estado a solucionado
     await sb(`correos?id=eq.${id}`,'PATCH',{estado:'solucionado',fecha_resolucion:new Date().toISOString()});
     // 5. Historial
@@ -1093,6 +1100,7 @@ async function _guardarAdjuntosEnStorage(correoId, archivos, enviadoPor) {
       const finalUrl=signData.signedURL?`${SB_URL}/storage/v1${signData.signedURL}`:storageUrl;
       await sb('adjuntos','POST',{
         correo_id:correoId,
+        attachment_id:`sal_${correoId}_${ts}`,
         nombre:file.name,
         tipo_contenido:file.type||'application/octet-stream',
         tamano_bytes:file.size,
