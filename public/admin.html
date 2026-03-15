@@ -1544,9 +1544,17 @@ async function selectEmail(id) {
       ` : email.estado==='pendiente_firma' ? `
         <span style="display:inline-flex;align-items:center;gap:5px;background:var(--purple-l);color:var(--purple);font-size:11px;font-weight:700;padding:5px 12px;border-radius:var(--r2)">✍️ Pendiente por firma · adjunta la firma para cerrar</span>
       ` : `
-      <button class="btn btn-ghost" onclick="toggleReply()">
+      <button class="btn btn-ghost" onclick="toggleReply('reply')" title="Responder al remitente">
         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 00-4-4H4"/></svg>
         Responder
+      </button>
+      <button class="btn btn-ghost" onclick="toggleReply('replyAll')" title="Responder a todos (remitente + CC)">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 17 4 12 9 7"/><polyline points="14 17 9 12 14 7"/><path d="M20 18v-2a4 4 0 00-4-4H4"/></svg>
+        Resp. a todos
+      </button>
+      <button class="btn btn-ghost" onclick="toggleReply('forward')" title="Reenviar este correo">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 17 20 12 15 7"/><path d="M4 18v-2a4 4 0 0 1 4-4h12"/></svg>
+        Reenviar
       </button>
       <button class="btn btn-ghost" onclick="openGestionModal()">
         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -2103,24 +2111,64 @@ async function _guardarAdjuntosEnStorage(correoId,archivos,enviadoPor){
   return resultados;
 }
 
-function toggleReply() {
+function toggleReply(modo) {
+  modo = modo || 'reply';
   const area = document.getElementById('replyBoxArea');
-  if(area.innerHTML) { area.innerHTML=''; return; }
+  // Si ya está abierto con el mismo modo, cerrar
+  if(area.innerHTML && area.dataset.modo === modo) { area.innerHTML=''; return; }
+  area.dataset.modo = modo;
+  window._replyModo = modo;
+
   const email = state.emails.find(e=>e.id===state.selectedId);
+  if(!email) return;
+
+  // Calcular campos según el modo
+  let toVal='', ccVal='', subjectVal='', titleColor='', modoLabel='';
+
+  if(modo==='reply') {
+    toVal = email.remitente||'';
+    ccVal = '';
+    subjectVal = 'RE: '+( email.asunto||'').replace(/^(RE:|RV:|FWD?:)\s*/i,'');
+    titleColor = 'var(--blue)'; modoLabel = '↩ Responder';
+  } else if(modo==='replyAll') {
+    toVal = email.remitente||'';
+    // CC = todos los to_recipients + cc_recipients excepto el buzón propio
+    const propioEmail = (window.GRAPH_USER_ID||'').toLowerCase();
+    const allCC = [
+      ...(email.to_recipients||[]).map(r=>r?.emailAddress?.address||r),
+      ...(email.cc_recipients||[]).map(r=>r?.emailAddress?.address||r),
+    ].filter(Boolean).filter(a=>a.toLowerCase()!==propioEmail && a.toLowerCase()!==toVal.toLowerCase());
+    ccVal = [...new Set(allCC)].join('; ');
+    subjectVal = 'RE: '+(email.asunto||'').replace(/^(RE:|RV:|FWD?:)\s*/i,'');
+    titleColor = 'var(--green)'; modoLabel = '↩↩ Responder a todos';
+  } else {
+    // forward
+    toVal = '';
+    ccVal = '';
+    subjectVal = 'RV: '+(email.asunto||'').replace(/^(RE:|RV:|FWD?:)\s*/i,'');
+    titleColor = 'var(--orange,#f97316)'; modoLabel = '↪ Reenviar';
+  }
+
+  const ccPrev = (email.cc_recipients||[]).map(r=>r?.emailAddress?.address||r).filter(Boolean).join('; ');
+
   area.innerHTML = `
     <div class="reply-box" style="border:1px solid var(--border);border-radius:var(--r);background:#fff;overflow:hidden;box-shadow:var(--shadow)">
+      <div style="padding:6px 12px;background:${titleColor}18;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:11px;font-weight:700;color:${titleColor}">${modoLabel}</span>
+        <button onclick="document.getElementById('replyBoxArea').innerHTML=''" style="background:none;border:none;cursor:pointer;color:var(--ink3);font-size:15px;line-height:1;padding:0 4px">✕</button>
+      </div>
       <div style="border-bottom:1px solid var(--border)">
         <div style="display:flex;align-items:center;padding:7px 12px;border-bottom:1px solid var(--border);gap:8px">
           <span style="font-size:11px;font-weight:700;color:var(--ink3);min-width:44px">Para</span>
-          <input id="replyTo" value="${esc(email?.remitente||'')}" style="flex:1;border:none;outline:none;font-size:12px;font-family:'Franklin Gothic Book','Franklin Gothic Medium',Arial,sans-serif;color:var(--ink);background:transparent"/>
+          <input id="replyTo" value="${esc(toVal)}" placeholder="${modo==='forward'?'Destinatario…':''}" style="flex:1;border:none;outline:none;font-size:12px;font-family:'Franklin Gothic Book','Franklin Gothic Medium',Arial,sans-serif;color:var(--ink);background:transparent"/>
         </div>
         <div style="display:flex;align-items:center;padding:7px 12px;border-bottom:1px solid var(--border);gap:8px">
           <span style="font-size:11px;font-weight:700;color:var(--ink3);min-width:44px">CC</span>
-          <input id="replyCC" value="${esc((email?.cc_recipients||[]).map(r=>r?.emailAddress?.address||r).filter(Boolean).join('; '))}" placeholder="Separar con punto y coma" style="flex:1;border:none;outline:none;font-size:12px;font-family:'Franklin Gothic Book','Franklin Gothic Medium',Arial,sans-serif;color:var(--ink);background:transparent"/>
+          <input id="replyCC" value="${esc(ccVal)}" placeholder="Separar con punto y coma" style="flex:1;border:none;outline:none;font-size:12px;font-family:'Franklin Gothic Book','Franklin Gothic Medium',Arial,sans-serif;color:var(--ink);background:transparent"/>
         </div>
         <div style="display:flex;align-items:center;padding:7px 12px;gap:8px">
           <span style="font-size:11px;font-weight:700;color:var(--ink3);min-width:44px">Asunto</span>
-          <input id="replySubject" value="RE: ${esc(email?.asunto||'')}" style="flex:1;border:none;outline:none;font-size:12px;font-family:'Franklin Gothic Book','Franklin Gothic Medium',Arial,sans-serif;color:var(--ink);background:transparent"/>
+          <input id="replySubject" value="${esc(subjectVal)}" style="flex:1;border:none;outline:none;font-size:12px;font-family:'Franklin Gothic Book','Franklin Gothic Medium',Arial,sans-serif;color:var(--ink);background:transparent"/>
         </div>
       </div>
       <div id="replyEditor" contenteditable="true" style="min-height:120px;padding:12px 14px;font-size:13px;font-family:'Franklin Gothic Book','Franklin Gothic Medium',Arial,sans-serif;color:var(--ink);outline:none;line-height:1.6"></div>
@@ -2135,7 +2183,7 @@ function toggleReply() {
         </div>
         <div style="margin-top:8px;font-size:12px;color:var(--ink2);font-family:'Franklin Gothic Book',Arial,sans-serif;max-height:180px;overflow-y:auto;border-left:3px solid var(--border);padding-left:10px">${email?.body_content||email?.raw?.body_preview||''}</div>
       </div>
-      <!-- Adjuntos estilo Outlook -->
+      <!-- Adjuntos -->
       <div id="replyAttachZone" style="padding:8px 12px;background:var(--bg2);border-top:1px solid var(--border);transition:background .15s"
            ondragover="event.preventDefault();this.style.background='#EFF6FF'"
            ondragleave="this.style.background='var(--bg2)'"
@@ -2145,7 +2193,7 @@ function toggleReply() {
             <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
             Adjuntar
           </label>
-          <span style="font-size:10px;color:var(--ink3)">o arrastra · máx. ${ATTACH_MAX_FILE_MB} MB/archivo · ${ATTACH_MAX_TOTAL_MB} MB total · incluye .eml</span>
+          <span style="font-size:10px;color:var(--ink3)">o arrastra · máx. ${ATTACH_MAX_FILE_MB} MB/archivo · ${ATTACH_MAX_TOTAL_MB} MB total</span>
         </div>
         <input type="file" id="replyFiles" multiple style="display:none" accept="*/*">
         <div id="replyFilesPreview" style="display:flex;flex-wrap:wrap;gap:4px"></div>
@@ -2153,9 +2201,9 @@ function toggleReply() {
       </div>
       <div style="display:flex;justify-content:flex-end;gap:6px;padding:10px 12px;border-top:1px solid var(--border);background:var(--bg)">
         <button class="btn btn-ghost" onclick="document.getElementById('replyBoxArea').innerHTML=''">Cancelar</button>
-        <button class="btn btn-primary" onclick="sendReply()">
+        <button class="btn btn-primary" onclick="sendReply()" style="background:${titleColor};border-color:${titleColor}">
           <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-          Enviar
+          ${modo==='forward'?'Reenviar':'Enviar'}
         </button>
       </div>
     </div>`;
