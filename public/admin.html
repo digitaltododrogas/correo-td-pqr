@@ -656,10 +656,16 @@ table.agents-tbl tr:hover td{background:var(--bg)}
       <div class="config-card" style="max-width:520px">
         <div class="config-title">Gestión de agentes</div>
         <div class="config-sub">Crea, edita o desactiva los agentes del sistema</div>
-        <button class="btn btn-primary" onclick="openCreateAgent()" style="margin-bottom:16px;font-size:13px;padding:8px 18px">
-          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Nuevo agente
-        </button>
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="openCreateAgent()" style="font-size:13px;padding:8px 18px">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nuevo agente
+          </button>
+          <button class="btn btn-ghost" onclick="abrirModalAutoAsignar()" style="font-size:13px;padding:8px 18px;border-color:var(--blue);color:var(--blue)" title="Distribuir todos los tickets pendientes sin agente de forma equitativa">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+            ⚡ Autoasignar pendientes
+          </button>
+        </div>
         <div class="config-section-label">Agentes activos</div>
         <div id="configAgentList"></div>
         <div class="config-section-label">Agentes inactivos</div>
@@ -693,6 +699,55 @@ table.agents-tbl tr:hover td{background:var(--bg)}
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('modalAgent')">Cancelar</button>
       <button class="btn btn-primary" onclick="saveAgent()">Guardar agente</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: AUTOASIGNACIÓN MASIVA ══ -->
+<div class="modal-backdrop" id="modalAutoAsignar" onclick="if(event.target===this)closeModal('modalAutoAsignar')">
+  <div class="modal" style="max-width:520px">
+    <button onclick="closeModal('modalAutoAsignar')" style="float:right;background:none;border:none;cursor:pointer;font-size:18px;color:var(--ink3);padding:0;line-height:1">✕</button>
+    <h3 style="margin-bottom:4px">⚡ Autoasignar tickets pendientes</h3>
+    <div class="modal-sub" style="margin-bottom:16px">Distribución equitativa round-robin — el agente con menos carga recibe el siguiente ticket</div>
+    <!-- Estado: cargando preview -->
+    <div id="autoAsignarLoading" style="padding:24px;text-align:center;color:var(--ink3);font-size:13px">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="animation:spin 1s linear infinite;vertical-align:middle;margin-right:6px"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0"/></svg>
+      Calculando distribución…
+    </div>
+    <!-- Estado: sin tickets -->
+    <div id="autoAsignarVacio" style="display:none;padding:20px;text-align:center;background:var(--green-l);border-radius:var(--r2);color:var(--green);font-size:13px;font-weight:600">
+      ✅ No hay tickets pendientes sin asignar
+    </div>
+    <!-- Estado: error -->
+    <div id="autoAsignarError" style="display:none;padding:12px;background:var(--red-l);border-radius:var(--r2);color:var(--red);font-size:12px;margin-bottom:12px"></div>
+    <!-- Preview de distribución -->
+    <div id="autoAsignarPreview" style="display:none">
+      <div style="background:var(--blue-l);border-radius:var(--r2);padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--blue)">
+        <strong id="autoAsignarResumen"></strong>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:var(--ink3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Distribución propuesta</div>
+      <div id="autoAsignarTabla" style="border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-bottom:16px"></div>
+      <div style="background:var(--bg2);border-radius:var(--r2);padding:10px 14px;font-size:11px;color:var(--ink3);margin-bottom:16px">
+        ℹ️ Los tickets se asignan del más antiguo al más reciente. El estado cambia a <strong>En gestión</strong> automáticamente.
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('modalAutoAsignar')">Cancelar</button>
+        <button class="btn btn-primary" id="btnConfirmarAutoAsignar" onclick="confirmarAutoAsignar()">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+          Confirmar y asignar
+        </button>
+      </div>
+    </div>
+    <!-- Estado: éxito -->
+    <div id="autoAsignarExito" style="display:none;padding:20px 0">
+      <div style="background:var(--green-l);border-radius:var(--r2);padding:14px;text-align:center;margin-bottom:14px">
+        <div style="font-size:20px;margin-bottom:4px">✅</div>
+        <div style="font-weight:700;color:var(--green);font-size:13px" id="autoAsignarExitoMsg"></div>
+      </div>
+      <div id="autoAsignarExitoTabla" style="border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;margin-bottom:16px"></div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" onclick="closeModal('modalAutoAsignar');loadEmails();">Cerrar y actualizar</button>
+      </div>
     </div>
   </div>
 </div>
@@ -2364,6 +2419,107 @@ async function verHiloCompleto(conversationId, correoId) {
       +'</div>'+rows+'</div>';
   } catch(e) {
     area.innerHTML = '<div style="padding:12px 14px;background:var(--red-l);border-radius:var(--r2);margin-top:8px;font-size:11px;color:var(--red)">⚠️ '+esc(e.message)+'</div>';
+  }
+}
+
+// ──────────────────────────────────────────────────────────────
+// AUTOASIGNACIÓN MASIVA EQUITATIVA
+// ──────────────────────────────────────────────────────────────
+
+function _autoAsignarEstado(estado) {
+  ['Loading','Vacio','Error','Preview','Exito'].forEach(s => {
+    const el = document.getElementById('autoAsignar'+s);
+    if(el) el.style.display = s === estado ? '' : 'none';
+  });
+}
+
+function _autoAsignarTablaHTML(distribucion) {
+  if(!distribucion.length) return '<div style="padding:10px;font-size:12px;color:var(--ink3)">Sin datos</div>';
+  return `
+    <div style="display:grid;grid-template-columns:1fr auto auto auto;font-size:11px">
+      <div style="padding:6px 12px;font-weight:700;color:var(--ink3);border-bottom:1px solid var(--border);background:var(--bg2)">Agente</div>
+      <div style="padding:6px 12px;font-weight:700;color:var(--ink3);border-bottom:1px solid var(--border);background:var(--bg2);text-align:center">Antes</div>
+      <div style="padding:6px 12px;font-weight:700;color:var(--ink3);border-bottom:1px solid var(--border);background:var(--bg2);text-align:center">Nuevos</div>
+      <div style="padding:6px 12px;font-weight:700;color:var(--ink3);border-bottom:1px solid var(--border);background:var(--bg2);text-align:center">Total</div>
+      ${distribucion.map((d,i) => `
+        <div style="padding:7px 12px;${i<distribucion.length-1?'border-bottom:1px solid var(--border);':''}">${esc(d.agente)}</div>
+        <div style="padding:7px 12px;text-align:center;color:var(--ink3);${i<distribucion.length-1?'border-bottom:1px solid var(--border);':''}">${d.casos_activos_antes||0}</div>
+        <div style="padding:7px 12px;text-align:center;font-weight:700;color:var(--blue);${i<distribucion.length-1?'border-bottom:1px solid var(--border);':''}'">+${d.tickets_nuevos}</div>
+        <div style="padding:7px 12px;text-align:center;font-weight:700;${i<distribucion.length-1?'border-bottom:1px solid var(--border);':''}">${d.casos_activos_despues}</div>
+      `).join('')}
+    </div>`;
+}
+
+async function abrirModalAutoAsignar() {
+  // Reset estado
+  _autoAsignarEstado('Loading');
+  document.getElementById('autoAsignarError').style.display = 'none';
+  document.getElementById('modalAutoAsignar').classList.add('show');
+
+  try {
+    const webhookBase = window.N8N_WEBHOOK_BASE || 'https://td-pruebas.online/webhook';
+    const res = await fetch(`${webhookBase}/autoasignar-pendientes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ solo_preview: true, admin_id: sessionStorage.getItem('pqr_agent_id')||'admin' })
+    });
+    if(!res.ok) throw new Error(`Webhook ${res.status}: ${await res.text()}`);
+    const data = await res.json();
+
+    if(!data.ok) {
+      document.getElementById('autoAsignarError').textContent = '⚠️ ' + (data.error||'Error desconocido');
+      _autoAsignarEstado('Error');
+      document.getElementById('autoAsignarError').style.display = '';
+      return;
+    }
+
+    if(data.total === 0 || !data.distribucion?.length) {
+      _autoAsignarEstado('Vacio');
+      return;
+    }
+
+    // Mostrar preview
+    document.getElementById('autoAsignarResumen').textContent =
+      `Se distribuirán ${data.total} ticket${data.total>1?'s':''} entre ${data.distribucion.length} agente${data.distribucion.length>1?'s':''}.`;
+    document.getElementById('autoAsignarTabla').innerHTML = _autoAsignarTablaHTML(data.distribucion);
+    _autoAsignarEstado('Preview');
+
+  } catch(e) {
+    document.getElementById('autoAsignarError').textContent = '⚠️ ' + e.message.substring(0,100);
+    document.getElementById('autoAsignarError').style.display = '';
+    _autoAsignarEstado('Loading');
+    document.getElementById('autoAsignarLoading').style.display = 'none';
+  }
+}
+
+async function confirmarAutoAsignar() {
+  const btn = document.getElementById('btnConfirmarAutoAsignar');
+  btn.disabled = true;
+  btn.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0"/></svg> Asignando…';
+
+  try {
+    const webhookBase = window.N8N_WEBHOOK_BASE || 'https://td-pruebas.online/webhook';
+    const res = await fetch(`${webhookBase}/autoasignar-pendientes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ solo_preview: false, admin_id: sessionStorage.getItem('pqr_agent_id')||'admin' })
+    });
+    if(!res.ok) throw new Error(`Webhook ${res.status}: ${await res.text()}`);
+    const data = await res.json();
+
+    if(!data.ok) throw new Error(data.error||'Error en la asignación');
+
+    // Mostrar resultado
+    document.getElementById('autoAsignarExitoMsg').textContent =
+      `✅ ${data.total_asignados} ticket${data.total_asignados>1?'s':''} asignados exitosamente`;
+    document.getElementById('autoAsignarExitoTabla').innerHTML = _autoAsignarTablaHTML(data.distribucion||[]);
+    _autoAsignarEstado('Exito');
+    showToast(`${data.total_asignados} tickets asignados ✓`, 'success');
+
+  } catch(e) {
+    showToast('Error en autoasignación: ' + e.message.substring(0,60), 'error');
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg> Confirmar y asignar';
   }
 }
 
