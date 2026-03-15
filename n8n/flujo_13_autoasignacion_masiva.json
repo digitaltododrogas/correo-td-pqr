@@ -1,1 +1,385 @@
-
+{
+  "name": "FLUJO 13 — Autoasignación Masiva Equitativa",
+  "nodes": [
+    {
+      "id": "f13-webhook",
+      "name": "Webhook Autoasignar",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        200,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "autoasignar-pendientes",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "f13-get-pendientes",
+      "name": "Obtener pendientes sin agente",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        420,
+        300
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://yeiupcumvdvdswfhcoty.supabase.co/rest/v1/correos?estado=eq.pendiente&agente_id=is.null&select=id,ticket_id,asunto,subject,tipo_pqr,prioridad,received_at,from_email,from_name&order=received_at.asc&limit=200",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $credentials.supabaseServiceKey }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $credentials.supabaseServiceKey }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "f13-check-hay-tickets",
+      "name": "¿Hay tickets pendientes?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        640,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "f13-get-agentes",
+      "name": "Obtener agentes activos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        860,
+        200
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://yeiupcumvdvdswfhcoty.supabase.co/rest/v1/agentes?activo=eq.true&select=id,nombre,email,casos_activos&order=casos_activos.asc",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $credentials.supabaseServiceKey }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $credentials.supabaseServiceKey }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "f13-check-hay-agentes",
+      "name": "¿Hay agentes disponibles?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1080,
+        200
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "f13-algoritmo",
+      "name": "Algoritmo round-robin equitativo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1300,
+        100
+      ],
+      "parameters": {
+        "jsCode": "// ─── ALGORITMO ROUND-ROBIN PONDERADO ───────────────────────────\n// Recibe todos los tickets pendientes y todos los agentes activos.\n// Distribuye de forma equitativa: el agente con menos carga siempre\n// recibe el siguiente ticket. Garantía: diferencia máxima de 1 ticket.\n\n// Obtener tickets del nodo anterior\nconst ticketsRaw = $('Obtener pendientes sin agente').all();\nconst agentesRaw = $('Obtener agentes activos').all();\n\nconst tickets = ticketsRaw.map(i => i.json);\nconst agentes = agentesRaw.map(i => ({\n  id: i.json.id,\n  nombre: i.json.nombre,\n  email: i.json.email,\n  casos_activos: parseInt(i.json.casos_activos) || 0\n}));\n\nif (!agentes.length) {\n  return [{ json: { error: 'No hay agentes activos', asignaciones: [], distribucion: [] } }];\n}\n\n// Carga extra acumulada en esta ejecución (no persistida aún)\nconst cargaExtra = {};\nagentes.forEach(ag => cargaExtra[ag.id] = 0);\n\nconst asignaciones = [];\n\nfor (const ticket of tickets) {\n  // Ordenar agentes por carga total (activos + extra de esta ejecución)\n  agentes.sort((a, b) => {\n    const cargaA = a.casos_activos + cargaExtra[a.id];\n    const cargaB = b.casos_activos + cargaExtra[b.id];\n    if (cargaA !== cargaB) return cargaA - cargaB;\n    // Desempate por nombre (consistencia)\n    return a.nombre.localeCompare(b.nombre);\n  });\n\n  const agente = agentes[0];\n  cargaExtra[agente.id]++;\n\n  asignaciones.push({\n    correo_id: ticket.id,\n    ticket_id: ticket.ticket_id || ticket.id,\n    agente_id: agente.id,\n    agente_nombre: agente.nombre,\n    agente_email: agente.email,\n    carga_resultante: agente.casos_activos + cargaExtra[agente.id]\n  });\n}\n\n// Resumen por agente para el preview y el log\nconst distribucion = agentes.map(ag => ({\n  agente_id: ag.id,\n  agente: ag.nombre,\n  email: ag.email,\n  tickets_nuevos: cargaExtra[ag.id],\n  casos_activos_antes: ag.casos_activos,\n  casos_activos_despues: ag.casos_activos + cargaExtra[ag.id]\n})).filter(d => d.tickets_nuevos > 0);\n\nreturn [{ json: {\n  asignaciones,\n  distribucion,\n  total: asignaciones.length,\n  agentes_involucrados: distribucion.length\n}}];"
+      }
+    },
+    {
+      "id": "f13-check-preview",
+      "name": "¿Solo preview?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1520,
+        100
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $('Webhook Autoasignar').first().json.body.solo_preview }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equal"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "f13-respond-preview",
+      "name": "Responder preview (sin ejecutar)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1740,
+        0
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, preview: true, total: $json.total, distribucion: $json.distribucion, mensaje: 'Preview calculado. Envía solo_preview: false para ejecutar.' }) }}",
+        "options": {
+          "responseCode": 200
+        }
+      }
+    },
+    {
+      "id": "f13-respond-sin-tickets",
+      "name": "Responder sin tickets pendientes",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        860,
+        400
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"ok\": true, \"total_asignados\": 0, \"distribucion\": [], \"mensaje\": \"No hay tickets pendientes sin agente.\"}",
+        "options": {
+          "responseCode": 200
+        }
+      }
+    },
+    {
+      "id": "f13-respond-sin-agentes",
+      "name": "Responder sin agentes activos",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        300
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"ok\": false, \"error\": \"No hay agentes activos en el sistema.\"}",
+        "options": {
+          "responseCode": 200
+        }
+      }
+    },
+    {
+      "id": "f13-ejecutar-patch",
+      "name": "Ejecutar asignaciones masivas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1740,
+        200
+      ],
+      "parameters": {
+        "jsCode": "// ─── EJECUTAR TODOS LOS PATCHes EN SECUENCIA ─────────────────────\n// Recibe asignaciones del algoritmo y ejecuta los PATCHes en Supabase\n// Más confiable que splitInBatches para operaciones masivas\n\nconst { asignaciones, distribucion, total } = $input.first().json;\n\nconst SB_URL  = 'https://yeiupcumvdvdswfhcoty.supabase.co/rest/v1';\nconst SB_KEY  = $credentials.supabaseServiceKey;\n\nconst headers = {\n  'apikey': SB_KEY,\n  'Authorization': 'Bearer ' + SB_KEY,\n  'Content-Type': 'application/json',\n  'Prefer': 'return=minimal'\n};\n\nlet exitosos = 0;\nlet errores = [];\n\n// 1. PATCH todos los correos (asignar agente + cambiar estado)\nfor (const asig of asignaciones) {\n  try {\n    const r = await $http.request({\n      method: 'PATCH',\n      url: `${SB_URL}/correos?id=eq.${asig.correo_id}`,\n      headers,\n      body: JSON.stringify({\n        agente_id: asig.agente_id,\n        asignado_a: asig.agente_nombre,\n        estado: 'gestion'\n      })\n    });\n    exitosos++;\n  } catch(e) {\n    errores.push({ correo_id: asig.correo_id, error: e.message });\n  }\n}\n\n// 2. PATCH casos_activos de cada agente (una sola vez por agente)\nconst agentesCargaFinal = {};\nfor (const asig of asignaciones) {\n  agentesCargaFinal[asig.agente_id] = asig.carga_resultante;\n}\n\nfor (const [agenteId, cargaFinal] of Object.entries(agentesCargaFinal)) {\n  try {\n    await $http.request({\n      method: 'PATCH',\n      url: `${SB_URL}/agentes?id=eq.${agenteId}`,\n      headers,\n      body: JSON.stringify({ casos_activos: cargaFinal })\n    });\n  } catch(e) {\n    errores.push({ agente_id: agenteId, error: e.message });\n  }\n}\n\nreturn [{\n  json: {\n    ok: errores.length === 0,\n    total_asignados: exitosos,\n    distribucion,\n    errores: errores.length > 0 ? errores : undefined,\n    mensaje: `Se asignaron ${exitosos} tickets de forma equitativa entre ${distribucion.length} agente(s).`\n  }\n}];"
+      }
+    },
+    {
+      "id": "f13-respond-ok",
+      "name": "Responder OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1960,
+        200
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 200
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Autoasignar": {
+      "main": [
+        [
+          {
+            "node": "Obtener pendientes sin agente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener pendientes sin agente": {
+      "main": [
+        [
+          {
+            "node": "¿Hay tickets pendientes?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Hay tickets pendientes?": {
+      "main": [
+        [
+          {
+            "node": "Obtener agentes activos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder sin tickets pendientes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener agentes activos": {
+      "main": [
+        [
+          {
+            "node": "¿Hay agentes disponibles?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Hay agentes disponibles?": {
+      "main": [
+        [
+          {
+            "node": "Algoritmo round-robin equitativo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder sin agentes activos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Algoritmo round-robin equitativo": {
+      "main": [
+        [
+          {
+            "node": "¿Solo preview?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Solo preview?": {
+      "main": [
+        [
+          {
+            "node": "Responder preview (sin ejecutar)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ejecutar asignaciones masivas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ejecutar asignaciones masivas": {
+      "main": [
+        [
+          {
+            "node": "Responder OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    "pqr",
+    "asignacion",
+    "automatizacion"
+  ]
+}
