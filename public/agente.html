@@ -199,6 +199,17 @@ body{background:var(--bg);color:var(--ink);font-family:'Poppins',sans-serif;heig
 
 /* Immutable badge */
 .lock-badge{display:inline-flex;align-items:center;gap:5px;background:var(--bg2);color:var(--ink3);font-size:10px;padding:3px 10px;border-radius:99px;font-weight:600;margin-bottom:12px}
+
+/* ── AUTOCOMPLETE CONTACTOS ─────────────────────────── */
+.ac-dropdown{position:fixed;z-index:9999;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.18);min-width:300px;max-width:420px;max-height:260px;overflow-y:auto;display:none}
+.ac-dropdown.show{display:block}
+.ac-item{display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;transition:background .1s}
+.ac-item:hover,.ac-item.focused{background:var(--blue-l)}
+.ac-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0}
+.ac-info{min-width:0;flex:1}
+.ac-nombre{font-size:12px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ac-email{font-size:10px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ac-cargo{font-size:10px;color:var(--blue);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 </head>
 <body>
@@ -1177,6 +1188,11 @@ function toggleReply(modo) {
     _attachAdd(this.files); this.value='';
   });
   document.getElementById('replyEditor').focus();
+  // Activar autocompletado en campos Para y CC
+  setTimeout(()=>{
+    _acInit(document.getElementById('replyTo'));
+    _acInit(document.getElementById('replyCC'));
+  },50);
 }
 
 async function sendReply() {
@@ -1867,6 +1883,83 @@ async function descargarHiloEML(msgs, asuntoHilo) {
   document.body.appendChild(a); a.click();
   setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); },2000);
   showToast(`Hilo descargado: ${msgs.length} mensaje${msgs.length>1?'s':''} ✓`,'success');
+}
+
+// ──────────────────────────────────────────────────────────────
+// AUTOCOMPLETADO DE CONTACTOS ESTILO OUTLOOK
+// Busca en contactos_frecuentes de Supabase, resalta coincidencia,
+// navega con ↑↓ Enter Tab Escape, incrementa frecuencia al elegir
+// ──────────────────────────────────────────────────────────────
+let _acCache = null;
+async function _acCargar() {
+  if(_acCache) return _acCache;
+  try { _acCache = await sb('contactos_frecuentes?activo=eq.true&order=frecuencia.desc&limit=500')||[]; }
+  catch(e){ _acCache=[]; }
+  return _acCache;
+}
+function _acNorm(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+async function _acBuscar(q) {
+  if(!q||q.length<1) return [];
+  const n=_acNorm(q), all=await _acCargar();
+  return all.filter(c=>_acNorm(c.nombre).includes(n)||_acNorm(c.email).includes(n)||_acNorm(c.cargo||'').includes(n)||(c.aliases||[]).some(a=>_acNorm(a).includes(n))).slice(0,8);
+}
+function _acHL(txt,q){
+  if(!q) return txt;
+  const i=_acNorm(txt).indexOf(_acNorm(q));
+  if(i<0) return txt;
+  return txt.slice(0,i)+'<mark style="background:var(--blue-l);color:var(--blue);border-radius:2px;padding:0 1px">'+txt.slice(i,i+q.length)+'</mark>'+txt.slice(i+q.length);
+}
+const _acCOLORS=['#3B82F6','#10B981','#8B5CF6','#F59E0B','#EF4444','#06B6D4','#EC4899','#14B8A6'];
+function _acMostrar(inp, res) {
+  let dd=document.getElementById('acDropdown');
+  if(!dd){dd=document.createElement('div');dd.id='acDropdown';dd.className='ac-dropdown';document.body.appendChild(dd);}
+  if(!res.length){dd.classList.remove('show');return;}
+  const rect=inp.getBoundingClientRect();
+  dd.style.cssText=`left:${rect.left}px;top:${rect.bottom+2}px;width:${Math.max(rect.width,300)}px`;
+  const q=inp._acQuery||'';
+  dd.innerHTML=res.map((c,i)=>`<div class="ac-item" onmousedown="event.preventDefault()" onclick="_acSelect('${c.email.replace(/'/g,"\\'")}','${(c.nombre||'').replace(/'/g,"\\'")}')">
+    <div class="ac-avatar" style="background:${_acCOLORS[i%_acCOLORS.length]}">${(c.nombre||'?')[0].toUpperCase()}</div>
+    <div class="ac-info">
+      <div class="ac-nombre">${_acHL(c.nombre,q)}</div>
+      <div class="ac-email">${c.email}${(c.aliases||[]).length?' +'+c.aliases.length+' alias':''}</div>
+      ${c.cargo?`<div class="ac-cargo">${c.cargo}</div>`:''}
+    </div>
+  </div>`).join('');
+  dd.classList.add('show');
+}
+function _acClose(){ const dd=document.getElementById('acDropdown'); if(dd) dd.classList.remove('show'); }
+let _acActive=null, _acTimer=null;
+function _acSelect(email,nombre){
+  const inp=_acActive; if(!inp) return;
+  const semi=inp.value.lastIndexOf(';');
+  inp.value=(semi>=0?inp.value.slice(0,semi+1)+' ':'')+email+'; ';
+  inp.dispatchEvent(new Event('input'));
+  _acClose();
+  // Incrementar frecuencia (async, no bloqueante)
+  sb(`contactos_frecuentes?email=eq.${encodeURIComponent(email)}`)
+    .then(r=>{if(r?.[0]?.id)sb(`contactos_frecuentes?id=eq.${r[0].id}`,'PATCH',{frecuencia:(r[0].frecuencia||0)+1}).catch(()=>{});}).catch(()=>{});
+}
+function _acInit(inp){
+  if(!inp||inp._acOk) return; inp._acOk=true;
+  inp.setAttribute('autocomplete','off');
+  inp.addEventListener('input', function(){
+    _acActive=this; clearTimeout(_acTimer);
+    const semi=this.value.lastIndexOf(';');
+    const q=(semi>=0?this.value.slice(semi+1):this.value).trim();
+    this._acQuery=q;
+    _acTimer=setTimeout(async()=>{ const r=await _acBuscar(q); _acMostrar(this,r); },100);
+  });
+  inp.addEventListener('keydown', function(e){
+    const dd=document.getElementById('acDropdown');
+    if(!dd?.classList.contains('show')) return;
+    const items=[...dd.querySelectorAll('.ac-item')];
+    const fi=items.findIndex(x=>x.classList.contains('focused'));
+    if(e.key==='ArrowDown'){e.preventDefault();items[fi]?.classList.remove('focused');items[Math.min(fi+1,items.length-1)]?.classList.add('focused');}
+    else if(e.key==='ArrowUp'){e.preventDefault();items[fi]?.classList.remove('focused');items[Math.max(fi-1,0)]?.classList.add('focused');}
+    else if(e.key==='Enter'||e.key==='Tab'){const f=dd.querySelector('.focused')||items[0];if(f){e.preventDefault();f.click();}}
+    else if(e.key==='Escape') _acClose();
+  });
+  inp.addEventListener('blur',()=>setTimeout(_acClose,150));
 }
 
 function limpiarHilo(){const a=document.getElementById('hiloArea');if(a){a.innerHTML='';a.dataset.conv='';}}
