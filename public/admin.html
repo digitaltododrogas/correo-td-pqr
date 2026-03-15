@@ -2458,7 +2458,7 @@ let _autoAsignarData = null; // guarda el resultado del preview para confirmar
 
 async function _calcularAutoAsignacion() {
   // 1. Obtener tickets pendientes sin agente (ordenados por fecha, más antiguo primero)
-  const tickets = await sb('correos?estado=eq.pendiente&agente_id=is.null&select=id,ticket_id,subject,asunto,received_at&order=received_at.asc&limit=200') || [];
+  const tickets = await sb('correos?estado=eq.pendiente&agente_id=is.null&select=id,ticket_id,subject,received_at&order=received_at.asc&limit=200') || [];
   if(!tickets.length) return { total: 0, asignaciones: [], distribucion: [] };
 
   // 2. Obtener agentes activos ordenados por carga
@@ -2483,7 +2483,7 @@ async function _calcularAutoAsignacion() {
     asignaciones.push({
       correo_id: ticket.id,
       ticket_id: ticket.ticket_id || ticket.id,
-      asunto: ticket.asunto || ticket.subject || '(Sin asunto)',
+      asunto: ticket.subject || '(Sin asunto)',
       agente_id: ag.id,
       agente_nombre: ag.nombre,
       carga_resultante: ag.casos_activos + cargaExtra[ag.id]
