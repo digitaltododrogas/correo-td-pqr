@@ -2450,74 +2450,124 @@ function _autoAsignarTablaHTML(distribucion) {
     </div>`;
 }
 
+// ─── AUTOASIGNACIÓN DIRECTA CONTRA SUPABASE ───────────────────
+// Sin webhook N8N — el algoritmo corre en el browser con la misma
+// conexión a Supabase que usa todo el panel. Cero dependencias externas.
+
+let _autoAsignarData = null; // guarda el resultado del preview para confirmar
+
+async function _calcularAutoAsignacion() {
+  // 1. Obtener tickets pendientes sin agente (ordenados por fecha, más antiguo primero)
+  const tickets = await sb('correos?estado=eq.pendiente&agente_id=is.null&select=id,ticket_id,subject,asunto,received_at&order=received_at.asc&limit=200') || [];
+  if(!tickets.length) return { total: 0, asignaciones: [], distribucion: [] };
+
+  // 2. Obtener agentes activos ordenados por carga
+  const agentes = (await sb('agentes?activo=eq.true&select=id,nombre,email,casos_activos&order=casos_activos.asc') || [])
+    .map(a => ({ ...a, casos_activos: parseInt(a.casos_activos) || 0 }));
+  if(!agentes.length) throw new Error('No hay agentes activos en el sistema.');
+
+  // 3. Algoritmo round-robin ponderado
+  const cargaExtra = {};
+  agentes.forEach(a => cargaExtra[a.id] = 0);
+  const asignaciones = [];
+
+  for (const ticket of tickets) {
+    // Ordenar por carga total (actual + lo que ya se asignó en este batch)
+    agentes.sort((a, b) => {
+      const ca = a.casos_activos + cargaExtra[a.id];
+      const cb = b.casos_activos + cargaExtra[b.id];
+      return ca !== cb ? ca - cb : a.nombre.localeCompare(b.nombre);
+    });
+    const ag = agentes[0];
+    cargaExtra[ag.id]++;
+    asignaciones.push({
+      correo_id: ticket.id,
+      ticket_id: ticket.ticket_id || ticket.id,
+      asunto: ticket.asunto || ticket.subject || '(Sin asunto)',
+      agente_id: ag.id,
+      agente_nombre: ag.nombre,
+      carga_resultante: ag.casos_activos + cargaExtra[ag.id]
+    });
+  }
+
+  // 4. Resumen por agente
+  const distribucion = agentes
+    .filter(a => cargaExtra[a.id] > 0)
+    .map(a => ({
+      agente_id: a.id,
+      agente: a.nombre,
+      tickets_nuevos: cargaExtra[a.id],
+      casos_activos_antes: a.casos_activos,
+      casos_activos_despues: a.casos_activos + cargaExtra[a.id]
+    }));
+
+  return { total: asignaciones.length, asignaciones, distribucion };
+}
+
 async function abrirModalAutoAsignar() {
-  // Reset estado
+  _autoAsignarData = null;
   _autoAsignarEstado('Loading');
   document.getElementById('autoAsignarError').style.display = 'none';
   document.getElementById('modalAutoAsignar').classList.add('show');
 
   try {
-    const webhookBase = window.N8N_WEBHOOK_BASE || 'https://n8n.srv1278939.hstgr.cloud/webhook';
-    const res = await fetch(`${webhookBase}/autoasignar-pendientes`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ solo_preview: true, admin_id: sessionStorage.getItem('pqr_agent_id')||'admin' })
-    });
-    if(!res.ok) throw new Error(`Webhook ${res.status}: ${await res.text()}`);
-    const data = await res.json();
+    const data = await _calcularAutoAsignacion();
+    _autoAsignarData = data;
 
-    if(!data.ok) {
-      document.getElementById('autoAsignarError').textContent = '⚠️ ' + (data.error||'Error desconocido');
-      _autoAsignarEstado('Error');
-      document.getElementById('autoAsignarError').style.display = '';
-      return;
-    }
+    if(!data.total) { _autoAsignarEstado('Vacio'); return; }
 
-    if(data.total === 0 || !data.distribucion?.length) {
-      _autoAsignarEstado('Vacio');
-      return;
-    }
-
-    // Mostrar preview
     document.getElementById('autoAsignarResumen').textContent =
       `Se distribuirán ${data.total} ticket${data.total>1?'s':''} entre ${data.distribucion.length} agente${data.distribucion.length>1?'s':''}.`;
     document.getElementById('autoAsignarTabla').innerHTML = _autoAsignarTablaHTML(data.distribucion);
     _autoAsignarEstado('Preview');
 
   } catch(e) {
-    document.getElementById('autoAsignarError').textContent = '⚠️ ' + e.message.substring(0,100);
+    document.getElementById('autoAsignarError').textContent = '⚠️ ' + e.message.substring(0,120);
     document.getElementById('autoAsignarError').style.display = '';
-    _autoAsignarEstado('Loading');
     document.getElementById('autoAsignarLoading').style.display = 'none';
   }
 }
 
 async function confirmarAutoAsignar() {
+  if(!_autoAsignarData?.asignaciones?.length) return;
   const btn = document.getElementById('btnConfirmarAutoAsignar');
   btn.disabled = true;
   btn.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0"/></svg> Asignando…';
 
+  const { asignaciones, distribucion } = _autoAsignarData;
+  let exitosos = 0, errores = 0;
+
   try {
-    const webhookBase = window.N8N_WEBHOOK_BASE || 'https://n8n.srv1278939.hstgr.cloud/webhook';
-    const res = await fetch(`${webhookBase}/autoasignar-pendientes`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ solo_preview: false, admin_id: sessionStorage.getItem('pqr_agent_id')||'admin' })
-    });
-    if(!res.ok) throw new Error(`Webhook ${res.status}: ${await res.text()}`);
-    const data = await res.json();
+    // PATCH cada correo con su agente asignado
+    for (const asig of asignaciones) {
+      try {
+        await sb(`correos?id=eq.${asig.correo_id}`, 'PATCH', {
+          agente_id: asig.agente_id,
+          asignado_a: asig.agente_nombre,
+          estado: 'gestion'
+        });
+        exitosos++;
+      } catch { errores++; }
+    }
 
-    if(!data.ok) throw new Error(data.error||'Error en la asignación');
+    // PATCH casos_activos de cada agente (una vez por agente)
+    const cargaFinalPorAgente = {};
+    asignaciones.forEach(a => cargaFinalPorAgente[a.agente_id] = a.carga_resultante);
+    for (const [agenteId, carga] of Object.entries(cargaFinalPorAgente)) {
+      try { await sb(`agentes?id=eq.${agenteId}`, 'PATCH', { casos_activos: carga }); }
+      catch { /* no crítico */ }
+    }
 
-    // Mostrar resultado
     document.getElementById('autoAsignarExitoMsg').textContent =
-      `✅ ${data.total_asignados} ticket${data.total_asignados>1?'s':''} asignados exitosamente`;
-    document.getElementById('autoAsignarExitoTabla').innerHTML = _autoAsignarTablaHTML(data.distribucion||[]);
+      `${exitosos} ticket${exitosos>1?'s':''} asignados${errores>0?' ('+errores+' con error)':''}`;
+    document.getElementById('autoAsignarExitoTabla').innerHTML = _autoAsignarTablaHTML(distribucion);
     _autoAsignarEstado('Exito');
-    showToast(`${data.total_asignados} tickets asignados ✓`, 'success');
+    showToast(`${exitosos} tickets asignados ✓`, 'success');
+    // Recargar estado local sin cerrar el modal
+    await loadEmails();
 
   } catch(e) {
-    showToast('Error en autoasignación: ' + e.message.substring(0,60), 'error');
+    showToast('Error: ' + e.message.substring(0,60), 'error');
     btn.disabled = false;
     btn.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg> Confirmar y asignar';
   }
