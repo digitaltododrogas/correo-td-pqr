@@ -2462,8 +2462,8 @@ async function _calcularAutoAsignacion() {
   if(!tickets.length) return { total: 0, asignaciones: [], distribucion: [] };
 
   // 2. Obtener agentes activos ordenados por carga
-  const agentes = (await sb('agentes?activo=eq.true&select=id,nombre,email,casos_activos&order=casos_activos.asc') || [])
-    .map(a => ({ ...a, casos_activos: parseInt(a.casos_activos) || 0 }));
+  const agentes = (await sb('agentes?activo=eq.true&select=id,nombre,correo,carga_actual&order=carga_actual.asc') || [])
+    .map(a => ({ ...a, carga_actual: parseInt(a.carga_actual) || 0 }));
   if(!agentes.length) throw new Error('No hay agentes activos en el sistema.');
 
   // 3. Algoritmo round-robin ponderado
@@ -2474,8 +2474,8 @@ async function _calcularAutoAsignacion() {
   for (const ticket of tickets) {
     // Ordenar por carga total (actual + lo que ya se asignó en este batch)
     agentes.sort((a, b) => {
-      const ca = a.casos_activos + cargaExtra[a.id];
-      const cb = b.casos_activos + cargaExtra[b.id];
+      const ca = a.carga_actual + cargaExtra[a.id];
+      const cb = b.carga_actual + cargaExtra[b.id];
       return ca !== cb ? ca - cb : a.nombre.localeCompare(b.nombre);
     });
     const ag = agentes[0];
@@ -2486,7 +2486,7 @@ async function _calcularAutoAsignacion() {
       asunto: ticket.subject || '(Sin asunto)',
       agente_id: ag.id,
       agente_nombre: ag.nombre,
-      carga_resultante: ag.casos_activos + cargaExtra[ag.id]
+      carga_resultante: ag.carga_actual + cargaExtra[ag.id]
     });
   }
 
@@ -2497,8 +2497,8 @@ async function _calcularAutoAsignacion() {
       agente_id: a.id,
       agente: a.nombre,
       tickets_nuevos: cargaExtra[a.id],
-      casos_activos_antes: a.casos_activos,
-      casos_activos_despues: a.casos_activos + cargaExtra[a.id]
+      casos_activos_antes: a.carga_actual,
+      casos_activos_despues: a.carga_actual + cargaExtra[a.id]
     }));
 
   return { total: asignaciones.length, asignaciones, distribucion };
@@ -2550,11 +2550,11 @@ async function confirmarAutoAsignar() {
       } catch { errores++; }
     }
 
-    // PATCH casos_activos de cada agente (una vez por agente)
+    // PATCH carga_actual de cada agente (una vez por agente)
     const cargaFinalPorAgente = {};
     asignaciones.forEach(a => cargaFinalPorAgente[a.agente_id] = a.carga_resultante);
     for (const [agenteId, carga] of Object.entries(cargaFinalPorAgente)) {
-      try { await sb(`agentes?id=eq.${agenteId}`, 'PATCH', { casos_activos: carga }); }
+      try { await sb(`agentes?id=eq.${agenteId}`, 'PATCH', { carga_actual: carga }); }
       catch { /* no crítico */ }
     }
 
