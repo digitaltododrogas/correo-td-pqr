@@ -2005,7 +2005,7 @@ function _acSelect(el) {
   const email = el.dataset.email;
   const val = inp.value;
   const semi = val.lastIndexOf(';');
-  inp.value = (semi >= 0 ? val.slice(0,semi+1)+' ' : '') + email + '; ';
+  inp.value = (semi >= 0 ? val.slice(0,semi+1)+' ' : '') + email;
   inp.dispatchEvent(new Event('input'));
   // Mover foco al siguiente campo vacío o al editor
   const nextInput = inp.id==='replyTo'
