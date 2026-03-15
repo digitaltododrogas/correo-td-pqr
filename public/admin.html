@@ -2601,6 +2601,59 @@ function mpAbrirEnGestion() {
   if(_mpCorreoId) setTimeout(()=>selectEmail(_mpCorreoId), 100);
 }
 
+async function descargarHiloEML(msgs, asuntoHilo) {
+  if(!msgs||!msgs.length){ showToast('No hay mensajes en el hilo','error'); return; }
+  const userId = window.GRAPH_USER_ID || '';
+  const token = await getGraphToken().catch(()=>null);
+  if(!token){ showToast('Sin token de Graph. Recarga la página.','error'); return; }
+
+  showToast(`Descargando hilo (${msgs.length} mensajes)…`,'info');
+
+  const boundary = '----=_HiloPQR_' + Date.now();
+  const ahora = new Date().toUTCString();
+  const asuntoSeguro = (asuntoHilo||'Hilo').replace(/[\r\n]/g,'');
+  const partes = [];
+
+  for(let i=0; i<msgs.length; i++) {
+    const m = msgs[i];
+    try {
+      const r = await fetch(
+        `https://graph.microsoft.com/v1.0/users/${userId}/messages/${m.id}/$value`,
+        { headers:{'Authorization':'Bearer '+token} }
+      );
+      if(!r.ok) {
+        const de = m.from?.emailAddress?.address||'?';
+        const err503 = r.status===503||r.status===504;
+        partes.push(`From: ${de}\r\nSubject: ${m.subject||''}\r\n\r\n[Mensaje no disponible${err503?' (buzón en migración)':' (error '+r.status+')'}]\r\n`);
+        continue;
+      }
+      partes.push(await r.text());
+    } catch(e) {
+      const de = m.from?.emailAddress?.address||'?';
+      partes.push(`From: ${de}\r\nSubject: ${m.subject||''}\r\n\r\n[Error: ${e.message.substring(0,80)}]\r\n`);
+    }
+  }
+
+  let eml = '';
+  eml += `From: PQR Tododrogas <noreply@tododrogas.com.co>\r\n`;
+  eml += `Subject: [Hilo] ${asuntoSeguro} (${msgs.length} mensaje${msgs.length>1?'s':''})\r\n`;
+  eml += `Date: ${ahora}\r\nMIME-Version: 1.0\r\n`;
+  eml += `Content-Type: multipart/digest; boundary="${boundary}"\r\n\r\n`;
+  partes.forEach(raw => {
+    eml += `--${boundary}\r\nContent-Type: message/rfc822\r\n\r\n${raw}\r\n`;
+  });
+  eml += `--${boundary}--\r\n`;
+
+  const fileName = ('[Hilo] '+(asuntoHilo||'conversacion')).replace(/[\/\\:*?"<>|]/g,'_').substring(0,80)+'.eml';
+  const blob = new Blob([eml],{type:'message/rfc822'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download=fileName;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); },2000);
+  showToast(`Hilo descargado: ${msgs.length} mensaje${msgs.length>1?'s':''} ✓`,'success');
+}
+
 function limpiarHilo(){const a=document.getElementById('hiloArea');if(a){a.innerHTML='';a.dataset.conv='';}}
 
 async function descargarEML(messageId, asunto) {
@@ -2674,6 +2727,8 @@ async function verHiloCompleto(conversationId, correoId) {
     }
     const data = await r.json();
     const msgs = (data.value||[]).sort((a,b)=>new Date(a.receivedDateTime||a.sentDateTime||0)-new Date(b.receivedDateTime||b.sentDateTime||0));
+    window._hiloMsgs = msgs;
+    window._hiloAsunto = msgs[0]?.subject||'';
     if(!msgs.length) {
       area.innerHTML = '<div style="padding:12px;font-size:12px;color:var(--ink3);background:var(--bg2);border-radius:var(--r2);margin-top:8px">No se encontraron mensajes en este hilo.</div>';
       return;
@@ -2703,10 +2758,12 @@ async function verHiloCompleto(conversationId, correoId) {
       rows += '</div>';
     });
     area.innerHTML = '<div style="margin-top:10px;border:1px solid var(--border);border-radius:var(--r);overflow:hidden">'
-      +'<div style="background:var(--bg2);padding:8px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">'
+      +'<div style="background:var(--bg2);padding:8px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px">'
       +'<span style="font-size:11px;font-weight:700;color:var(--ink2)">🧵 Hilo completo · '+msgs.length+' mensaje'+(msgs.length>1?'s':'')+'</span>'
+      +'<div style="display:flex;gap:6px;align-items:center">'
+      +'<button onclick="descargarHiloEML(window._hiloMsgs,window._hiloAsunto)" title="Descargar hilo completo como un solo .eml (igual que Outlook)" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:10px;font-weight:700;cursor:pointer;color:var(--ink2);display:flex;align-items:center;gap:4px"><svg width=\'10\' height=\'10\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2.5\' viewBox=\'0 0 24 24\'><path d=\'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\'/><polyline points=\'7 10 12 15 17 10\'/><line x1=\'12\' y1=\'15\' x2=\'12\' y2=\'3\'/></svg> ⬇ Hilo completo</button>'
       +'<button onclick="limpiarHilo()" style="background:none;border:none;cursor:pointer;color:var(--ink3);font-size:13px">✕</button>'
-      +'</div>'+rows+'</div>';
+      +'</div></div>'+rows+'</div>';
   } catch(e) {
     area.innerHTML = '<div style="padding:12px 14px;background:var(--red-l);border-radius:var(--r2);margin-top:8px;font-size:11px;color:var(--red)">⚠️ '+esc(e.message)+'</div>';
   }
