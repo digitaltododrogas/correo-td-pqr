@@ -2605,32 +2605,41 @@ function limpiarHilo(){const a=document.getElementById('hiloArea');if(a){a.inner
 
 async function descargarEML(messageId, asunto) {
   if(!messageId) { showToast('No hay ID de mensaje para descargar','error'); return; }
-  showToast('Preparando descarga EML…','info');
-  // Retry automático para errores 503 (buzón en migración) — máx 3 intentos
+  const userId = window.GRAPH_USER_ID || '';
+  const fileName = (asunto||'correo').replace(/[/\\:*?"<>|]/g,'_').substring(0,80) + '.eml';
+
   for(let intento=1; intento<=3; intento++) {
+    if(intento===1) showToast('Preparando descarga EML…','info');
+    else            showToast(`Reintentando descarga EML (${intento}/3)…`,'info');
     try {
       const token = await getGraphToken();
-      const userId = window.GRAPH_USER_ID || '';
-      // GET /messages/{id}/$value devuelve el MIME completo (RFC 2822) = el .eml de Outlook
-      const r = await fetch(`https://graph.microsoft.com/v1.0/users/${userId}/messages/${messageId}/$value`, {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      if(r.status === 503) {
-        if(intento < 3) { await new Promise(res=>setTimeout(res, intento*2000)); continue; }
-        throw new Error('Buzón temporalmente en migración (503). Intenta en unos minutos.');
+      // Endpoint principal: MIME completo del mensaje
+      const r = await fetch(
+        `https://graph.microsoft.com/v1.0/users/${userId}/messages/${messageId}/$value`,
+        { headers:{'Authorization':'Bearer '+token} }
+      );
+      if(r.status===503||r.status===504) {
+        // Buzón en migración o timeout — esperar y reintentar
+        if(intento<3){ await new Promise(res=>setTimeout(res,intento*3000)); continue; }
+        // 3 intentos fallidos: ofrecer fallback
+        showToast('Buzón en migración. Inténtalo en 2-3 minutos.','error');
+        return;
       }
-      if(!r.ok) throw new Error('Graph API '+r.status+': '+(await r.text()).substring(0,80));
+      if(r.status===404) { showToast('Mensaje no encontrado en el buzón (404)','error'); return; }
+      if(r.status===401) { showToast('Token expirado. Recarga la página.','error'); return; }
+      if(!r.ok) { showToast('Error Graph API '+r.status,'error'); return; }
+
       const blob = await r.blob();
-      const fileName = (asunto||'correo').replace(/[/\\:*?"<>|]/g,'_').substring(0,80) + '.eml';
-      const url = URL.createObjectURL(new Blob([blob], {type:'message/rfc822'}));
+      const url = URL.createObjectURL(new Blob([blob],{type:'message/rfc822'}));
       const a = document.createElement('a');
-      a.href = url; a.download = fileName;
+      a.href=url; a.download=fileName;
       document.body.appendChild(a); a.click();
-      setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 2000);
+      setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); },2000);
       showToast('EML descargado ✓','success');
       return;
-    } catch(e) { 
-      if(intento===3) showToast('Error EML: '+e.message.substring(0,70),'error');
+    } catch(e) {
+      if(intento<3){ await new Promise(res=>setTimeout(res,intento*3000)); continue; }
+      showToast('Error EML: '+e.message.substring(0,70),'error');
     }
   }
 }
