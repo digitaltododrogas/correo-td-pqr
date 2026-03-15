@@ -2604,34 +2604,72 @@ function mpAbrirEnGestion() {
 async function descargarHiloEML(msgs, asuntoHilo) {
   if(!msgs||!msgs.length){ showToast('No hay mensajes en el hilo','error'); return; }
   const userId = window.GRAPH_USER_ID || '';
-  const token = await getGraphToken().catch(()=>null);
-  if(!token){ showToast('Sin token de Graph. Recarga la página.','error'); return; }
-
-  showToast(`Descargando hilo (${msgs.length} mensajes)…`,'info');
-
   const boundary = '----=_HiloPQR_' + Date.now();
   const ahora = new Date().toUTCString();
   const asuntoSeguro = (asuntoHilo||'Hilo').replace(/[\r\n]/g,'');
   const partes = [];
 
+  // Intentar obtener token — si falla, usamos solo datos locales
+  let token = null;
+  try { token = await getGraphToken(); } catch(e) {}
+
+  showToast(`Preparando hilo (${msgs.length} mensajes)…`,'info');
+
   for(let i=0; i<msgs.length; i++) {
     const m = msgs[i];
-    try {
-      const r = await fetch(
-        `https://graph.microsoft.com/v1.0/users/${userId}/messages/${m.id}/$value`,
-        { headers:{'Authorization':'Bearer '+token} }
-      );
-      if(!r.ok) {
-        const de = m.from?.emailAddress?.address||'?';
-        const err503 = r.status===503||r.status===504;
-        partes.push(`From: ${de}\r\nSubject: ${m.subject||''}\r\n\r\n[Mensaje no disponible${err503?' (buzón en migración)':' (error '+r.status+')'}]\r\n`);
-        continue;
-      }
-      partes.push(await r.text());
-    } catch(e) {
-      const de = m.from?.emailAddress?.address||'?';
-      partes.push(`From: ${de}\r\nSubject: ${m.subject||''}\r\n\r\n[Error: ${e.message.substring(0,80)}]\r\n`);
+    let raw = null;
+
+    // Intentar Graph API si tenemos token
+    if(token && m.id) {
+      try {
+        const r = await fetch(
+          `https://graph.microsoft.com/v1.0/users/${userId}/messages/${m.id}/$value`,
+          { headers:{'Authorization':'Bearer '+token} }
+        );
+        if(r.ok) raw = await r.text();
+      } catch(e) {}
     }
+
+    // Fallback: construir MIME con datos locales del mensaje
+    if(!raw) {
+      const de     = m.from?.emailAddress?.address || 'desconocido@tododrogas.com.co';
+      const deNom  = m.from?.emailAddress?.name || de;
+      const para   = (m.toRecipients||[]).map(r=>r.emailAddress?.address||'').join(', ') || userId;
+      const fecha  = m.receivedDateTime||m.sentDateTime||new Date().toISOString();
+      const asunto = m.subject || '(Sin asunto)';
+      // Buscar cuerpo completo en state si es el correo principal
+      const emailLocal = (typeof state!=='undefined' && state.emails)
+        ? state.emails.find(e => e.message_id === m.id)
+        : null;
+      const cuerpo = emailLocal?.body_content || m.bodyPreview || '(Sin contenido disponible)';
+      const esCuerpoHTML = emailLocal?.body_type === 'html';
+      const fechaUTC = new Date(fecha).toUTCString();
+
+      if(esCuerpoHTML) {
+        const innerBoundary = '----=_Parte_' + i + '_' + Date.now();
+        raw  = `From: ${deNom} <${de}>\r\n`;
+        raw += `To: ${para}\r\n`;
+        raw += `Subject: ${asunto}\r\n`;
+        raw += `Date: ${fechaUTC}\r\n`;
+        raw += `MIME-Version: 1.0\r\n`;
+        raw += `Content-Type: multipart/alternative; boundary="${innerBoundary}"\r\n\r\n`;
+        raw += `--${innerBoundary}\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n`;
+        raw += (m.bodyPreview||'').replace(/\r?\n/g,'\r\n') + '\r\n';
+        raw += `--${innerBoundary}\r\nContent-Type: text/html; charset=utf-8\r\n\r\n`;
+        raw += cuerpo + '\r\n';
+        raw += `--${innerBoundary}--\r\n`;
+      } else {
+        raw  = `From: ${deNom} <${de}>\r\n`;
+        raw += `To: ${para}\r\n`;
+        raw += `Subject: ${asunto}\r\n`;
+        raw += `Date: ${fechaUTC}\r\n`;
+        raw += `MIME-Version: 1.0\r\n`;
+        raw += `Content-Type: text/plain; charset=utf-8\r\n\r\n`;
+        raw += cuerpo.replace(/\r?\n/g,'\r\n') + '\r\n';
+      }
+    }
+
+    partes.push(raw);
   }
 
   let eml = '';
@@ -2659,29 +2697,26 @@ function limpiarHilo(){const a=document.getElementById('hiloArea');if(a){a.inner
 async function descargarEML(messageId, asunto) {
   if(!messageId) { showToast('No hay ID de mensaje para descargar','error'); return; }
   const userId = window.GRAPH_USER_ID || '';
-  const fileName = (asunto||'correo').replace(/[/\\:*?"<>|]/g,'_').substring(0,80) + '.eml';
+  const fileName = (asunto||'correo').replace(/[\/\\:*?"<>|]/g,'_').substring(0,80) + '.eml';
 
+  // Intentar Graph API con retry
   for(let intento=1; intento<=3; intento++) {
     if(intento===1) showToast('Preparando descarga EML…','info');
     else            showToast(`Reintentando descarga EML (${intento}/3)…`,'info');
     try {
       const token = await getGraphToken();
-      // Endpoint principal: MIME completo del mensaje
       const r = await fetch(
         `https://graph.microsoft.com/v1.0/users/${userId}/messages/${messageId}/$value`,
         { headers:{'Authorization':'Bearer '+token} }
       );
       if(r.status===503||r.status===504) {
-        // Buzón en migración o timeout — esperar y reintentar
         if(intento<3){ await new Promise(res=>setTimeout(res,intento*3000)); continue; }
-        // 3 intentos fallidos: ofrecer fallback
-        showToast('Buzón en migración. Inténtalo en 2-3 minutos.','error');
-        return;
+        // Graph no responde: construir EML con datos locales
+        return _descargarEMLLocal(messageId, asunto, fileName);
       }
-      if(r.status===404) { showToast('Mensaje no encontrado en el buzón (404)','error'); return; }
+      if(r.status===404) { showToast('Mensaje no encontrado en el buzón','error'); return; }
       if(r.status===401) { showToast('Token expirado. Recarga la página.','error'); return; }
       if(!r.ok) { showToast('Error Graph API '+r.status,'error'); return; }
-
       const blob = await r.blob();
       const url = URL.createObjectURL(new Blob([blob],{type:'message/rfc822'}));
       const a = document.createElement('a');
@@ -2692,9 +2727,55 @@ async function descargarEML(messageId, asunto) {
       return;
     } catch(e) {
       if(intento<3){ await new Promise(res=>setTimeout(res,intento*3000)); continue; }
-      showToast('Error EML: '+e.message.substring(0,70),'error');
+      return _descargarEMLLocal(messageId, asunto, fileName);
     }
   }
+}
+
+function _descargarEMLLocal(messageId, asunto, fileName) {
+  // Construir EML con datos que ya tenemos en memoria
+  const email = (typeof state!=='undefined' && state.emails)
+    ? state.emails.find(e => e.message_id === messageId || e.id === messageId)
+    : null;
+
+  if(!email) {
+    showToast('Buzón en migración y sin datos locales disponibles. Inténtalo en 2-3 minutos.','error');
+    return;
+  }
+
+  const de     = email.remitente || 'desconocido@tododrogas.com.co';
+  const deNom  = email.remitente_nombre || de;
+  const asuntoMsg = email.asunto || asunto || '(Sin asunto)';
+  const fecha  = email.sent_at || email.fecha || new Date().toISOString();
+  const cuerpo = email.body_content || email.raw?.body_preview || '(Sin contenido)';
+  const boundary = '----=_Local_' + Date.now();
+
+  let eml = '';
+  eml += `From: ${deNom} <${de}>\r\n`;
+  eml += `Subject: ${asuntoMsg}\r\n`;
+  eml += `Date: ${new Date(fecha).toUTCString()}\r\n`;
+  eml += `MIME-Version: 1.0\r\n`;
+
+  if(email.body_type==='html') {
+    eml += `Content-Type: multipart/alternative; boundary="${boundary}"\r\n\r\n`;
+    eml += `--${boundary}\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n`;
+    eml += (email.raw?.body_preview||'').replace(/\r?\n/g,'\r\n') + '\r\n';
+    eml += `--${boundary}\r\nContent-Type: text/html; charset=utf-8\r\n\r\n`;
+    eml += cuerpo + '\r\n';
+    eml += `--${boundary}--\r\n`;
+  } else {
+    eml += `Content-Type: text/plain; charset=utf-8\r\n\r\n`;
+    eml += cuerpo.replace(/\r?\n/g,'\r\n') + '\r\n';
+  }
+
+  const fn = fileName || (asuntoMsg.replace(/[\/\\:*?"<>|]/g,'_').substring(0,80)+'.eml');
+  const blob = new Blob([eml],{type:'message/rfc822'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download=fn;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); },2000);
+  showToast('EML descargado desde datos locales ✓','success');
 }
 
 async function verHiloCompleto(conversationId, correoId) {
