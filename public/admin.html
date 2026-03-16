@@ -1611,6 +1611,10 @@ async function selectEmail(id) {
         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Gestión
       </button>
+      <button class="btn btn-ghost" onclick="generarConNovaTD('${email.id}')" title="Generar respuesta con IA" style="border-color:#7c3aed;color:#7c3aed">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        ✦ Nova TD
+      </button>
       `}
       ${email.message_id ? `
       <button class="btn btn-ghost" onclick="descargarEML('${esc(email.message_id)}','${esc(email.asunto)}')" title="Descargar este correo como .eml (igual que Outlook)">
@@ -1984,6 +1988,43 @@ function gestionEvidenciaAdd(file) {
       <span style="color:var(--ink3)">${size}</span>
       <button onclick="_gestionEvidenciaFile=null;document.getElementById('gestionEvidenciaPreview').innerHTML='<svg width=\\'14\\' height=\\'14\\' fill=\\'none\\' stroke=\\'currentColor\\' stroke-width=\\'2\\' viewBox=\\'0 0 24 24\\'><path d=\\'M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48\\'/></svg> Clic aquí o arrastra un archivo'" style="background:none;border:none;cursor:pointer;color:var(--ink3);font-size:15px;line-height:1;padding:0 2px" title="Quitar">×</button>
     </span>`;
+}
+
+
+// ── NOVA TD — Asistente IA de respuesta ──────────────────────
+async function generarConNovaTD(correoId) {
+  const email = state.emails.find(e=>e.id===correoId);
+  if(!email) return;
+  const area = document.getElementById('replyBoxArea');
+  area.innerHTML = `<div style="background:#f5f3ff;border:1px solid #7c3aed;border-radius:8px;padding:12px 16px;margin-bottom:10px;display:flex;align-items:center;gap:10px"><div style="width:18px;height:18px;border:2px solid #7c3aed;border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite"></div><span style="color:#7c3aed;font-weight:600;font-size:13px">✦ Nova TD generando respuesta...</span></div>`;
+  try {
+    const agent = state.agents.find(a=>a.id===email.asignado_a);
+    const res = await fetch(`${window.N8N_WEBHOOK_BASE}/nova-td-respuesta`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        correo_id: email.id, asunto: email.asunto||'',
+        body_content: email.body_content||'', tipo_pqr: email.tipo_pqr||'',
+        categoria_ia: email.categoria_ia||'', prioridad: email.prioridad||'',
+        es_urgente: email.es_urgente||false, ley_aplicable: email.ley_aplicable||'Ley 1755/2015',
+        fecha_limite_sla: email.fecha_limite_sla||'',
+        agente_nombre: agent?.nombre||'Equipo PQRSFD',
+        remitente_nombre: email.remitente_nombre||email.remitente||'',
+        ticket_id: email.raw?.ticket_id||email.id
+      })
+    });
+    const data = await res.json();
+    const html = data.respuesta_html||data.respuesta||'';
+    const confianza = data.confianza||70;
+    const advertencias = data.advertencias||[];
+    const bc = confianza>=80?'#dcfce7':confianza>=50?'#fef9c3':'#fee2e2';
+    const tc = confianza>=80?'#16a34a':confianza>=50?'#ca8a04':'#dc2626';
+    const msg = confianza>=80?'✅ Alta confianza':confianza>=50?'⚠️ Confianza media · revisa antes de enviar':'❌ Baja confianza · reescribe manualmente';
+    area.innerHTML = `<div style="background:${bc};border-radius:6px;padding:8px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center"><span style="color:${tc};font-weight:700;font-size:12px">${msg}</span><span style="color:${tc};font-size:11px">Confianza: ${confianza}%</span></div>${advertencias.length?`<ul style="margin:0 0 8px;padding:0 0 0 18px;font-size:12px;color:#ca8a04">${advertencias.map(a=>`<li>${a}</li>`).join('')}</ul>`:''}`;
+    toggleReply('reply');
+    setTimeout(()=>{ const ed=document.querySelector('#replyBoxArea [contenteditable]'); if(ed) ed.innerHTML=html; },300);
+  } catch(err) {
+    area.innerHTML=`<div style="background:#fee2e2;color:#dc2626;padding:10px;border-radius:6px;font-size:12px">❌ Error al conectar con Nova TD. Verifica que el Flujo 14 está activo en N8N.</div>`;
+  }
 }
 
 function openGestionModal(mode) {
