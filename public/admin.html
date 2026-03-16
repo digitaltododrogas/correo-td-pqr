@@ -1508,10 +1508,21 @@ function renderEmailList() {
       ondragstart="onDragStart(event,'${e.id}')"
       >
       ${!e.is_read?'<div class="unread-pip"></div>':''}
-      ${e.prioridad?`<div style="position:absolute;right:6px;top:6px;width:6px;height:6px;border-radius:50%;background:${prioColor}"></div>`:''}
-      ${e.es_urgente?`<div style="position:absolute;right:16px;top:4px;background:#dc2626;color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:99px">⚠ URGENTE</div>`:''}
       <div class="ei-from">${esc(e.remitente_nombre||e.remitente)}</div>
       <div class="ei-subj">${esc(e.asunto)}</div>
+      ${(e.es_urgente||e.tipo_pqr||e.fecha_limite_sla)?`<div style="display:flex;flex-wrap:wrap;gap:3px;margin:3px 0">
+        ${e.es_urgente?`<span style="background:#fee2e2;color:#dc2626;font-size:9px;font-weight:700;padding:1px 6px;border-radius:99px">⚠ URGENTE</span>`:''}
+        ${e.tipo_pqr?`<span style="background:var(--bg2);color:var(--ink2);font-size:9px;font-weight:600;padding:1px 6px;border-radius:99px;text-transform:capitalize;border:1px solid var(--border)">${e.tipo_pqr}</span>`:''}
+        ${e.fecha_limite_sla?(()=>{
+          const fin=new Date(e.fecha_limite_sla).getTime();
+          const ahora=Date.now();
+          const hRest=Math.max(0,Math.round((fin-ahora)/3600000));
+          const vencido=fin<ahora;
+          const color=vencido?'#dc2626':hRest<24?'#ca8a04':'#16a34a';
+          const bg=vencido?'#fee2e2':hRest<24?'#fef9c3':'#dcfce7';
+          return `<span style="background:${bg};color:${color};font-size:9px;font-weight:700;padding:1px 6px;border-radius:99px">${vencido?'⚠ Vencido':'⏱ '+hRest+'h'}</span>`;
+        })():''}
+      </div>`:''}
       <div class="ei-foot">
         <span class="ei-time">${formatDate(new Date(e.fecha))}</span>
         <div class="ei-badges">
