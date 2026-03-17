@@ -927,7 +927,7 @@ async function callClaude(userText, withAudio=false){
   try{
     const r=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
-      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true','x-api-key':window.ANTHROPIC_KEY||window.CONFIG?.ANTHROPIC_KEY||''},
+      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,system:SYS,messages:history})
     });
     const d=await r.json();
@@ -999,7 +999,7 @@ async function processVoice(chunks){
   try{
     const r=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
-      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true','x-api-key':window.ANTHROPIC_KEY||window.CONFIG?.ANTHROPIC_KEY||''},
+      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,
         system:SYS+'\n\nEl usuario habló por audio. Responde de forma muy clara y breve. Pregúntale en qué le puedes ayudar.',
         messages:[{role:'user',content:'El paciente grabó un audio. Salúdale y pregúntale qué necesita.'}]
