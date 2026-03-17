@@ -2006,20 +2006,31 @@ async function generarConNovaTD(correoId) {
         body_content: email.body_content||'', tipo_pqr: email.tipo_pqr||'',
         categoria_ia: email.categoria_ia||'', prioridad: email.prioridad||'',
         es_urgente: email.es_urgente||false, ley_aplicable: email.ley_aplicable||'Ley 1755/2015',
-        fecha_limite_sla: email.fecha_limite_sla||'',
+        fecha_limite_sla: email.fecha_limite_sla||'', nivel_riesgo: email.nivel_riesgo||'',
+        horas_sla: email.horas_sla||120,
         agente_nombre: agent?.nombre||'Equipo PQRSFD',
         remitente_nombre: email.remitente_nombre||email.remitente||'',
-        ticket_id: email.raw?.ticket_id||email.id
+        remitente: email.remitente||'',
+        conversation_id: email.raw?.conversation_id||'',
+        ticket_id: email.raw?.ticket_id||email.id,
+        estado: email.estado||''
       })
     });
     const data = await res.json();
     const html = data.respuesta_html||data.respuesta||'';
     const confianza = data.confianza||70;
     const advertencias = data.advertencias||[];
+    const fuentes = data.fuentes_usadas||{};
     const bc = confianza>=80?'#dcfce7':confianza>=50?'#fef9c3':'#fee2e2';
     const tc = confianza>=80?'#16a34a':confianza>=50?'#ca8a04':'#dc2626';
     const msg = confianza>=80?'✅ Alta confianza':confianza>=50?'⚠️ Confianza media · revisa antes de enviar':'❌ Baja confianza · reescribe manualmente';
-    area.innerHTML = `<div style="background:${bc};border-radius:6px;padding:8px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center"><span style="color:${tc};font-weight:700;font-size:12px">${msg}</span><span style="color:${tc};font-size:11px">Confianza: ${confianza}%</span></div>${advertencias.length?`<ul style="margin:0 0 8px;padding:0 0 0 18px;font-size:12px;color:#ca8a04">${advertencias.map(a=>`<li>${a}</li>`).join('')}</ul>`:''}`;
+    const fuentesBadges = [
+      fuentes.kb?'<span style="background:#ede9fe;color:#6d28d9;font-size:10px;font-weight:700;padding:1px 6px;border-radius:99px">📚 KB</span>':'',
+      fuentes.historial?'<span style="background:#dbeafe;color:#1d4ed8;font-size:10px;font-weight:700;padding:1px 6px;border-radius:99px">📋 Historial</span>':'',
+      fuentes.perfil_remitente?'<span style="background:#d1fae5;color:#065f46;font-size:10px;font-weight:700;padding:1px 6px;border-radius:99px">👤 Perfil</span>':'',
+      fuentes.hilo_graph?'<span style="background:#fef3c7;color:#92400e;font-size:10px;font-weight:700;padding:1px 6px;border-radius:99px">💬 Hilo</span>':''
+    ].filter(Boolean).join(' ');
+    area.innerHTML = `<div style="background:${bc};border-radius:6px;padding:8px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center"><span style="color:${tc};font-weight:700;font-size:12px">${msg}</span><span style="color:${tc};font-size:11px">Confianza: ${confianza}%</span></div>${fuentesBadges?`<div style="margin-bottom:6px;display:flex;gap:4px;flex-wrap:wrap">Fuentes: ${fuentesBadges}</div>`:''  }${advertencias.length?`<ul style="margin:0 0 8px;padding:0 0 0 18px;font-size:12px;color:#ca8a04">${advertencias.map(a=>`<li>${a}</li>`).join('')}</ul>`:''}`;
     toggleReply('reply');
     setTimeout(()=>{ const ed=document.querySelector('#replyBoxArea [contenteditable]'); if(ed) ed.innerHTML=html; },300);
   } catch(err) {
