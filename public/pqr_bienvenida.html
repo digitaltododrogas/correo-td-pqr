@@ -16,7 +16,7 @@
   --shadow-xl:0 20px 60px rgba(8,13,26,.22),0 4px 16px rgba(8,13,26,.1);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;font-family:'Sora',sans-serif;overflow:hidden}
+html,body{height:100%;font-family:'Sora',sans-serif;overflow-x:hidden;}
 body{background:var(--ink);display:flex;min-height:100vh;}
 
 /* ════ LAYOUT ════ */
@@ -223,11 +223,13 @@ body{background:var(--ink);display:flex;min-height:100vh;}
 .qr-card .qr-frame{margin:0;width:100%;}
 .qr-card-url{font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--blue);text-align:center;}
 .right{
-  width:430px;min-width:390px;
+  /* Ancho fluido: 38% en desktop, nunca menos de 300px ni más de 480px */
+  width:clamp(300px, 38vw, 480px);
+  flex-shrink:0;
   background:var(--surface);
   display:flex;flex-direction:column;align-items:center;justify-content:space-between;
   overflow-y:auto;
-  padding:28px 28px 24px;
+  padding:clamp(14px,2.5vw,28px) clamp(12px,2.2vw,28px) 20px;
   box-shadow:-10px 0 48px rgba(8,13,26,.14);
   gap:0;
 }
@@ -423,6 +425,91 @@ body{background:var(--ink);display:flex;min-height:100vh;}
   border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
   flex-shrink:0;transition:all .15s;box-shadow:0 4px 14px rgba(37,99,235,.35);}
 .send-btn:hover{transform:scale(1.06);}
+
+/* ════ RESPONSIVE FLUID ════
+   Estrategia: clamp() para todo, breakpoints solo para cambios de layout
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── Tablet (< 900px): sigue siendo 2 columnas pero más compacto ── */
+@media (max-width:900px){
+  .right{
+    width:clamp(280px,42vw,380px);
+    padding:16px 14px;
+  }
+  .rp-title{font-size:clamp(20px,4vw,28px);}
+  .qr-frame{padding:10px !important;}
+  #qr-encuesta,#qr-radicar{
+    min-width:clamp(90px,15vw,130px) !important;
+    min-height:clamp(90px,15vw,130px) !important;
+  }
+  .agent-right{width:180px;}
+  .carousel-text{font-size:clamp(20px,3.2vw,36px);}
+}
+
+/* ── Móvil / pantalla angosta (< 650px): una sola columna ── */
+@media (max-width:650px){
+  html,body{overflow-x:hidden;overflow-y:auto;height:auto;}
+  .layout{
+    flex-direction:column;
+    min-height:100svh;
+    min-height:100vh;
+  }
+  /* Panel QR primero (arriba) */
+  .right{
+    order:1;
+    width:100% !important;
+    max-width:100%;
+    flex-shrink:0;
+    height:auto;
+    overflow-y:visible;
+    padding:20px 16px 16px;
+    box-shadow:none;
+    border-bottom:1px solid rgba(255,255,255,.07);
+    justify-content:flex-start;
+    gap:14px;
+  }
+  /* Panel izquierdo (carrusel + chat) abajo */
+  .left{
+    order:2;
+    flex:none;
+    width:100%;
+    min-height:50vh;
+    overflow:visible;
+  }
+  /* QRs a tamaño cómodo para pantallas pequeñas */
+  .qr-frame{padding:12px !important;margin:0 !important;}
+  #qr-encuesta,#qr-radicar{
+    min-width:clamp(100px,28vw,150px) !important;
+    min-height:clamp(100px,28vw,150px) !important;
+  }
+  .rp-title{font-size:clamp(22px,7vw,32px);}
+  .rp-sub{font-size:12px;}
+  /* Carrusel compacto */
+  .carousel-section{padding:14px 16px 10px;}
+  .carousel-text{font-size:clamp(18px,6vw,28px);}
+  /* Agent row vertical */
+  .agent-row{flex-direction:column;}
+  .agent-right{
+    width:100%;
+    border-top:1px solid rgba(255,255,255,.08);
+    border-left:none;
+    padding:10px 16px 14px;
+  }
+  .agent-divider{display:none;}
+  /* Stats bar */
+  .stats-bar{flex-wrap:wrap;padding:10px 12px !important;}
+}
+
+/* ── Móvil muy pequeño (< 380px) ── */
+@media (max-width:380px){
+  .right{padding:14px 10px;}
+  #qr-encuesta,#qr-radicar{
+    min-width:clamp(80px,26vw,120px) !important;
+    min-height:clamp(80px,26vw,120px) !important;
+  }
+  .rp-title{font-size:20px;}
+  .horario-badge{font-size:9px;padding:4px 10px;}
+}
 </style>
 </head>
 <body>
@@ -560,7 +647,7 @@ body{background:var(--ink);display:flex;min-height:100vh;}
     <!-- ZONA ENCUESTA -->
     <div style="width:100%;display:flex;flex-direction:column;align-items:center;gap:6px;">
       <!-- ETIQUETA ENCUESTA -->
-      <div style="width:100%;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 14px;border-radius:12px;background:linear-gradient(135deg,rgba(37,99,235,.15),rgba(37,99,235,.05));border:1px solid rgba(37,99,235,.4);">
+      <div id="btn-encuesta-wrap" onclick="openEncuesta()" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 14px;border-radius:12px;background:linear-gradient(135deg,rgba(37,99,235,.15),rgba(37,99,235,.05));border:1px solid rgba(37,99,235,.4);cursor:pointer;transition:border-color .2s,opacity .2s;">
         <div style="display:flex;align-items:center;gap:7px;">
           <span style="font-size:18px;">⭐</span>
           <div style="font-size:14px;font-weight:900;color:#fff;background:#2563eb;padding:2px 10px;border-radius:6px;letter-spacing:.3px;">Encuesta de satisfacción</div>
@@ -684,39 +771,90 @@ let FRASES = [
 
 // Carga config desde localStorage (guardada por el panel en el mismo dominio)
 let CFG = {};
-let FORM_URL = 'pqr_form.html';
+let FORM_URL = 'pqr_form.html'; // default
+let _lastQrUrl = null; // para detectar cambios
+
+function applyConfig(cfg){
+  if(!cfg) return;
+  CFG = cfg;
+  if(cfg.frases && cfg.frases.length)
+    FRASES = cfg.frases.map((f,i) => ({text: f.text, hl: i===0}));
+  if(cfg.qrUrl) FORM_URL = cfg.qrUrl;
+}
+
+// Carga inicial desde localStorage
 try {
   const saved = localStorage.getItem('pqr_config');
-  if(saved){
-    CFG = JSON.parse(saved);
-    if(CFG.frases && CFG.frases.length)
-      FRASES = CFG.frases.map((f,i) => ({text: f.text, hl: i===0}));
-    if(CFG.qrUrl){
-      let u = CFG.qrUrl.trim();
-      // Si la URL es solo el dominio sin ruta de archivo, agregar /pqr_form.html
-      try{
-        const parsed = new URL(u);
-        if(parsed.pathname === '/' || parsed.pathname === '')
-          u = u.replace(/\/+$/, '') + '/pqr_bienvenida.html';
-      }catch(e){}
-      FORM_URL = u;
-    }
-  }
+  if(saved) applyConfig(JSON.parse(saved));
 } catch(e){}
 
-function makeQR(elId, url, size){
+// Credenciales Supabase hardcodeadas — permite que tablet/celular lean config sin localStorage del PC
+const SB_URL  = 'https://yeiupcumvdvdswfhcoty.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InllaXVwY3VtdmR2ZHN3Zmhjb3R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ2MjY0MTYsImV4cCI6MjA2MDIwMjQxNn0.2M5OXY0m03yIJTypGn-C1dQV8l-QnZX1Ik8z_pNAmxk';
+
+// Polling a Supabase: revisa la config cada 30 s y actualiza QRs
+async function pollSupabaseConfig(){
+  try {
+    // Usar credenciales hardcodeadas; fallback a localStorage si existen
+    let sbUrl  = SB_URL;
+    let sbAnon = SB_ANON;
+    try {
+      const sbRaw = localStorage.getItem('td_sb_cfg');
+      if(sbRaw){ const sb=JSON.parse(sbRaw); if(sb.url) sbUrl=sb.url; if(sb.anon) sbAnon=sb.anon; }
+    } catch(e){}
+    const r = await fetch(`${sbUrl}/rest/v1/config_sistema?id=eq.main&select=data`, {
+      headers:{ apikey: sbAnon, Authorization: 'Bearer ' + sbAnon }
+    });
+    if(!r.ok) return;
+    const rows = await r.json();
+    if(!rows || !rows.length || !rows[0].data) return;
+    const remoteCfg = rows[0].data;
+    const newQrUrl  = remoteCfg.qrUrl || '';
+    const newEncUrl = remoteCfg.canales && remoteCfg.canales.encuesta ? remoteCfg.canales.encuesta : '';
+    const oldEncUrl = CFG.canales && CFG.canales.encuesta ? CFG.canales.encuesta : '';
+    const qrChanged  = newQrUrl  && newQrUrl  !== _lastQrUrl;
+    const encChanged = newEncUrl !== oldEncUrl;
+    const firstLoad  = !CFG.updatedAt; // primera vez que llega data de Supabase
+    if(firstLoad || qrChanged || encChanged){
+      CFG = remoteCfg;
+      if(newQrUrl){ _lastQrUrl = newQrUrl; FORM_URL = newQrUrl; }
+      applyQRs(); // regenera AMBOS QRs
+    }
+    localStorage.setItem('pqr_config', JSON.stringify(remoteCfg));
+  } catch(e){}
+}
+
+// Genera QR midiendo el contenedor real para adaptarse a cualquier pantalla
+function makeQR(elId, url, fallbackSize){
   const el = document.getElementById(elId);
   if(!el) return;
   el.innerHTML = '';
   if(!url){
-    el.innerHTML = '<span style="color:#6b748a;font-size:10px;text-align:center;display:block;padding:20px 4px;">Sin URL<br>configurada</span>';
+    el.innerHTML='<span style="color:#6b748a;font-size:10px;text-align:center;display:block;padding:20px 4px;">Sin URL<br>configurada</span>';
     return;
   }
-  const s = size || 130;
-  const encoded = encodeURIComponent(url);
-  el.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size='+s+'x'+s+'&data='+encoded+'&bgcolor=0a0e1a&color=ffffff&qzone=1" width="'+s+'" height="'+s+'" style="display:block;border-radius:4px;" onerror="this.style.display='none'">';
+  // Medir el contenedor padre para saber cuánto espacio hay disponible
+  const parent = el.closest('.qr-frame') || el.parentElement;
+  const available = parent ? Math.floor(parent.getBoundingClientRect().width) - 32 : 0;
+  // Usar el tamaño disponible, mínimo 90px, máximo 200px
+  const s = Math.max(90, Math.min(200, available > 60 ? available : (fallbackSize || 130)));
+  el.style.minWidth = s+'px';
+  el.style.minHeight = s+'px';
+  el.innerHTML='<img src="https://api.qrserver.com/v1/create-qr-code/?size='+s+'x'+s+'&data='+encodeURIComponent(url)+'&bgcolor=0a0e1a&color=ffffff&qzone=1" width="'+s+'" height="'+s+'" style="display:block;border-radius:4px;width:100%;height:auto;">';
 }
 
+// Regenera QRs al cambiar tamaño de ventana (orientación, resize)
+let _qrResizeTimer = null;
+window.addEventListener('resize', ()=>{
+  clearTimeout(_qrResizeTimer);
+  _qrResizeTimer = setTimeout(applyQRs, 250);
+});
+
+// URL global de encuesta (accesible por openEncuesta)
+const ENC_DEFAULT = 'https://td-pruebas.online/pqr_encuesta.html';
+let ENC_URL = ENC_DEFAULT; // hardcodeado — Supabase puede sobreescribir
+
+// Aplica QRs una vez el DOM esté listo
 function applyQRs(){
   // QR Radicar
   makeQR('qr-radicar', FORM_URL, 130);
@@ -726,14 +864,38 @@ function applyQRs(){
     catch(e){ radLbl.textContent = FORM_URL; }
   }
   // QR Encuesta
-  const encUrl = CFG.canales && CFG.canales.encuesta ? CFG.canales.encuesta : '';
-  makeQR('qr-encuesta', encUrl, 130);
+  ENC_URL = (CFG.canales && CFG.canales.encuesta) ? CFG.canales.encuesta : ENC_DEFAULT;
+  makeQR('qr-encuesta', ENC_URL, 130);
   const encLbl = document.getElementById('qr-encuesta-url');
-  if(encLbl) encLbl.textContent = encUrl
-    ? 'Encuesta de satisfacción · Escanea con tu cámara'
-    : 'Encuesta · configura la URL en el panel';
+  if(encLbl) encLbl.textContent = ENC_URL ? 'Encuesta · Escanea con tu cámara' : 'Encuesta · configura la URL en el panel';
+  // Estilo del botón encuesta según tenga URL o no
+  const btnWrap = document.getElementById('btn-encuesta-wrap');
+  if(btnWrap){
+    if(ENC_URL){
+      btnWrap.style.opacity = '1';
+      btnWrap.style.borderColor = 'rgba(37,99,235,.7)';
+      btnWrap.title = 'Abrir encuesta de satisfacción';
+    } else {
+      btnWrap.style.opacity = '0.65';
+      btnWrap.style.cursor = 'default';
+      btnWrap.title = 'URL no configurada — panel de administración';
+    }
+  }
 }
 
+// Abre la encuesta en nueva pestaña (toque del botón en móvil)
+function openEncuesta(){
+  if(ENC_URL){
+    window.open(ENC_URL, '_blank');
+  } else {
+    const lbl = document.getElementById('qr-encuesta-url');
+    if(lbl){
+      lbl.style.color = '#f87171';
+      lbl.textContent = '⚠ Configura la URL en el panel de administración';
+      setTimeout(()=>{ lbl.style.color=''; lbl.textContent='Encuesta · configura la URL en el panel'; }, 3000);
+    }
+  }
+}
 
 let cIdx = 0;
 let cTimer = null;
@@ -791,8 +953,6 @@ function startCarousel(){
 })();
 
 function goToForm(){
-  // El botón siempre va al formulario directamente
-  // El QR (cfg.qrUrl) es para imprimir/escanear desde fuera — apunta a bienvenida
   document.body.style.transition='opacity .35s ease';
   document.body.style.opacity='0';
   setTimeout(()=>{ window.location.href='pqr_form.html'; },350);
@@ -1031,11 +1191,27 @@ document.body.style.opacity='0';
 document.body.style.transition='opacity .4s ease';
 setTimeout(()=>{ document.body.style.opacity='1'; },50);
 
-// ── INIT — script al final del body, DOM ya existe ──
+// ── INIT ──
 startCarousel();
-applyQRs();
-document.getElementById("btn-radicar-main").addEventListener("click", goToForm);
-document.getElementById("btn-radicar-chat").addEventListener("click", goToForm);
+
+// Esperar a que el DOM esté pintado para medir contenedores correctamente
+// requestAnimationFrame garantiza que los estilos ya están aplicados
+requestAnimationFrame(()=>{
+  requestAnimationFrame(()=>{
+    applyQRs();
+    _lastQrUrl = FORM_URL;
+    pollSupabaseConfig();
+    setInterval(pollSupabaseConfig, 30000);
+  });
+});
+
+document.getElementById('btn-radicar-main').addEventListener('click', goToForm);
+document.getElementById('btn-radicar-chat').addEventListener('click', goToForm);
+
+// También re-aplicar al cambiar orientación en móvil/tablet
+window.addEventListener('orientationchange', ()=>{
+  setTimeout(applyQRs, 400); // esperar que el viewport actualice sus dimensiones
+});
 </script>
 </body>
 </html>
