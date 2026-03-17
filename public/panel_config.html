@@ -260,9 +260,6 @@ html,body{height:100%;font-family:'Space Grotesk',sans-serif;background:var(--bg
       <div class="nav-item" onclick="goTo('qr',this)">
         <span class="icon">◼</span> Código QR
       </div>
-      <div class="nav-item" onclick="goTo('sedes-encuesta',this)">
-        <span class="icon">🏥</span> Sedes (Encuesta)
-      </div>
       <div class="nav-item" onclick="goTo('sedes',this)">
         <span class="icon">📍</span> Sedes
       </div>
@@ -407,6 +404,15 @@ html,body{height:100%;font-family:'Space Grotesk',sans-serif;background:var(--bg
         </div>
 
         <div class="card">
+          <div class="card-head"><h3>⚙️ N8N — URL base de webhooks</h3><span class="badge badge-orange">Requerido</span></div>
+          <div class="form-group">
+            <label>URL base de N8N (sin barra final) — usada por pqr_form.html para radicar PQRs</label>
+            <input type="text" id="ch-n8n-base" class="inp" placeholder="https://n8n.srv1278939.hstgr.cloud/webhook" value="https://n8n.srv1278939.hstgr.cloud/webhook">
+          </div>
+          <p style="font-size:12px;color:var(--ink3);margin-top:6px;">ℹ️ Esta URL se guarda en el localStorage de la tablet y pqr_form.html la usa automáticamente. Debe terminar en <code>/webhook</code>.</p>
+        </div>
+
+        <div class="card">
           <div class="card-head"><h3>🌐 Página Web</h3><span class="badge badge-green">Clickeable</span></div>
           <div class="form-group">
             <label>URL completa</label>
@@ -462,15 +468,16 @@ html,body{height:100%;font-family:'Space Grotesk',sans-serif;background:var(--bg
             </div>
             <div class="qr-meta">
               <h4>QR de radicación PQRSF</h4>
-              <p id="qr-url-label">https://td-pruebas.online/pqr_form.html</p>
+              <p id="qr-url-label">https://td-pruebas.online/pqr_bienvenida.html</p>
             </div>
             <div class="url-input-wrap">
-              <input type="text" id="qr-url-input" value="https://td-pruebas.online/pqr_form.html" placeholder="https://tu-dominio.com/form">
+              <input type="text" id="qr-url-input" value="https://td-pruebas.online/pqr_bienvenida.html" placeholder="https://tu-dominio.com/pqr_bienvenida.html">
               <button class="btn btn-primary" onclick="generateQR()">↺ Actualizar</button>
             </div>
             <div class="qr-actions">
               <button class="btn btn-ghost" onclick="downloadQR()">⬇ Descargar PNG</button>
               <button class="btn btn-primary" onclick="copyQRLink()">📋 Copiar URL</button>
+              <button class="btn btn-primary" onclick="generarQRN8N()" style="background:var(--green,#16a34a);" title="Genera el QR via Flujo 12 de N8N y lo sube a Supabase Storage para que pqr_bienvenida.html lo consuma en tiempo real">☁️ Subir a Supabase (Flujo 12)</button>
             </div>
           </div>
           <div style="max-width:520px;width:100%;">
@@ -487,56 +494,12 @@ html,body{height:100%;font-family:'Space Grotesk',sans-serif;background:var(--bg
         </div>
       </div>
 
-      <!-- SEDES ENCUESTA (lista para autocomplete — sin GPS) -->
-      <div class="page" id="page-sedes-encuesta">
-        <div class="section-head" style="display:flex;align-items:flex-start;justify-content:space-between;">
-          <div>
-            <h2>Sedes — Lista de Encuesta</h2>
-            <p>Estas sedes aparecen en el autocomplete cuando el GPS falla. No requieren coordenadas. Extraídas del RUT de Tododrogas CIA S.A.S.</p>
-          </div>
-          <div style="display:flex;gap:8px;flex-shrink:0;margin-top:4px;">
-            <button class="btn btn-ghost btn-sm" onclick="syncSedesEncuesta()">↻ Sincronizar</button>
-            <button class="btn btn-primary btn-sm" onclick="openSedeEncuestaModal()">+ Nueva sede</button>
-          </div>
-        </div>
-        <div class="sedes-stats">
-          <div class="sede-stat blue"><div class="sv" id="se-total">—</div><div class="sl">Total sedes</div></div>
-          <div class="sede-stat green"><div class="sv" id="se-activas">—</div><div class="sl">Activas</div></div>
-          <div class="sede-stat yellow"><div class="sv" id="se-inactivas">—</div><div class="sl">Inactivas</div></div>
-          <div class="sede-stat"><div class="sv" id="se-ciudades">—</div><div class="sl">Ciudades</div></div>
-        </div>
-
-        <!-- Filtro por ciudad -->
-        <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center;">
-          <input class="inp" id="se-filter" placeholder="🔍 Filtrar por nombre o ciudad…" oninput="renderSedesEncuesta()" style="flex:1;margin-top:0;">
-          <select class="inp" id="se-ciudad-filter" onchange="renderSedesEncuesta()" style="width:180px;margin-top:0;">
-            <option value="">Todas las ciudades</option>
-          </select>
-        </div>
-
-        <div class="sedes-grid" id="sedes-encuesta-grid">
-          <div style="grid-column:1/-1;text-align:center;padding:40px;background:var(--bg3);border:1px dashed var(--border);border-radius:var(--radius);color:var(--ink3);font-size:13px;">
-            Cargando sedes…
-          </div>
-        </div>
-
-        <div class="card" style="margin-bottom:0;">
-          <div class="card-head"><h3>💡 ¿Cómo funciona?</h3></div>
-          <p style="font-size:13px;color:var(--ink2);line-height:1.9;">
-            1. Cuando el usuario abre la encuesta, el sistema intenta <strong style="color:var(--ink)">detectar su ubicación por GPS</strong>.<br>
-            2. Si el GPS funciona, la sede se asigna automáticamente (configurada en <strong style="color:var(--blue)">Sedes GPS</strong>).<br>
-            3. Si el GPS falla o el usuario lo deniega, aparece un <strong style="color:var(--green)">campo de búsqueda con autocomplete</strong>.<br>
-            4. El usuario escribe el nombre y el sistema sugiere de esta lista. <strong style="color:var(--ink)">No puede escribir libremente</strong> — solo puede elegir de las opciones.
-          </p>
-        </div>
-      </div>
-
-      <!-- SEDES GPS -->
+      <!-- SEDES -->
       <div class="page" id="page-sedes">
         <div class="section-head" style="display:flex;align-items:flex-start;justify-content:space-between;">
           <div>
             <h2>Gestión de Sedes</h2>
-            <p>Sedes con coordenadas GPS para detección automática. Si el GPS falla, el usuario elige de la lista de Sedes (Encuesta).</p>
+            <p>La encuesta detecta la sede más cercana al usuario por GPS. Agrega, edita o desactiva sedes aquí.</p>
           </div>
           <div style="display:flex;gap:8px;flex-shrink:0;margin-top:4px;">
             <button class="btn btn-ghost btn-sm" onclick="syncSedes()">↻ Sincronizar</button>
@@ -608,42 +571,6 @@ html,body{height:100%;font-family:'Space Grotesk',sans-serif;background:var(--bg
 </div>
 
 <div id="toast"><span class="ti">✓</span><span id="toast-msg">Cambios guardados</span></div>
-
-<!-- MODAL SEDE ENCUESTA -->
-<div class="modal-overlay" id="sede-enc-modal-overlay" onclick="if(event.target===this)closeSedeEncuestaModal()">
-  <div class="modal" style="max-width:480px;">
-    <div class="modal-head">
-      <h3 id="sede-enc-modal-title">Nueva sede (Encuesta)</h3>
-      <button class="modal-close" onclick="closeSedeEncuestaModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="fg"><label class="fg-label">ID de sede <span style="color:var(--red)">*</span></label>
-        <input class="inp" id="me-id" placeholder="ej: drogueria-15-envigado" style="font-family:'JetBrains Mono',monospace;font-size:12px;">
-        <span class="fg-hint">Identificador único, sin espacios ni tildes.</span>
-      </div>
-      <div class="fg"><label class="fg-label">Nombre de la sede <span style="color:var(--red)">*</span></label>
-        <input class="inp" id="me-nombre" placeholder="Ej: Droguería Todo Drogas 15">
-      </div>
-      <div class="fg"><label class="fg-label">Ciudad / Municipio <span style="color:var(--red)">*</span></label>
-        <input class="inp" id="me-ciudad" placeholder="Ej: Medellín">
-      </div>
-      <div class="fg"><label class="fg-label">Dirección</label>
-        <input class="inp" id="me-dir" placeholder="Ej: CR 50 45 12 LC 101">
-      </div>
-      <div class="fg" style="display:flex;align-items:center;gap:10px;">
-        <div class="tog" id="me-tog" onclick="toggleSedeEncActiva()"></div>
-        <span id="me-tog-lbl" style="font-size:13px;color:var(--ink2);">Sede activa</span>
-      </div>
-      <div style="background:var(--blue-glow);border:1px solid rgba(79,142,247,.2);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--ink2);line-height:1.6;">
-        💡 Esta sede <strong style="color:var(--ink)">no necesita coordenadas GPS</strong>. Aparecerá en el autocomplete de la encuesta solo cuando el GPS falle.
-      </div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeSedeEncuestaModal()">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveSedeEncuesta()">💾 Guardar sede</button>
-    </div>
-  </div>
-</div>
 
 <!-- MODAL SEDE -->
 <div class="modal-overlay" id="sede-modal-overlay" onclick="onModalOverlay(event)">
@@ -739,7 +666,7 @@ const STATE = {
     horario:'Lun-Vier 7 a.m-5:30 p.m. · Nova 24/7',
     encuesta:'',
   },
-  qrUrl:'https://td-pruebas.online/pqr_form.html',
+  qrUrl:'https://td-pruebas.online/pqr_bienvenida.html',
   instName:'Tododrogas',
   sbUrl:'', sbKey:'', sbAnon:'', nextId:10,
 };
@@ -752,12 +679,11 @@ function goTo(page,el){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
   el.classList.add('active');
-  const T={frases:'Frases del Carrusel',logo:'Logo & Colores',faq:'Preguntas Frecuentes',canales:'Canales de Contacto',qr:'Código QR','sedes-encuesta':'Sedes (Encuesta)',sedes:'Sedes GPS',supabase:'Conexión BD'};
+  const T={frases:'Frases del Carrusel',logo:'Logo & Colores',faq:'Preguntas Frecuentes',canales:'Canales de Contacto',qr:'Código QR',sedes:'Gestión de Sedes',supabase:'Conexión BD'};
   document.getElementById('topbar-title').textContent=T[page]||page;
   if(page==='qr') setTimeout(generateQR,100);
   if(page==='frases') startPreview(); else stopPreview();
   if(page==='sedes') syncSedes();
-  if(page==='sedes-encuesta') syncSedesEncuesta();
 }
 
 // FRASES
@@ -840,7 +766,7 @@ function delFaq(id){STATE.faq=STATE.faq.filter(f=>f.id!==id);renderFaq();}
 
 // CANALES
 function saveCanales(){
-  ['whatsapp','whatsapp-label','correo','pbx','pbx-label','pbx-opcion','web','web-label','horario','encuesta'].forEach(k=>{
+  ['whatsapp','whatsapp-label','correo','pbx','pbx-label','pbx-opcion','web','web-label','horario','encuesta','n8n-base'].forEach(k=>{
     const el=document.getElementById('ch-'+k);
     if(el) STATE.canales[k.replace(/-([a-z])/g,(_,c)=>c.toUpperCase())]=el.value.trim();
   });
@@ -848,7 +774,11 @@ function saveCanales(){
 
 // QR
 function generateQR(){
-  const url=document.getElementById('qr-url-input').value.trim()||STATE.qrUrl;
+  let url=document.getElementById('qr-url-input').value.trim();
+  // Si está vacía o es solo dominio sin path, completar con /pqr_bienvenida.html
+  if(!url) url=STATE.qrUrl;
+  try{const p=new URL(url);if(p.pathname==='/'||p.pathname==='')url=url.replace(/\/+$/,'')+'/pqr_bienvenida.html';}catch(e){}
+  document.getElementById('qr-url-input').value=url;
   STATE.qrUrl=url; document.getElementById('qr-url-label').textContent=url;
   document.getElementById('qr-code-el').innerHTML='';
   qrInstance=new QRCode(document.getElementById('qr-code-el'),{text:url,width:220,height:220,colorDark:'#0a0e1a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});
@@ -869,6 +799,34 @@ function downloadQR(){
 }
 function copyQRLink(){navigator.clipboard.writeText(STATE.qrUrl).then(()=>showToast('URL copiada'));}
 
+// ── Flujo 12 — Generar QR dinámico via N8N y subir a Supabase Storage ──
+async function generarQRN8N(){
+  const url=document.getElementById('qr-url-input').value.trim();
+  if(!url){showToast('Ingresa la URL destino del QR','err');return;}
+  const n8nBase=(document.getElementById('ch-n8n-base')?.value||'').replace(/\/+$/,'')||'https://n8n.srv1278939.hstgr.cloud/webhook';
+  const endpoint=n8nBase.replace(/\/webhook$/,'')+'/webhook/admin/generar-qr';
+  showToast('Generando QR en N8N…');
+  try{
+    const r=await fetch(endpoint,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Admin-Key':'TD20*qr2026'},
+      body:JSON.stringify({url_destino:url})
+    });
+    const data=await r.json();
+    if(data.success){
+      STATE.qrUrl=url;
+      const cfg=buildConfig(); cfg.qrUrl=url;
+      localStorage.setItem('pqr_config',JSON.stringify(cfg));
+      showToast('✅ QR generado y guardado en Supabase Storage');
+      generateQR(); // también renderizar localmente
+    } else {
+      showToast('Error N8N: '+(data.error||'desconocido'),'err');
+    }
+  } catch(e){
+    showToast('No se conectó con N8N: '+e.message,'err');
+  }
+}
+
 // SUPABASE
 async function testSupabase(){
   const url=document.getElementById('sb-url').value.trim();
@@ -885,7 +843,6 @@ async function testSupabase(){
       localStorage.setItem('td_sb_cfg',JSON.stringify({url,key,anon:STATE.sbAnon}));
       showToast('Conectado ✓');
       syncSedes();
-    syncSedesEncuesta();
     } else throw new Error('Status '+r.status);
   }catch(e){el.className='sb-status err';el.innerHTML='<span>✕</span> Error: '+e.message;}
 }
@@ -902,18 +859,14 @@ function saveSupabase(){
 async function saveAll(){
   saveCanales();
   const cfg=buildConfig();
-  // Siempre guardar en localStorage
-  try{ localStorage.setItem('pqr_config',JSON.stringify(cfg)); }catch(e){}
-  // Si hay Supabase, sincronizar también allá
   if(STATE.sbUrl&&STATE.sbKey){
     try{
       const r=await fetch(`${STATE.sbUrl}/rest/v1/config_sistema`,{method:'POST',headers:{apikey:STATE.sbKey,Authorization:'Bearer '+STATE.sbKey,'Content-Type':'application/json',Prefer:'resolution=merge-duplicates'},body:JSON.stringify({id:'main',data:cfg,updated_at:new Date().toISOString()})});
-      if(r.ok||r.status===201){showToast('Guardado en Supabase ✓ — La pantalla se actualizará en 30s');return;}
-      else showToast('Supabase error '+r.status+' — guardado local','err');
-    }catch(e){showToast('Sin conexión Supabase — guardado local','err');}
-  } else {
-    showToast('Guardado localmente');
+      if(r.ok||r.status===201){showToast('Guardado en Supabase ✓ — La tablet se actualizará');return;}
+    }catch(e){}
   }
+  try{localStorage.setItem('pqr_config',JSON.stringify(cfg));showToast('Guardado localmente');}
+  catch(e){showToast('Error: '+e.message,'err');}
 }
 function buildConfig(){
   return{frases:STATE.frases,colors:STATE.colors,logo:STATE.logo,faq:STATE.faq,canales:STATE.canales,qrUrl:STATE.qrUrl,instName:document.getElementById('inst-name')?.value||STATE.instName,updatedAt:new Date().toISOString()};
@@ -974,214 +927,6 @@ try{
   const el=document.getElementById('tables-list');
   if(el)el.innerHTML=tables.map(([t,d,s])=>`<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-s);"><span style="font-family:JetBrains Mono,monospace;font-size:12px;color:var(--blue);min-width:200px;">${t}</span><span style="font-size:12px;color:var(--ink2);flex:1;">${d}</span><span class="badge ${s==='OK'?'badge-green':'badge-orange'}">${s}</span></div>`).join('');
 })();
-
-// ── SEDES ENCUESTA (lista autocomplete, sin GPS) ──────────────────
-const SEDES_ENCUESTA_DEFAULT = [
-  // PROPIOS
-  { id:'sf-abejorral',         nombre:'Tododrogas Abejorral',              ciudad:'Abejorral',            direccion:'Carrera Santander # 48-11',                             activa:true },
-  { id:'sf-amaga',             nombre:'Tododrogas Amagá',                  ciudad:'Amagá',                direccion:'Calle 51 N 51 Bloque 1 Primer Piso',                    activa:true },
-  { id:'sf-andes',             nombre:'Tododrogas Andes',                  ciudad:'Andes',                direccion:'Carrera 50 # 49-68 Local 102 Edificio El Tesoro',       activa:true },
-  { id:'sf-apartado',          nombre:'Tododrogas Apartadó',               ciudad:'Apartadó',             direccion:'Carrera 102 # 92-16/18 Barrio Industriales',            activa:true },
-  { id:'sf-carepa',            nombre:'Tododrogas Carepa',                 ciudad:'Carepa',               direccion:'Calle 81 con Carrera 74-12/14 Barrio Pueblo Nuevo',      activa:true },
-  { id:'sf-caucasia',          nombre:'Tododrogas Caucasia',               ciudad:'Caucasia',             direccion:'Carrera 20 # 3-76 CC Cauca Centro A1 Loc 120-123',      activa:true },
-  { id:'sf-chigorodo',         nombre:'Tododrogas Chigorodó',              ciudad:'Chigorodó',            direccion:'Calle 95 # 97-04 Local 2',                              activa:true },
-  { id:'sf-ciudad-bolivar',    nombre:'Tododrogas Ciudad Bolívar',         ciudad:'Ciudad Bolívar',       direccion:'Calle 49 # 50-57 Local 104',                            activa:true },
-  { id:'sf-bagre',             nombre:'Tododrogas El Bagre',               ciudad:'El Bagre',             direccion:'Calle 50 # 47A-31',                                     activa:true },
-  { id:'sf-medellin1',         nombre:'Tododrogas Medellín',               ciudad:'Medellín',             direccion:'Carrera 49 # 48-57',                                    activa:true },
-  { id:'sf-medellin2',         nombre:'Tododrogas Medellín 2',             ciudad:'Medellín',             direccion:'Calle 48 # 48-03',                                      activa:true },
-  { id:'sf-puerto-berrio',     nombre:'Tododrogas Puerto Berrío',          ciudad:'Puerto Berrío',        direccion:'Calle 48 # 4-56 Barrio El Hoyo',                        activa:true },
-  { id:'sf-santa-barbara',     nombre:'Tododrogas Santa Bárbara',          ciudad:'Santa Bárbara',        direccion:'Carrera 50 # 48-17',                                    activa:true },
-  { id:'sf-santafe',           nombre:'Tododrogas Santa Fe de Antioquia',  ciudad:'Santa Fe de Antioquia',direccion:'Calle 10 # 7-49',                                       activa:true },
-  { id:'sf-segovia',           nombre:'Tododrogas Segovia',                ciudad:'Segovia',              direccion:'Calle 52 N 48-69 Calle El Palo Taratal',                activa:true },
-  { id:'sf-tamesis',           nombre:'Tododrogas Támesis',                ciudad:'Támesis',              direccion:'Carrera 10 # 9-47 Primer Piso Local 1',                 activa:true },
-  { id:'sf-turbo',             nombre:'Tododrogas Turbo',                  ciudad:'Turbo',                direccion:'Calle 101 # 15-14 Barrio Baltazar',                      activa:true },
-  { id:'sf-yarumal',           nombre:'Tododrogas Yarumal',                ciudad:'Yarumal',              direccion:'Carrera 21 # 17-17 Mall Cubox LC 102',                  activa:true },
-  { id:'sf-yolombo',           nombre:'Tododrogas Yolombó',                ciudad:'Yolombó',              direccion:'Carrera 24 Calle 18-04 Local 2 Edif SYS',               activa:true },
-  { id:'sf-zaragoza',          nombre:'Tododrogas Zaragoza',               ciudad:'Zaragoza',             direccion:'Calle Principal San Gregorio 36-20',                    activa:true },
-  { id:'sf-nechi',             nombre:'Tododrogas Nechí',                  ciudad:'Nechí',                direccion:'Cl 25 N.º 31A-16 Barrio San Nicolás',                   activa:true },
-  { id:'sf-rionegro',          nombre:'Tododrogas Rionegro',               ciudad:'Rionegro',             direccion:'Cl 52 #45-70 Local 2006',                               activa:true },
-  { id:'sf-la-ceja',           nombre:'Tododrogas La Ceja',                ciudad:'La Ceja',              direccion:'Carrera 24 19 40',                                      activa:true },
-  { id:'sf-sopetran',          nombre:'Tododrogas Sopetrán',               ciudad:'Sopetrán',             direccion:'Carrera 10 # 11-65',                                    activa:true },
-  // IN HOUSE / ALIADOS
-  { id:'ih-amalfi',            nombre:'Droguería Farmavida (Savia) Amalfi',          ciudad:'Amalfi',               direccion:'Calle 23 # 29-54',                             activa:true },
-  { id:'ih-angostura',         nombre:'Droguería Coopriachon (Savia) Angostura',     ciudad:'Angostura',            direccion:'Carrera 10 # 9-20',                            activa:true },
-  { id:'ih-anori',             nombre:'Droguería San Rafael (Savia) Anorí',          ciudad:'Anorí',                direccion:'Avenida 31 n 30-16',                           activa:true },
-  { id:'ih-frontino',          nombre:'Droguería Frontifarma (Savia) Frontino',      ciudad:'Frontino',             direccion:'Carrera 30 # 38-47',                           activa:true },
-  { id:'ih-mutata',            nombre:'Droguería Familiar Eddy (Savia) Mutatá',      ciudad:'Mutatá',               direccion:'Carrera 10 # 10-41-43',                        activa:true },
-  { id:'ih-necocli',           nombre:'Droguería La Píldora (Savia) Necoclí',        ciudad:'Necoclí',              direccion:'Calle 51 # 48-38 Barrio Centro',               activa:true },
-  { id:'ih-remedios',          nombre:'Farmax La Droguería (Savia) Remedios',        ciudad:'Remedios',             direccion:'Calle 11 # 8-12',                              activa:true },
-  { id:'al-giraldo',           nombre:'ESE Hospital San Isidro (Savia) Giraldo',     ciudad:'Giraldo',              direccion:'Carrera 10 # 11-05',                           activa:true },
-  { id:'al-armenia',           nombre:'ESE San Martín de Porres (Savia) Armenia',    ciudad:'Armenia Antioquia',    direccion:'Calle 11 # 6-69',                              activa:true },
-  { id:'al-briceno',           nombre:'ESE Sagrado Corazón (Savia) Briceño',         ciudad:'Briceño',              direccion:'Calle 11 # 8-31',                              activa:true },
-  { id:'al-dabeiba',           nombre:'Droguería Donde Natalia (Savia) Dabeiba',     ciudad:'Dabeiba',              direccion:'Carrera 10 # 6-47',                            activa:true },
-  { id:'al-hispania',          nombre:'Droguería Biomedic (Savia) Hispania',         ciudad:'Hispania',             direccion:'Calle 50 Toledo # 50-12',                      activa:true },
-  { id:'al-peque',             nombre:"Farmacia D'Andreé (Savia) Peque",             ciudad:'Peque',                direccion:'Carrera Bolívar # 11-19',                      activa:true },
-  { id:'al-pueblorrico',       nombre:'Droguería Familia S.G. (Savia) Pueblorrico',  ciudad:'Pueblorrico',          direccion:'Carrera 30 # 30-56 Local 101',                 activa:true },
-  { id:'al-uramita',           nombre:'Droguería H. Ramírez (Savia) Uramita',        ciudad:'Uramita',              direccion:'Carrera 20 # 20-67',                           activa:true },
-  { id:'al-valdivia',          nombre:'Droguería Macefarma (Savia) Valdivia',        ciudad:'Valdivia',             direccion:'Calle Libertador # 9-92',                      activa:true },
-  { id:'al-yali',              nombre:'Droguería El Regalo de Dios (Savia) Yalí',    ciudad:'Yalí',                 direccion:'Calle 20 # 19-71 Barrio La Plaza',             activa:true },
-  { id:'al-anza',              nombre:'Droguería San Martín 712 (Savia) Anzá',       ciudad:'Anzá',                 direccion:'Carrera 8 # 7-51',                             activa:true },
-  { id:'ih-betulia',           nombre:'Droguería Famidrogas (Savia) Betulia',        ciudad:'Betulia',              direccion:'Calle 21 # 21-42',                             activa:true },
-  { id:'ih-buritica',          nombre:'Droguería San Antonio (Savia) Buriticá',      ciudad:'Buriticá',             direccion:'Calle 6 # 5-12 Parque Principal',              activa:true },
-  { id:'al-caicedo',           nombre:'ESE Hospital G. Gaviria (Savia) Caicedo',     ciudad:'Caicedo',              direccion:'Cra. 5 # 3-23',                                activa:true },
-  { id:'ih-jardin',            nombre:'Droguería Macrodescuentos #9 (Savia) Jardín', ciudad:'Jardín',               direccion:'Calle 9 # 2-59',                               activa:true },
-  { id:'ih-liborina',          nombre:'Droguería San Gabriel (Savia) Liborina',      ciudad:'Liborina',             direccion:'Carrera 9 # 8-4 Parque Principal',             activa:true },
-  { id:'al-olaya',             nombre:'ESE Hospital San Miguel (Savia) Olaya',       ciudad:'Olaya',                direccion:'Carrera 10 # 10-34 Llanadas',                  activa:true },
-  { id:'al-sabanalarga-savia', nombre:'Droguería La Amistad (Savia) Sabanalarga',    ciudad:'Sabanalarga',          direccion:'Calle 17 # 18-06',                             activa:true },
-  { id:'al-san-jeronimo',      nombre:'Droguería Santa Teresita (Savia) San Jerónimo',ciudad:'San Jerónimo',        direccion:'Carrera 11 # 21-73',                           activa:true },
-  { id:'ih-caceres',           nombre:'Droguería Bienestar (Coosalud) Cáceres',      ciudad:'Cáceres',              direccion:'Calle 49 # 51-36 Brr Centro',                  activa:true },
-  { id:'ih-jerico',            nombre:'Droguería San Antonio (Coosalud) Jericó',     ciudad:'Jericó',               direccion:'Carrera 5 # 6-09',                             activa:true },
-  { id:'al-puerto-nare',       nombre:'Hospital Octavio Álvarez (Coosalud) Puerto Nare',ciudad:'Puerto Nare',       direccion:'Carrera 5 # 45-103',                           activa:true },
-  { id:'al-samana',            nombre:'ESE San José (Coosalud) Samaná',             ciudad:'Samaná',               direccion:'Carrera 9 # 4-79',                             activa:true },
-  { id:'al-sabanalarga-cos',   nombre:'ESE Hospital San Pedro (Coosalud) Sabanalarga',ciudad:'Sabanalarga',         direccion:'Carrera 17 # 15-94',                           activa:true },
-  { id:'ih-taraza',            nombre:'Droguería Kirius (Coosalud) Tarazá',          ciudad:'Tarazá',               direccion:'Carrera 28 # 27-26',                           activa:true },
-  { id:'ih-barbosa',           nombre:'Droguería La Solidaria (Coosalud) Barbosa',   ciudad:'Barbosa',              direccion:'Calle 15 No. 17-22',                           activa:true },
-  { id:'ih-girardota',         nombre:'Droguería Familiar E&M (Salud Total) Girardota',ciudad:'Girardota',          direccion:'Carrera 15 No. 5-42',                          activa:true },
-  { id:'ih-rionegro-st',       nombre:'Droguerías Oriente (Salud Total) Rionegro',   ciudad:'Rionegro',             direccion:'Carrera 48 # 51-15 Centro',                    activa:true },
-  { id:'al-concordia',         nombre:'Droguería La Nuestra (Salud Total) Concordia',ciudad:'Concordia',            direccion:'Calle 19 No. 19-30',                           activa:true },
-  { id:'al-copacabana',        nombre:'Droguería Alma Salud 1 (Salud Total) Copacabana',ciudad:'Copacabana',        direccion:'Calle 40 No. 84-18',                           activa:true },
-  { id:'ih-sabaneta',          nombre:'Droguería Innova Farma (Nueva EPS) Sabaneta', ciudad:'Sabaneta',             direccion:'Calle 73 Sur # 46-09 Entre Amigos',            activa:true },
-];
-let SEDES_ENCUESTA = [...SEDES_ENCUESTA_DEFAULT];
-let sedeEncuestaEditId = null;
-
-async function syncSedesEncuesta(){
-  if(STATE.sbUrl && STATE.sbKey){
-    try{
-      const r = await fetch(`${STATE.sbUrl}/rest/v1/sedes_encuesta?select=*&order=ciudad.asc,nombre.asc`, {headers:sbH()});
-      if(r.ok){
-        const data = await r.json();
-        if(data.length){ SEDES_ENCUESTA = data; localStorage.setItem('td_sedes_encuesta', JSON.stringify(SEDES_ENCUESTA)); }
-      }
-    }catch(e){ showToast('Error cargando sedes encuesta: '+e.message,'err'); }
-  } else {
-    try{ const d=JSON.parse(localStorage.getItem('td_sedes_encuesta')||'null'); if(d&&d.length) SEDES_ENCUESTA=d; }catch(_){}
-  }
-  renderSedesEncuesta();
-}
-
-function renderSedesEncuesta(){
-  const q    = (document.getElementById('se-filter')?.value||'').toLowerCase();
-  const ciu  = document.getElementById('se-ciudad-filter')?.value||'';
-  const grid = document.getElementById('sedes-encuesta-grid');
-  if(!grid) return;
-
-  // Actualizar stats
-  const activas = SEDES_ENCUESTA.filter(s=>s.activa).length;
-  const ciudades = [...new Set(SEDES_ENCUESTA.map(s=>s.ciudad))].length;
-  document.getElementById('se-total').textContent    = SEDES_ENCUESTA.length;
-  document.getElementById('se-activas').textContent  = activas;
-  document.getElementById('se-inactivas').textContent= SEDES_ENCUESTA.length-activas;
-  document.getElementById('se-ciudades').textContent = ciudades;
-
-  // Llenar select de ciudades
-  const sel = document.getElementById('se-ciudad-filter');
-  if(sel && sel.options.length <= 1){
-    [...new Set(SEDES_ENCUESTA.map(s=>s.ciudad))].sort().forEach(c=>{
-      const o = document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o);
-    });
-  }
-
-  // Filtrar
-  const filtered = SEDES_ENCUESTA.filter(s=>{
-    const matchQ = !q || s.nombre.toLowerCase().includes(q) || s.ciudad.toLowerCase().includes(q);
-    const matchC = !ciu || s.ciudad===ciu;
-    return matchQ && matchC;
-  });
-
-  if(!filtered.length){
-    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:40px;background:var(--bg3);border:1px dashed var(--border);border-radius:var(--radius);color:var(--ink3);font-size:13px;">Sin resultados para ese filtro.</div>`;
-    return;
-  }
-
-  grid.innerHTML = filtered.map(s=>`
-    <div class="sede-card ${s.activa?'activa':'inactiva'}">
-      <div class="sc-top">
-        <div>
-          <div class="sc-name">${escHtml(s.nombre)}</div>
-          <div class="sc-id">${escHtml(s.id)}</div>
-        </div>
-        <div class="sc-actions">
-          <span class="badge ${s.activa?'badge-green':'badge-red'}" style="margin-right:4px;">${s.activa?'Activa':'Inactiva'}</span>
-          <button class="btn-icon" onclick="openSedeEncuestaModal('${escHtml(s.id)}')" title="Editar">✏️</button>
-          <button class="btn-icon del" onclick="deleteSedeEncuesta('${escHtml(s.id)}')" title="Eliminar">🗑</button>
-        </div>
-      </div>
-      <div class="sc-row"><span class="ico">🏙</span><span>${escHtml(s.ciudad)}</span></div>
-      <div class="sc-row"><span class="ico">📍</span><span>${escHtml(s.direccion||'—')}</span></div>
-      <div class="sc-divider"></div>
-      <div class="sc-footer">
-        <span style="font-size:11px;color:var(--ink3);">Sin GPS · solo autocomplete</span>
-        <button class="btn btn-ghost btn-sm" style="font-size:11px;padding:3px 10px;" onclick="toggleSedeEncuestaActiva('${escHtml(s.id)}')">
-          ${s.activa?'Desactivar':'Activar'}
-        </button>
-      </div>
-    </div>
-  `).join('');
-}
-
-function openSedeEncuestaModal(id=null){
-  sedeEncuestaEditId = id;
-  if(id){
-    const s = SEDES_ENCUESTA.find(x=>x.id===id); if(!s) return;
-    document.getElementById('me-id').value      = s.id;
-    document.getElementById('me-id').disabled   = true;
-    document.getElementById('me-nombre').value  = s.nombre||'';
-    document.getElementById('me-ciudad').value  = s.ciudad||'';
-    document.getElementById('me-dir').value     = s.direccion||'';
-    setTogE(s.activa!==false);
-  } else {
-    ['me-id','me-nombre','me-ciudad','me-dir'].forEach(f=>document.getElementById(f).value='');
-    document.getElementById('me-id').disabled=false;
-    setTogE(true);
-  }
-  document.getElementById('sede-enc-modal-overlay').classList.add('open');
-}
-function closeSedeEncuestaModal(){ document.getElementById('sede-enc-modal-overlay').classList.remove('open'); sedeEncuestaEditId=null; }
-function setTogE(on){ document.getElementById('me-tog').className='tog'+(on?' on':''); document.getElementById('me-tog-lbl').textContent=on?'Sede activa':'Sede inactiva'; }
-function toggleSedeEncActiva(){ setTogE(!document.getElementById('me-tog').classList.contains('on')); }
-
-async function saveSedeEncuesta(){
-  const id      = document.getElementById('me-id').value.trim();
-  const nombre  = document.getElementById('me-nombre').value.trim();
-  const ciudad  = document.getElementById('me-ciudad').value.trim();
-  const dir     = document.getElementById('me-dir').value.trim();
-  if(!id||!nombre||!ciudad){ showToast('ID, nombre y ciudad son obligatorios','err'); return; }
-  const sede = { id, nombre, ciudad, direccion:dir, activa: document.getElementById('me-tog').classList.contains('on') };
-  if(STATE.sbUrl && STATE.sbKey){
-    try{
-      const r=await fetch(`${STATE.sbUrl}/rest/v1/sedes_encuesta`,{method:'POST',headers:{...sbH(),Prefer:'resolution=merge-duplicates,return=representation'},body:JSON.stringify(sede)});
-      if(!r.ok) throw new Error(await r.text());
-      showToast(sedeEncuestaEditId?'Sede actualizada ✓':'Sede creada ✓');
-    }catch(e){ showToast('Error: '+e.message,'err'); }
-  }
-  const idx = SEDES_ENCUESTA.findIndex(s=>s.id===id);
-  if(idx>=0) SEDES_ENCUESTA[idx]={...SEDES_ENCUESTA[idx],...sede}; else SEDES_ENCUESTA.push(sede);
-  localStorage.setItem('td_sedes_encuesta', JSON.stringify(SEDES_ENCUESTA));
-  renderSedesEncuesta(); closeSedeEncuestaModal();
-}
-
-async function deleteSedeEncuesta(id){
-  const s = SEDES_ENCUESTA.find(x=>x.id===id); if(!s) return;
-  if(!confirm(`¿Eliminar "${s.nombre}"?`)) return;
-  if(STATE.sbUrl&&STATE.sbKey){
-    try{ await fetch(`${STATE.sbUrl}/rest/v1/sedes_encuesta?id=eq.${id}`,{method:'DELETE',headers:sbH()}); }
-    catch(e){ showToast('Error: '+e.message,'err'); return; }
-  }
-  SEDES_ENCUESTA = SEDES_ENCUESTA.filter(x=>x.id!==id);
-  localStorage.setItem('td_sedes_encuesta', JSON.stringify(SEDES_ENCUESTA));
-  renderSedesEncuesta(); showToast('Sede eliminada');
-}
-
-function toggleSedeEncuestaActiva(id){
-  const s = SEDES_ENCUESTA.find(x=>x.id===id); if(!s) return;
-  s.activa = !s.activa;
-  if(STATE.sbUrl&&STATE.sbKey){
-    fetch(`${STATE.sbUrl}/rest/v1/sedes_encuesta?id=eq.${id}`,{method:'PATCH',headers:{...sbH(),Prefer:'return=minimal'},body:JSON.stringify({activa:s.activa})});
-  }
-  localStorage.setItem('td_sedes_encuesta', JSON.stringify(SEDES_ENCUESTA));
-  renderSedesEncuesta();
-}
 
 // ── SEDES ──────────────────────────────────────────
 function sbH(extra={}){return{apikey:STATE.sbKey,Authorization:'Bearer '+STATE.sbKey,'Content-Type':'application/json',...extra};}
