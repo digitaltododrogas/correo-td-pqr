@@ -404,15 +404,6 @@ html,body{height:100%;font-family:'Space Grotesk',sans-serif;background:var(--bg
         </div>
 
         <div class="card">
-          <div class="card-head"><h3>⚙️ N8N — URL base de webhooks</h3><span class="badge badge-orange">Requerido</span></div>
-          <div class="form-group">
-            <label>URL base de N8N (sin barra final) — usada por pqr_form.html para radicar PQRs</label>
-            <input type="text" id="ch-n8n-base" class="inp" placeholder="https://n8n.srv1278939.hstgr.cloud/webhook" value="https://n8n.srv1278939.hstgr.cloud/webhook">
-          </div>
-          <p style="font-size:12px;color:var(--ink3);margin-top:6px;">ℹ️ Esta URL se guarda en el localStorage de la tablet y pqr_form.html la usa automáticamente. Debe terminar en <code>/webhook</code>.</p>
-        </div>
-
-        <div class="card">
           <div class="card-head"><h3>🌐 Página Web</h3><span class="badge badge-green">Clickeable</span></div>
           <div class="form-group">
             <label>URL completa</label>
@@ -477,7 +468,6 @@ html,body{height:100%;font-family:'Space Grotesk',sans-serif;background:var(--bg
             <div class="qr-actions">
               <button class="btn btn-ghost" onclick="downloadQR()">⬇ Descargar PNG</button>
               <button class="btn btn-primary" onclick="copyQRLink()">📋 Copiar URL</button>
-              <button class="btn btn-primary" onclick="generarQRN8N()" style="background:var(--green,#16a34a);" title="Genera el QR via Flujo 12 de N8N y lo sube a Supabase Storage para que pqr_bienvenida.html lo consuma en tiempo real">☁️ Subir a Supabase (Flujo 12)</button>
             </div>
           </div>
           <div style="max-width:520px;width:100%;">
@@ -766,7 +756,7 @@ function delFaq(id){STATE.faq=STATE.faq.filter(f=>f.id!==id);renderFaq();}
 
 // CANALES
 function saveCanales(){
-  ['whatsapp','whatsapp-label','correo','pbx','pbx-label','pbx-opcion','web','web-label','horario','encuesta','n8n-base'].forEach(k=>{
+  ['whatsapp','whatsapp-label','correo','pbx','pbx-label','pbx-opcion','web','web-label','horario','encuesta'].forEach(k=>{
     const el=document.getElementById('ch-'+k);
     if(el) STATE.canales[k.replace(/-([a-z])/g,(_,c)=>c.toUpperCase())]=el.value.trim();
   });
@@ -798,34 +788,6 @@ function downloadQR(){
   function dl(){const a=document.createElement('a');a.href=out.toDataURL('image/png');a.download='QR_PQR_'+Date.now()+'.png';a.click();showToast('QR descargado');}
 }
 function copyQRLink(){navigator.clipboard.writeText(STATE.qrUrl).then(()=>showToast('URL copiada'));}
-
-// ── Flujo 12 — Generar QR dinámico via N8N y subir a Supabase Storage ──
-async function generarQRN8N(){
-  const url=document.getElementById('qr-url-input').value.trim();
-  if(!url){showToast('Ingresa la URL destino del QR','err');return;}
-  const n8nBase=(document.getElementById('ch-n8n-base')?.value||'').replace(/\/+$/,'')||'https://n8n.srv1278939.hstgr.cloud/webhook';
-  const endpoint=n8nBase.replace(/\/webhook$/,'')+'/webhook/admin/generar-qr';
-  showToast('Generando QR en N8N…');
-  try{
-    const r=await fetch(endpoint,{
-      method:'POST',
-      headers:{'Content-Type':'application/json','X-Admin-Key':'TD20*qr2026'},
-      body:JSON.stringify({url_destino:url})
-    });
-    const data=await r.json();
-    if(data.success){
-      STATE.qrUrl=url;
-      const cfg=buildConfig(); cfg.qrUrl=url;
-      localStorage.setItem('pqr_config',JSON.stringify(cfg));
-      showToast('✅ QR generado y guardado en Supabase Storage');
-      generateQR(); // también renderizar localmente
-    } else {
-      showToast('Error N8N: '+(data.error||'desconocido'),'err');
-    }
-  } catch(e){
-    showToast('No se conectó con N8N: '+e.message,'err');
-  }
-}
 
 // SUPABASE
 async function testSupabase(){
