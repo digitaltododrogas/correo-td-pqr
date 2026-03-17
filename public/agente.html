@@ -1048,9 +1048,15 @@ async function generarConNovaTD(correoId) {
         body_content: email.body_content||'', tipo_pqr: email.tipo_pqr||'',
         categoria_ia: email.categoria_ia||'', prioridad: email.prioridad||'',
         es_urgente: email.es_urgente||false, ley_aplicable: email.ley_aplicable||'Ley 1755/2015',
-        fecha_limite_sla: email.fecha_limite_sla||'',
+        fecha_limite_sla: email.fecha_limite_sla||'', nivel_riesgo: email.nivel_riesgo||'',
+        horas_sla: email.horas_sla||120,
         agente_nombre: state.user?.nombre||'Equipo PQRSFD',
         remitente_nombre: email.remitente_nombre||email.remitente||'',
+        remitente: email.remitente||'',
+        conversation_id: email.raw?.conversation_id||'',
+        ticket_id: email.raw?.ticket_id||email.id,
+        estado: email.estado||''
+      })
         ticket_id: email.raw?.ticket_id||email.id
       })
     });
